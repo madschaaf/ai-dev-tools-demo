@@ -442,6 +442,24 @@ body {
   flex-direction: column;
 }
 
+.step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  background: var(--color-blue-500);
+  color: white;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.quick-link-row.active .step-number {
+  background: var(--color-green-500);
+}
+
 /* Colorful left border on the active quick link row, matching the tool accent color */
 .quick-link-row.active[data-accent="var(--color-yellow-500)"] {
   border-left-color: var(--color-yellow-500);
