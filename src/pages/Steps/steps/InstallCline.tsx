@@ -10,7 +10,7 @@ export default function InstallCline() {
 
   return (
     <>
-      <h2>Step 10: Install Cline</h2>
+      <h2>Step 13: Install Cline</h2>
       <p>Download and install eBay's customized Cline extension for VS Code. Cline is an AI-powered coding assistant that integrates with VS Code.</p>
 
       {!downloadStarted ? (
@@ -70,8 +70,8 @@ export default function InstallCline() {
             <li>Open VS Code and look for the Cline icon in the left sidebar</li>
             <li>Click the Cline icon to open the panel</li>
             <li>Click "Sign In" or "Configure"</li>
-            <li>Enter your GitHub Enterprise Personal Access Token (from Step 8)</li>
-            <li>Configure MCP servers if needed (Step 13 has more details)</li>
+            <li>Enter your GitHub Enterprise Personal Access Token (from Step 11)</li>
+            <li>Configure MCP servers if needed (Step 15 has more details)</li>
           </ol>
 
           <h3 style={{ marginTop: 'var(--space-4)' }}>Test Cline</h3>
@@ -81,11 +81,11 @@ export default function InstallCline() {
           </div>
 
           <div className="callout" style={{ background: '#fff3cd', borderColor: '#ffeaa7', color: '#856404', marginTop: 'var(--space-3)' }}>
-            <strong>Remember:</strong> You'll need your GitHub Enterprise token from Step 8 to sign into Cline
+            <strong>Remember:</strong> You'll need your GitHub Enterprise token from Step 11 to sign into Cline
           </div>
 
           <h3 style={{ marginTop: 'var(--space-4)' }}>Using Cline with MCP</h3>
-          <p>Cline integrates with Model Context Protocol (MCP) servers. You'll configure these in Step 13 when setting up your VS Code settings.</p>
+          <p>Cline integrates with Model Context Protocol (MCP) servers. You'll configure these in Step 15 when setting up your VS Code settings.</p>
 
           <div style={{ marginTop: 'var(--space-4)', display: 'flex', gap: 'var(--space-3)' }}>
             <button

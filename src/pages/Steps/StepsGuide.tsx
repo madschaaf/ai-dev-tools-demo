@@ -1,9 +1,13 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import UserInfo from './steps/UserInfo'
 import VerifySecurity from './steps/VerifySecurity'
-import SetupProxy from './steps/SetupProxy'
-import InstallVSCode from './steps/InstallVSCode'
-import InstallNode from './steps/InstallNode'
+import InstallChromeGlean from './steps/InstallChromeGlean'
 import InstallGit from './steps/InstallGit'
+import InstallNode from './steps/InstallNode'
+import InstallChatGPTCLI from './steps/InstallChatGPTCLI'
+import InstallVSCode from './steps/InstallVSCode'
+import AIToolsCheckpoint from './steps/AIToolsCheckpoint'
+import SetupProxy from './steps/SetupProxy'
 import RequestAccess from './steps/RequestAccess'
 import SetupGitHub from './steps/SetupGitHub'
 import SetupGitHubEnterprise from './steps/SetupGitHubEnterprise'
@@ -13,8 +17,16 @@ import InstallExtensions from './steps/InstallExtensions'
 import ConfigureMCPs from './steps/ConfigureMCPs'
 import ConfigureVSCode from './steps/ConfigureVSCode'
 import JoinSlackChannels from './steps/JoinSlackChannels'
+import PracticeExercises from './steps/PracticeExercises'
 
 const steps = [
+  {
+    id: 0,
+    name: 'Your Information',
+    description: 'Enter your name and email for personalized setup',
+    category: 'Getting Started',
+    status: 'pending' as const
+  },
   {
     id: 1,
     name: 'Verify Security Setup',
@@ -24,113 +36,147 @@ const steps = [
   },
   {
     id: 2,
-    name: 'Setup Proxy',
-    description: 'Configure eBay proxy settings for network access',
+    name: 'Request Access',
+    description: 'Request access to GitHub Enterprise, Jira, Slack, and other tools',
     category: 'Pre-Setup',
     status: 'pending' as const
   },
   {
     id: 3,
-    name: 'Install VS Code',
-    description: 'Download and install the latest version of Visual Studio Code',
-    category: 'Core Tools',
+    name: 'Install Chrome & AI Extensions',
+    description: 'Set up Chrome browser with ChatGPT and Glean extensions',
+    category: 'Installs',
     status: 'pending' as const
   },
   {
     id: 4,
     name: 'Install Node.js',
-    description: 'Download and install Node.js and npm for JavaScript development',
-    category: 'Core Tools',
+    description: 'Install Node.js via terminal or download',
+    category: 'Installs',
     status: 'pending' as const
   },
   {
     id: 5,
-    name: 'Install Git',
-    description: 'Install Git version control (Git Bash for Windows, Terminal for Mac)',
-    category: 'Core Tools',
+    name: 'Install Claude Code CLI',
+    description: 'Install Claude Code CLI for terminal AI assistance with eBay SSO',
+    category: 'Installs',
     status: 'pending' as const
   },
   {
     id: 6,
-    name: 'Request Access',
-    description: 'Request access to GitHub Enterprise, Jira, Slack, and other tools',
-    category: 'Access & Permissions',
+    name: 'Install Git',
+    description: 'Install Git Bash (Windows) or verify Git (Mac)',
+    category: 'Installs',
     status: 'pending' as const
   },
   {
     id: 7,
+    name: 'Install VS Code',
+    description: 'Install VS Code via terminal or download',
+    category: 'Installs',
+    status: 'pending' as const
+  },
+  {
+    id: 'checkpoint-ai-tools',
+    name: '✓ Checkpoint: AI Tools',
+    description: 'Review all AI tools available to help you',
+    category: 'Installs',
+    status: 'pending' as const,
+    isCheckpoint: true
+  },
+  {
+    id: 8,
+    name: 'Setup Proxy',
+    description: 'Configure eBay proxy settings for network access',
+    category: 'Access & Permissions',
+    status: 'pending' as const
+  },
+  {
+    id: 9,
     name: 'Setup GitHub',
     description: 'Create GitHub account and configure SSH keys',
     category: 'Access & Permissions',
     status: 'pending' as const
   },
   {
-    id: 8,
+    id: 10,
     name: 'Setup GitHub Enterprise',
     description: 'Configure GitHub Enterprise with tokens and link accounts',
     category: 'Access & Permissions',
     status: 'pending' as const
   },
   {
-    id: 9,
-    name: 'Install Obsidian App',
-    description: 'Add Obsidian workflow app to GitHub Enterprise',
+    id: 11,
+    name: 'Install VS Code Extensions',
+    description: 'Install essential VS Code extensions for development',
     category: 'AI Tools',
     status: 'pending' as const
   },
   {
-    id: 10,
+    id: 12,
     name: 'Install Cline',
     description: 'Download and install eBay Cline extension for VS Code',
     category: 'AI Tools',
     status: 'pending' as const
   },
   {
-    id: 11,
-    name: 'Install VS Code Extensions',
-    description: 'Install essential VS Code extensions for development',
-    category: 'Configuration',
+    id: 13,
+    name: 'Install Obsidian App',
+    description: 'Add Obsidian workflow app to GitHub Enterprise',
+    category: 'AI Tools',
     status: 'pending' as const
   },
   {
-    id: 12,
+    id: 14,
     name: 'Configure MCPs',
     description: 'Set up MCP servers with tokens and credentials',
     category: 'Configuration',
     status: 'pending' as const
   },
   {
-    id: 13,
+    id: 15,
     name: 'Configure VS Code Settings',
     description: 'Update settings.json with eBay-specific configurations',
     category: 'Configuration',
     status: 'pending' as const
   },
   {
-    id: 14,
+    id: 16,
     name: 'Join Slack Channels',
     description: 'Join key Slack channels for support and collaboration',
+    category: 'Final Steps',
+    status: 'pending' as const
+  },
+  {
+    id: 17,
+    name: 'Practice & Learn',
+    description: 'Master your AI tools with hands-on exercises',
     category: 'Final Steps',
     status: 'pending' as const
   }
 ]
 
 // Component mapper for steps
-const stepComponents: Record<number, React.ComponentType<any>> = {
+const stepComponents: Record<number | string, React.ComponentType<any>> = {
+  0: UserInfo,
   1: VerifySecurity,
-  2: SetupProxy,
-  3: InstallVSCode,
+  2: RequestAccess,
+  3: InstallChromeGlean,
   4: InstallNode,
-  5: InstallGit,
-  6: RequestAccess,
-  7: SetupGitHub,
-  8: SetupGitHubEnterprise,
-  9: InstallObsidian,
-  10: InstallCline,
+  5: InstallChatGPTCLI,
+  6: InstallGit,
+  7: InstallVSCode,
+  'checkpoint-ai-tools': AIToolsCheckpoint,
+  8: SetupProxy,
+  9: SetupGitHub,
+  10: SetupGitHubEnterprise,
   11: InstallExtensions,
-  12: ConfigureMCPs,
-  13: ConfigureVSCode,
-  14: JoinSlackChannels
+  12: InstallCline,
+  13: InstallObsidian,
+  14: ConfigureMCPs,
+  15: ConfigureVSCode,
+  16: JoinSlackChannels,
+  17: PracticeExercises
 }
 
 // Group steps by category
@@ -141,9 +187,39 @@ const stepsByCategory = steps.reduce<Record<string, typeof steps>>((acc, step) =
 }, {})
 
 export default function StepsGuide() {
-  const [selectedStep, setSelectedStep] = useState<number | null>(steps[0]?.id ?? null)
+  const [selectedStep, setSelectedStep] = useState<number | string | null>(steps[0]?.id ?? null)
+  const [completedSteps, setCompletedSteps] = useState<Set<number | string>>(() => {
+    // Load completed steps from localStorage
+    const saved = localStorage.getItem('completedSteps')
+    return saved ? new Set(JSON.parse(saved)) : new Set()
+  })
 
   const activeStep = steps.find((s) => s.id === selectedStep) ?? null
+
+  // Scroll to top whenever selectedStep changes
+  useEffect(() => {
+    const detailPanel = document.querySelector('.link-detail-panel')
+    if (detailPanel) {
+      detailPanel.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }, [selectedStep])
+
+  const handleCompleteStep = (stepId: number | string) => {
+    setCompletedSteps(prev => {
+      const newSet = new Set(prev)
+      newSet.add(stepId)
+      // Save to localStorage
+      localStorage.setItem('completedSteps', JSON.stringify([...newSet]))
+      return newSet
+    })
+  }
+
+  const handleNextStep = () => {
+    const currentIndex = steps.findIndex(s => s.id === selectedStep)
+    if (currentIndex < steps.length - 1) {
+      setSelectedStep(steps[currentIndex + 1].id)
+    }
+  }
 
   return (
     <>
@@ -159,21 +235,36 @@ export default function StepsGuide() {
                   <section key={category} className="quick-links-group">
                     <h3 className="quick-links-group-title">{category}</h3>
                     <ul className="quick-links-items">
-                      {categorySteps.map((step) => (
-                        <li key={step.id}>
-                          <button
-                            type="button"
-                            onClick={() => setSelectedStep(step.id)}
-                            className={`quick-link-row ${selectedStep === step.id ? 'active' : ''}`}
-                          >
-                            <span className="step-number">{step.id}</span>
-                            <span className="quick-link-row-main">
-                              <span className="quick-link-name">{step.name}</span>
-                              <span className="quick-link-desc">{step.description}</span>
-                            </span>
-                          </button>
-                        </li>
-                      ))}
+                      {categorySteps.map((step) => {
+                        const isCompleted = completedSteps.has(step.id)
+                        return (
+                          <li key={step.id}>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedStep(step.id)}
+                              className={`quick-link-row ${selectedStep === step.id ? 'active' : ''}`}
+                              style={step.isCheckpoint ? {
+                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                color: 'white',
+                                borderLeft: '4px solid #ffd700'
+                              } : isCompleted ? {
+                                background: '#d4edda',
+                                borderLeft: '4px solid #28a745'
+                              } : {}}
+                            >
+                              {!step.isCheckpoint && (
+                                <span className="step-number" style={isCompleted ? { background: '#28a745', color: 'white' } : {}}>
+                                  {isCompleted ? '✓' : step.id}
+                                </span>
+                              )}
+                              <span className="quick-link-row-main">
+                                <span className="quick-link-name" style={step.isCheckpoint ? { color: 'white', fontWeight: 600 } : {}}>{step.name}</span>
+                                <span className="quick-link-desc" style={step.isCheckpoint ? { color: 'rgba(255,255,255,0.9)' } : {}}>{step.description}</span>
+                              </span>
+                            </button>
+                          </li>
+                        )
+                      })}
                     </ul>
                   </section>
                 ))}
@@ -185,8 +276,9 @@ export default function StepsGuide() {
                 <article className="page link-detail">
                   {(() => {
                     const Component = stepComponents[activeStep.id]
+                    const isCompleted = completedSteps.has(activeStep.id)
                     if (Component) {
-                      return <Component />
+                      return <Component onComplete={() => handleCompleteStep(activeStep.id)} isCompleted={isCompleted} onNext={handleNextStep} />
                     }
 
                     return (

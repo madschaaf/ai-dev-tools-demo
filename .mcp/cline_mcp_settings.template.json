@@ -132,6 +132,19 @@
         "no_proxy": "localhost,127.0.0.1,.vip.ebay.com,.corp.ebay.com,.ebayc3.com"
       },
       "disabled": true
+    },
+    "glean-server": {
+      "command": "node",
+      "args": [
+        "/Users/YOUR_USERNAME/ebay-mcp/mcp-tools-servers/glean-server/build/index.js"
+      ],
+      "env": {
+        "GLEAN_API_TOKEN": "REPLACE_WITH_YOUR_GLEAN_API_TOKEN",
+        "GLEAN_API_URL": "https://app.glean.com/api",
+        "NO_PROXY": "localhost,127.0.0.1,.vip.ebay.com,.corp.ebay.com,.ebayc3.com",
+        "no_proxy": "localhost,127.0.0.1,.vip.ebay.com,.corp.ebay.com,.ebayc3.com"
+      },
+      "disabled": false
     }
   }
 }

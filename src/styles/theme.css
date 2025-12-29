@@ -317,6 +317,32 @@ body {
   z-index: 1;
 }
 
+.ai-helper-icons {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.ai-helper-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.ai-helper-icon-glean {
+  background: #345cff;
+}
+
+.ai-helper-icon-chatgpt {
+  background: #00a37f;
+}
+
 .hero-header {
   display: flex;
   align-items: center;

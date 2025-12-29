@@ -1,18 +1,16 @@
 import { useState, useEffect } from 'react'
+import { getUserOS } from './UserInfo'
 
 export default function InstallGit() {
   const [downloadStarted, setDownloadStarted] = useState(false)
   const [isDownloading, setIsDownloading] = useState(false)
-  const [userOS, setUserOS] = useState<'Windows' | 'Mac' | 'Linux' | 'Unknown'>('Unknown')
+  const [userOS, setUserOS] = useState<'windows' | 'mac' | null>(null)
+  const [copiedCommand, setCopiedCommand] = useState<string | null>(null)
 
   useEffect(() => {
-    const userAgent = navigator.userAgent
-    if (userAgent.includes('Win')) {
-      setUserOS('Windows')
-    } else if (userAgent.includes('Mac')) {
-      setUserOS('Mac')
-    } else if (userAgent.includes('Linux')) {
-      setUserOS('Linux')
+    const os = getUserOS()
+    if (os) {
+      setUserOS(os)
     }
   }, [])
 
@@ -20,16 +18,7 @@ export default function InstallGit() {
     setDownloadStarted(true)
     setIsDownloading(true)
 
-    // Provide appropriate download link based on OS
-    let downloadUrl = 'https://git-scm.com/downloads'
-
-    if (userOS === 'Windows') {
-      downloadUrl = 'https://github.com/git-for-windows/git/releases/download/v2.43.0.windows.1/Git-2.43.0-64-bit.exe'
-    } else if (userOS === 'Mac') {
-      downloadUrl = 'https://git-scm.com/download/mac'
-    } else if (userOS === 'Linux') {
-      downloadUrl = 'https://git-scm.com/download/linux'
-    }
+    const downloadUrl = 'https://github.com/git-for-windows/git/releases/download/v2.43.0.windows.1/Git-2.43.0-64-bit.exe'
 
     // Trigger download
     window.open(downloadUrl, '_blank')
@@ -40,46 +29,96 @@ export default function InstallGit() {
     }, 3000)
   }
 
+  const handleCopy = (text: string, commandKey: string) => {
+    navigator.clipboard.writeText(text)
+    setCopiedCommand(commandKey)
+    setTimeout(() => setCopiedCommand(null), 2000)
+  }
+
+  const chatgptCommand = 'npm install -g chatgpt-cli'
+
   return (
     <>
-      <h2>Step 3: Install Git</h2>
+      <h2>Step 7: Install Git</h2>
 
-      {!downloadStarted ? (
+      {!userOS && (
+        <div className="callout" style={{ background: '#fff3cd', borderColor: '#ffeaa7', color: '#856404', marginTop: 'var(--space-4)' }}>
+          <strong>Tip:</strong> Go back to Step 0 to select your operating system for personalized instructions.
+        </div>
+      )}
+
+      {userOS === 'mac' && (
         <>
-          <p>Git is a distributed version control system that tracks changes in your code and enables collaboration with other developers.</p>
+          <div className="callout" style={{ background: '#e3f2fd', borderColor: '#90caf9', color: '#0d47a1', marginTop: 'var(--space-4)' }}>
+            <strong>Mac Users:</strong> Git is typically pre-installed on macOS. You'll use Terminal for all commands throughout this guide. 
+            Note: If you run into issues during installation, type "Claude" in your terminal to get AI-powered help right in the command line.
+          </div>
 
-          {userOS === 'Windows' && (
-            <div className="callout" style={{ background: '#e3f2fd', borderColor: '#90caf9', color: '#0d47a1', marginBottom: 'var(--space-4)' }}>
-              <strong>Windows Users:</strong> You'll install Git Bash, which provides both Git and a Unix-like terminal environment.
+          <div className="callout" style={{ background: '#e3f2fd', borderColor: '#90caf9', color: '#0d47a1', marginTop: 'var(--space-3)' }}>
+            <strong>Quick Access: Open Terminal</strong>
+            <div style={{ marginTop: 'var(--space-2)' }}>
+              <p style={{ margin: '0 0 8px' }}>Press <kbd style={{ background: '#fff', padding: '2px 6px', borderRadius: '4px', border: '1px solid #90caf9' }}>⌘ Command</kbd> + <kbd style={{ background: '#fff', padding: '2px 6px', borderRadius: '4px', border: '1px solid #90caf9' }}>Space</kbd></p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <p style={{ margin: 0 }}>Type "Terminal" and press Enter</p>
+                <button
+                  type="button"
+                  onClick={() => handleCopy('Terminal', 'terminal-search')}
+                  style={{
+                    padding: '4px 8px',
+                    fontSize: '0.75rem',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--color-blue-500)',
+                    background: copiedCommand === 'terminal-search' ? 'var(--color-green-500)' : 'white',
+                    color: copiedCommand === 'terminal-search' ? 'white' : 'var(--color-blue-500)',
+                    cursor: 'pointer',
+                    fontWeight: 600,
+                    transition: 'all 0.2s',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {copiedCommand === 'terminal-search' ? '✓' : 'Copy'}
+                </button>
+              </div>
             </div>
-          )}
+          </div>
 
-          {userOS === 'Mac' && (
-            <div className="callout" style={{ background: '#e3f2fd', borderColor: '#90caf9', color: '#0d47a1', marginBottom: 'var(--space-4)' }}>
-              <strong>Mac Users:</strong> Git may already be installed. After installation, you can use the built-in Terminal app for Git commands.
-            </div>
-          )}
+          <h3 style={{ marginTop: 'var(--space-4)' }}>Verify Git Installation</h3>
+          <p style={{ fontSize: '0.9rem', color: 'var(--color-neutral-700)', marginBottom: 'var(--space-2)' }}>
+            Check that Git is installed on your Mac:
+          </p>
 
-          <h3>Why Git?</h3>
+          <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)' }}>
+            <code>git --version</code>
+            <p style={{ margin: 'var(--space-2) 0 0', fontSize: '0.85rem', color: 'var(--color-neutral-700)' }}>
+              Should output something like: git version 2.39.0
+            </p>
+          </div>
+
+          <p style={{ marginTop: 'var(--space-2)', fontSize: '0.9rem', color: 'var(--color-neutral-700)' }}>
+            If not installed, run: <code>xcode-select --install</code>
+          </p>
+
+          <h3 style={{ marginTop: 'var(--space-4)' }}>Next Steps</h3>
+          <p>Once Git is verified, proceed to Step 8 to install VS Code.</p>
+        </>
+      )}
+
+      {userOS === 'windows' && !downloadStarted ? (
+        <>
+          <p>Git Bash is a Windows application that provides a Unix-like terminal environment with Git version control. This is essential for your development workflow.</p>
+
+          <div className="callout" style={{ background: '#e3f2fd', borderColor: '#90caf9', color: '#0d47a1', marginBottom: 'var(--space-4)' }}>
+            <strong>Windows Users:</strong> Git Bash will be your primary terminal throughout this guide. Note: if you run into issues during installation type "Claude" in your terminal to get AI-powered help right in the command line.
+          </div>
+
+          <h3>Why Git Bash?</h3>
           <ul>
-            <li><strong>Version Control</strong> - Track every change to your code over time</li>
-            <li><strong>Collaboration</strong> - Work with teams using branches and pull requests</li>
-            <li><strong>History</strong> - Review and revert to any previous version of your code</li>
-            <li><strong>Industry Standard</strong> - Used by virtually all modern development teams</li>
-            <li><strong>GitHub Integration</strong> - Works seamlessly with GitHub for remote repositories</li>
+            <li><strong>Git Commands</strong> - Full Git command-line interface for version control</li>
+            <li><strong>Bash Shell</strong> - Unix-style terminal for running commands (used throughout this guide)</li>
+            <li><strong>SSH Support</strong> - Secure connection to GitHub and remote servers</li>
+            <li><strong>Unix Tools</strong> - Access to common Unix utilities like grep, sed, awk</li>
+            <li><strong>Package Management</strong> - Install additional tools like ChatGPT CLI</li>
           </ul>
-
-          {userOS === 'Windows' && (
-            <>
-              <h3>Git Bash Features</h3>
-              <ul>
-                <li><strong>Git Commands</strong> - Full Git command-line interface</li>
-                <li><strong>Bash Shell</strong> - Unix-style terminal for running commands</li>
-                <li><strong>SSH Support</strong> - Secure connection to GitHub and other remote servers</li>
-                <li><strong>Unix Tools</strong> - Access to common Unix utilities like grep, sed, awk</li>
-              </ul>
-            </>
-          )}
 
           <div style={{ marginTop: 'var(--space-4)' }}>
             <button
@@ -88,25 +127,25 @@ export default function InstallGit() {
               onClick={handleDownload}
               style={{ fontSize: '1.1rem', padding: '14px 24px' }}
             >
-              {userOS === 'Windows' ? 'Download Git Bash' : 'Download Git'}
+              Download Git Bash
             </button>
           </div>
         </>
-      ) : (
+      ) : userOS === 'windows' ? (
         <>
           <div className="callout" style={{ background: '#d4edda', borderColor: '#c3e6cb', color: '#155724' }}>
             {isDownloading ? (
               <>
                 <strong>Download Started!</strong>
                 <p style={{ margin: '8px 0 0' }}>
-                  Your {userOS === 'Windows' ? 'Git Bash' : 'Git'} download is starting...
+                  Your Git Bash download is starting...
                 </p>
               </>
             ) : (
               <>
                 <strong>Download in Progress</strong>
                 <p style={{ margin: '8px 0 0' }}>
-                  Check your downloads folder for the {userOS === 'Windows' ? 'Git Bash' : 'Git'} installer.
+                  Check your downloads folder for the Git Bash installer.
                 </p>
               </>
             )}
@@ -114,10 +153,10 @@ export default function InstallGit() {
 
           <h3 style={{ marginTop: 'var(--space-4)' }}>What's happening now?</h3>
           <p>
-            We've initiated the download of Git {userOS === 'Windows' && 'Bash '}for your operating system.
+            We've initiated the download of Git Bash for Windows. After installation, you'll install ChatGPT CLI for AI-powered command line assistance.
           </p>
 
-          {userOS === 'Windows' && (
+          {userOS === 'windows' && (
             <>
               <h3>Installation Steps (Windows):</h3>
               <ol>
@@ -141,66 +180,14 @@ export default function InstallGit() {
               <h3>After Installation</h3>
               <p><strong>To use Git Bash:</strong></p>
               <ul>
-                <li>Right-click anywhere in a folder and select "Git Bash Here"</li>
-                <li>Or search for "Git Bash" in the Start menu</li>
+                <li>Press the <kbd style={{ background: '#fff', padding: '2px 6px', borderRadius: '4px', border: '1px solid #d0d7de' }}>⊞ Windows</kbd> key and type "Git Bash"</li>
+                <li>Or right-click anywhere in a folder and select "Git Bash Here"</li>
               </ul>
             </>
           )}
 
-          {userOS === 'Mac' && (
-            <>
-              <h3>Installation Steps (Mac):</h3>
-              <ol>
-                <li><strong>Check if Git is already installed:</strong>
-                  <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)' }}>
-                    <code>git --version</code>
-                  </div>
-                  <p style={{ marginTop: 'var(--space-2)', fontSize: '0.9rem' }}>
-                    If Git is installed, you'll see the version number and can skip to the next step.
-                  </p>
-                </li>
-                <li><strong>If not installed</strong> - Follow the downloaded instructions or use Homebrew:
-                  <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)' }}>
-                    <code>brew install git</code>
-                  </div>
-                </li>
-                <li><strong>Or install Xcode Command Line Tools</strong> - This includes Git:
-                  <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)' }}>
-                    <code>xcode-select --install</code>
-                  </div>
-                </li>
-              </ol>
-
-              <h3>Using Terminal</h3>
-              <p>Mac users can use the built-in Terminal app for Git commands:</p>
-              <ul>
-                <li>Press <kbd>Cmd + Space</kbd> and type "Terminal"</li>
-                <li>Or find Terminal in Applications → Utilities</li>
-                <li>You can also use the integrated terminal in VS Code</li>
-              </ul>
-            </>
-          )}
-
-          {userOS === 'Linux' && (
-            <>
-              <h3>Installation Steps (Linux):</h3>
-              <p>Install Git using your distribution's package manager:</p>
-
-              <h4>Debian/Ubuntu:</h4>
-              <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)' }}>
-                <code>sudo apt-get update</code><br />
-                <code>sudo apt-get install git</code>
-              </div>
-
-              <h4>Fedora:</h4>
-              <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)' }}>
-                <code>sudo dnf install git</code>
-              </div>
-            </>
-          )}
-
-          <h3>Verify Installation</h3>
-          <p>After installation, open {userOS === 'Windows' ? 'Git Bash' : 'Terminal'} and verify Git is installed:</p>
+          <h3 style={{ marginTop: 'var(--space-4)' }}>Verify Installation</h3>
+          <p>After installation, open Git Bash and verify Git is installed:</p>
 
           <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-3)' }}>
             <code>git --version</code>
@@ -210,7 +197,7 @@ export default function InstallGit() {
           </div>
 
           <h3>Next Steps</h3>
-          <p>Once Git is installed and verified, proceed to Step 4 to install essential VS Code extensions, then Step 5 to configure Git with your identity.</p>
+          <p>Once Git Bash is installed and verified, proceed to Step 8 to install VS Code.</p>
 
           <div style={{ marginTop: 'var(--space-4)', display: 'flex', gap: 'var(--space-3)' }}>
             <button
@@ -230,7 +217,7 @@ export default function InstallGit() {
             </a>
           </div>
         </>
-      )}
+      ) : null}
     </>
   )
 }

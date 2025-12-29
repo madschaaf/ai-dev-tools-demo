@@ -1,6 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { getUserInfo, getUserFullName } from './UserInfo'
 
-export default function RequestAccess() {
+export default function RequestAccess({ onComplete, isCompleted, onNext }: { onComplete: () => void, isCompleted: boolean, onNext: () => void }) {
+  const [userName, setUserName] = useState<string>('')
+  const [copiedPrompt, setCopiedPrompt] = useState<string | null>(null)
   const [requestedItems, setRequestedItems] = useState({
     github: false,
     copilot: false,
@@ -10,6 +13,13 @@ export default function RequestAccess() {
     figma: false
   })
   const [copiedItem, setCopiedItem] = useState<string | null>(null)
+
+  useEffect(() => {
+    const userInfo = getUserInfo()
+    if (userInfo) {
+      setUserName(`${userInfo.firstName} ${userInfo.lastName}`)
+    }
+  }, [])
 
   const handleRequest = (item: keyof typeof requestedItems) => {
     setRequestedItems(prev => ({ ...prev, [item]: !prev[item] }))
@@ -21,31 +31,103 @@ export default function RequestAccess() {
     setTimeout(() => setCopiedItem(null), 2000)
   }
 
+  const handleCopyPrompt = (text: string, promptKey: string) => {
+    navigator.clipboard.writeText(text)
+    setCopiedPrompt(promptKey)
+    setTimeout(() => setCopiedPrompt(null), 2000)
+  }
+
   const allRequested = Object.values(requestedItems).every(v => v)
+
+  const userInfo = getUserInfo()
+  const fullName = getUserFullName()
 
   const accessItems = [
     { key: 'github', name: 'eBay GitHub Access', description: 'Access to GitHub Enterprise (github.corp.ebay.com)' },
     { key: 'copilot', name: 'github-emu-copilot', description: 'Access to GitHub Copilot AI assistant' },
     { key: 'genai', name: 'github-emu-genai', description: 'Access to generative AI tools and features' },
     { key: 'jira', name: 'CORP Citrix Jira Access', description: 'Access to Jira for project management and issue tracking' },
-    { key: 'slack', name: 'Slack End User', description: 'Access to eBay\'s Slack workspace for communication' },
+    { key: 'slack', name: 'Slack End User', description: "Access to eBay's Slack workspace for communication" },
     { key: 'figma', name: 'CORP Citrix Figma', description: 'Access to Figma for design collaboration' }
   ]
 
+  const aiHelpPrompt = `I need to request access to several systems for my new eBay developer account. Can you help me:
+
+1. Understand what each of these access items is for:
+${accessItems.map(item => `   - ${item.name}: ${item.description}`).join('\n')}
+
+2. Explain the Secure Access portal process at eBay
+3. Help me troubleshoot if I get stuck or encounter errors
+
+My name is: ${fullName || '[Your Name]'}
+My email is: ${userInfo?.email || '[Your Email]'}
+
+Please explain the process step-by-step and what each system will let me do.`
+
   return (
     <>
-      <h2>Step 6: Request Access</h2>
+      <h2>Step 3: Request Access</h2>
       <p>Before you can use eBay's development tools, you need to request access through Secure Access. This process may take some time for approval.</p>
 
       <div className="callout" style={{ background: '#fff3cd', borderColor: '#ffeaa7', color: '#856404', marginTop: 'var(--space-4)' }}>
         <strong>Important:</strong> Access requests may take a few hours to a few days to be approved. Continue with other steps while waiting.
       </div>
 
-      <h3 style={{ marginTop: 'var(--space-4)' }}>How to Request Access</h3>
+      <div className="callout" style={{ background: '#e3f2fd', borderColor: '#90caf9', color: '#0d47a1', marginTop: 'var(--space-3)' }}>
+        <strong>💡 Get AI Help:</strong> Not sure what these access items are for? Copy this prompt and paste it into eBay's Glean Chat for explanations and guidance:
+        <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--space-3)' }}>
+            <pre style={{ flex: 1, margin: 0, fontSize: '0.8rem', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+              {aiHelpPrompt}
+            </pre>
+            <button
+              type="button"
+              onClick={() => handleCopyPrompt(aiHelpPrompt, 'ai-help')}
+              style={{
+                padding: '6px 12px',
+                fontSize: '0.85rem',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--color-blue-500)',
+                background: copiedPrompt === 'ai-help' ? 'var(--color-green-500)' : 'white',
+                color: copiedPrompt === 'ai-help' ? 'white' : 'var(--color-blue-500)',
+                cursor: 'pointer',
+                fontWeight: 600,
+                transition: 'all 0.2s',
+                whiteSpace: 'nowrap',
+                flexShrink: 0
+              }}
+            >
+              {copiedPrompt === 'ai-help' ? 'Copied!' : 'Copy'}
+            </button>
+          </div>
+        </div>
+        <p style={{ margin: 'var(--space-2) 0 0', fontSize: '0.85rem' }}>
+          {/* Paste into <a href="https://chat.openai.com" target="_blank" rel="noopener noreferrer">ChatGPT</a> or <a href="https://claude.ai" target="_blank" rel="noopener noreferrer">Claude.ai</a> */}
+            Paste into <a href="https://app.glean.com/chat" target="_blank" rel="noopener noreferrer">Glean Chat</a>
+        </p>
+      </div>
+
+      <h3 style={{ marginTop: 'var(--space-4)' }}>Request Process</h3>
       <ol>
         <li>Open the <a href="https://secureaccess.corp.ebay.com/" target="_blank" rel="noopener noreferrer">Secure Access Portal</a></li>
         <li>Click <strong>"Request Access"</strong> button</li>
-        <li>Enter your name in the search field</li>
+        <li>
+          {userName ? (
+            <>
+              Enter <strong>{userName}</strong> in the search field
+              <div style={{ fontSize: '0.85rem', color: 'var(--color-neutral-700)', marginTop: '4px' }}>
+                (Your name from Step 0)
+              </div>
+            </>
+          ) : (
+            <>
+              Enter your name in the search field
+              <div style={{ fontSize: '0.85rem', color: 'var(--color-yellow-500)', marginTop: '4px' }}>
+                💡 Tip: Go back to Step 0 to save your information for auto-fill throughout the guide
+              </div>
+            </>
+          )}
+        </li>
         <li>Click on your name when it appears</li>
         <li>Click <strong>"Next"</strong></li>
         <li>For each item below:
@@ -136,6 +218,53 @@ export default function RequestAccess() {
         >
           Open Secure Access Portal
         </a>
+      </div>
+
+      <div style={{ marginTop: 'var(--space-4)', paddingTop: 'var(--space-4)', borderTop: '1px solid #e0e0e0', display: 'flex', gap: 'var(--space-3)', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          {!isCompleted ? (
+            <button
+              type="button"
+              onClick={onComplete}
+              disabled={!allRequested}
+              style={{
+                fontSize: '1rem',
+                padding: '12px 24px',
+                background: allRequested ? '#28a745' : '#ccc',
+                color: 'white',
+                border: 'none',
+                borderRadius: 'var(--radius-md)',
+                cursor: allRequested ? 'pointer' : 'not-allowed',
+                fontWeight: 600,
+                transition: 'all 0.2s',
+                opacity: allRequested ? 1 : 0.6
+              }}
+            >
+              Mark as Complete
+            </button>
+          ) : (
+            <div style={{ color: '#28a745', fontWeight: 600, fontSize: '1.1rem' }}>
+              ✓ Step Completed
+            </div>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={onNext}
+          style={{
+            fontSize: '1rem',
+            padding: '12px 24px',
+            background: '#0969da',
+            color: 'white',
+            border: 'none',
+            borderRadius: 'var(--radius-md)',
+            cursor: 'pointer',
+            fontWeight: 600,
+            transition: 'all 0.2s'
+          }}
+        >
+          Next Step →
+        </button>
       </div>
     </>
   )

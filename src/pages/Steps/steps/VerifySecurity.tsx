@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export default function VerifySecurity() {
+export default function VerifySecurity({ onComplete, isCompleted, onNext }: { onComplete: () => void, isCompleted: boolean, onNext: () => void }) {
   const [verifiedItems, setVerifiedItems] = useState({
     sso: false,
     pingid: false,
@@ -15,7 +15,7 @@ export default function VerifySecurity() {
 
   return (
     <>
-      <h2>Step 1: Verify Security Setup</h2>
+      <h2>Step 2: Verify Security Setup</h2>
       <p>Before you can download and access eBay tools, you need to confirm your security credentials are working properly.</p>
 
       <div className="callout" style={{ background: '#fff3cd', borderColor: '#ffeaa7', color: '#856404', marginTop: 'var(--space-4)' }}>
@@ -113,7 +113,7 @@ export default function VerifySecurity() {
         <div className="callout" style={{ background: '#d4edda', borderColor: '#c3e6cb', color: '#155724' }}>
           <strong>Great! All security tools verified.</strong>
           <p style={{ margin: '8px 0 0' }}>
-            You're ready to proceed to Step 2: Setup Proxy
+            You're ready to proceed to Step 3: Request Access
           </p>
         </div>
       )}
@@ -125,7 +125,18 @@ export default function VerifySecurity() {
         <li><strong>YubiKey not validating:</strong> Ensure you're on the corporate network/VPN and that your PIN meets requirements</li>
       </ul>
 
-      <div style={{ marginTop: 'var(--space-4)', display: 'flex', gap: 'var(--space-3)' }}>
+      <div className="callout" style={{ background: '#e3f2fd', borderColor: '#90caf9', color: '#0d47a1', marginTop: 'var(--space-4)' }}>
+        <strong>Need Help?</strong>
+        <p style={{ margin: '8px 0 0', fontSize: '0.9rem' }}>
+          If you're having trouble with security setup, contact IT support through the{' '}
+          <a href="https://ebayinc.service-now.com/esc" target="_blank" rel="noopener noreferrer" style={{ color: '#0d47a1', fontWeight: 600 }}>
+            Employee Service Center
+          </a>
+          . They can help with SSO, PingID, and YubiKey issues.
+        </p>
+      </div>
+
+      <div style={{ marginTop: 'var(--space-4)', display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap' }}>
         <a
           className="button ghost"
           href="https://tokenaccess.corp.ebay.com/"
@@ -142,6 +153,61 @@ export default function VerifySecurity() {
         >
           Test YubiKey
         </a>
+        <a
+          className="button ghost"
+          href="https://ebayinc.service-now.com/esc"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Contact IT Support
+        </a>
+      </div>
+
+      <div style={{ marginTop: 'var(--space-4)', paddingTop: 'var(--space-4)', borderTop: '1px solid #e0e0e0', display: 'flex', gap: 'var(--space-3)', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          {!isCompleted ? (
+            <button
+              type="button"
+              onClick={onComplete}
+              disabled={!allVerified}
+              style={{
+                fontSize: '1rem',
+                padding: '12px 24px',
+                background: allVerified ? '#28a745' : '#ccc',
+                color: 'white',
+                border: 'none',
+                borderRadius: 'var(--radius-md)',
+                cursor: allVerified ? 'pointer' : 'not-allowed',
+                fontWeight: 600,
+                transition: 'all 0.2s',
+                opacity: allVerified ? 1 : 0.6
+              }}
+            >
+              Mark as Complete
+            </button>
+          ) : (
+            <div style={{ color: '#28a745', fontWeight: 600, fontSize: '1.1rem' }}>
+              ✓ Step Completed
+            </div>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={onNext}
+          style={{
+            fontSize: '1rem',
+            padding: '12px 24px',
+            background: '#0969da',
+            color: 'white',
+            border: 'none',
+            borderRadius: 'var(--radius-md)',
+            cursor: 'pointer',
+            fontWeight: 600,
+            transition: 'all 0.2s'
+          }}
+        >
+          Next Step →
+        </button>
       </div>
     </>
   )

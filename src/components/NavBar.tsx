@@ -13,6 +13,7 @@ export default function NavBar() {
         <div className="navbar-links">
           <NavLink to="/" className="nav-link" end>Explore Links</NavLink>
           <NavLink to="/vscode-extensions" className="nav-link">VS Code Extensions</NavLink>
+          <NavLink to="/ai-sandbox" className="nav-link">AI Sandbox</NavLink>
         </div>
 
         <div className="navbar-actions">

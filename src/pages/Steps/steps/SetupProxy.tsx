@@ -1,37 +1,75 @@
 import { useState, useEffect } from 'react'
+import { getUserOS } from './UserInfo'
+import selfServiceIcon from '../../../assets/self-service-icon.png'
+import selfServiceSearch from '../../../assets/self-service-search.png'
 
 export default function SetupProxy() {
-  const [userOS, setUserOS] = useState<'Windows' | 'Mac' | 'Unknown'>('Unknown')
+  const [userOS, setUserOS] = useState<'windows' | 'mac' | null>(null)
   const [setupComplete, setSetupComplete] = useState(false)
 
   useEffect(() => {
-    const userAgent = navigator.userAgent
-    if (userAgent.includes('Win')) {
-      setUserOS('Windows')
-    } else if (userAgent.includes('Mac')) {
-      setUserOS('Mac')
+    const os = getUserOS()
+    if (os) {
+      setUserOS(os)
     }
   }, [])
 
   return (
     <>
-      <h2>Step 2: Setup Proxy</h2>
-      <p>Configure eBay's proxy settings to access internal tools and download software. This is required before installing development tools.</p>
+      <h2>Step 9: Setup Proxy</h2>
+      <p>Configure eBay's proxy settings to access internal tools and download software.</p>
 
-      <div className="callout" style={{ background: '#e3f2fd', borderColor: '#90caf9', color: '#0d47a1', marginTop: 'var(--space-4)' }}>
-        <strong>Detected OS: {userOS}</strong>
-        <p style={{ margin: '8px 0 0' }}>Follow the {userOS} instructions below</p>
-      </div>
+      {!userOS && (
+        <div className="callout" style={{ background: '#fff3cd', borderColor: '#ffeaa7', color: '#856404', marginTop: 'var(--space-4)' }}>
+          <strong>Tip:</strong> Go back to Step 0 to select your operating system for customized instructions.
+        </div>
+      )}
 
-      {userOS === 'Mac' && (
+      {userOS && (
+        <div className="callout" style={{ background: '#e3f2fd', borderColor: '#90caf9', color: '#0d47a1', marginTop: 'var(--space-4)' }}>
+          <strong>Your OS: {userOS === 'mac' ? 'macOS' : 'Windows'}</strong>
+          <p style={{ margin: '8px 0 0' }}>Follow the {userOS === 'mac' ? 'macOS' : 'Windows'} instructions below</p>
+        </div>
+      )}
+
+      {userOS === 'mac' && (
         <>
           <h3 style={{ marginTop: 'var(--space-4)' }}>macOS: Automatic Configuration (Recommended)</h3>
+
+          <h4>Step 1: Open Self Service App</h4>
+          <p>Find and open the Self Service app from your Applications or using Spotlight:</p>
+          <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)', marginBottom: 'var(--space-3)' }}>
+            <img
+              src={selfServiceIcon}
+              alt="Self Service app icon in Mac dock"
+              style={{ width: '100%', maxWidth: '600px', borderRadius: 'var(--radius-sm)', border: '1px solid #d0d7de' }}
+            />
+            <p style={{ margin: 'var(--space-2) 0 0', fontSize: '0.85rem', color: 'var(--color-neutral-700)' }}>
+              Look for the Self Service app icon (multicolor grid icon)
+            </p>
+          </div>
+
+          <h4>Step 2: Log In with Your eBay Credentials</h4>
+          <p>If prompted, log in using your eBay username and password.</p>
+
+          <h4>Step 3: Search for Site Proxy Configuration</h4>
           <ol>
-            <li>Open the <strong>Self Service</strong> app on your Mac</li>
-            <li>Search for "Site Proxy Configuration"</li>
-            <li>Run the tool to auto-configure the proxy</li>
+            <li>In the Self Service app, use the search bar to search for "Site Proxy Configuration" or "site prox"</li>
+            <li>Click the "Run" button next to "Site Proxy Configuration"</li>
+            <li>Wait for the tool to auto-configure the proxy</li>
             <li><strong>Restart your Mac</strong> for changes to apply</li>
           </ol>
+
+          <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)', marginBottom: 'var(--space-3)' }}>
+            <img
+              src={selfServiceSearch}
+              alt="Self Service app showing Site Proxy Configuration search results"
+              style={{ width: '100%', maxWidth: '800px', borderRadius: 'var(--radius-sm)', border: '1px solid #d0d7de' }}
+            />
+            <p style={{ margin: 'var(--space-2) 0 0', fontSize: '0.85rem', color: 'var(--color-neutral-700)' }}>
+              Search for "site prox" and click Run on "Site Proxy Configuration"
+            </p>
+          </div>
 
           <h3 style={{ marginTop: 'var(--space-4)' }}>macOS: Manual Configuration</h3>
 
@@ -85,7 +123,7 @@ c2sproxy() {
         </>
       )}
 
-      {userOS === 'Windows' && (
+      {userOS === 'windows' && (
         <>
           <h3 style={{ marginTop: 'var(--space-4)' }}>Windows: Automatic Configuration (Recommended)</h3>
           <ol>
@@ -145,7 +183,7 @@ Write-Host "C2S proxy enabled for this PowerShell session."`}</pre>
         <div className="callout" style={{ background: '#d4edda', borderColor: '#c3e6cb', color: '#155724', marginTop: 'var(--space-4)' }}>
           <strong>Proxy configured!</strong>
           <p style={{ margin: '8px 0 0' }}>
-            You can now proceed to Step 3 to install VS Code
+            You can now proceed to Step 8 to request access to eBay tools
           </p>
         </div>
       )}

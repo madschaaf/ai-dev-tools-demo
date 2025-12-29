@@ -1,31 +1,114 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { getUserOS } from './UserInfo'
 
-export default function InstallExtensions() {
+export default function InstallExtensions({ onComplete, isCompleted, onNext }: { onComplete: () => void, isCompleted: boolean, onNext: () => void }) {
   const [cloned, setCloned] = useState(false)
+  const [userOS, setUserOS] = useState<'mac' | 'windows' | null>(null)
+  const [copiedCommand, setCopiedCommand] = useState<string | null>(null)
+
+  useEffect(() => {
+    const os = getUserOS()
+    if (os) {
+      setUserOS(os)
+    }
+  }, [])
+
+  const handleCopy = (text: string, commandKey: string) => {
+    navigator.clipboard.writeText(text)
+    setCopiedCommand(commandKey)
+    setTimeout(() => setCopiedCommand(null), 2000)
+  }
 
   return (
     <>
-      <h2>Step 11: Install VS Code Extensions</h2>
+      <h2>Step 12: Install VS Code Extensions</h2>
       <p>Clone the AI Dev Tools repository to automatically get all recommended VS Code extensions.</p>
 
-      <h3 style={{ marginTop: 'var(--space-4)' }}>Clone the Repository</h3>
+      <h3 style={{ marginTop: 'var(--space-4)' }}>Step 1: Clone the Repository</h3>
       <p>This repository includes a pre-configured list of essential extensions for eBay development.</p>
 
       <h4>Using Terminal/Git Bash:</h4>
       <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)' }}>
-        <code style={{ display: 'block', marginBottom: 'var(--space-2)' }}>
-          cd ~/Documents  # or your preferred location
-        </code>
-        <code style={{ display: 'block' }}>
-          git clone https://github.com/madschaaf/ai-dev-tools.git
-        </code>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--space-3)' }}>
+          <code style={{ flex: 1, whiteSpace: 'pre-wrap' }}>
+            cd ~/Documents{'\n'}git clone https://github.com/madschaaf/ai-dev-tools.git{'\n'}cd ai-dev-tools
+          </code>
+          <button
+            type="button"
+            onClick={() => handleCopy('cd ~/Documents\ngit clone https://github.com/madschaaf/ai-dev-tools.git\ncd ai-dev-tools', 'clone')}
+            style={{
+              padding: '6px 12px',
+              fontSize: '0.85rem',
+              borderRadius: 'var(--radius-sm)',
+              border: '1px solid var(--color-blue-500)',
+              background: copiedCommand === 'clone' ? 'var(--color-green-500)' : 'white',
+              color: copiedCommand === 'clone' ? 'white' : 'var(--color-blue-500)',
+              cursor: 'pointer',
+              fontWeight: 600,
+              transition: 'all 0.2s',
+              whiteSpace: 'nowrap',
+              flexShrink: 0
+            }}
+          >
+            {copiedCommand === 'clone' ? 'Copied!' : 'Copy'}
+          </button>
+        </div>
+        <p style={{ margin: 'var(--space-2) 0 0', fontSize: '0.85rem', color: 'var(--color-neutral-700)' }}>
+          Clone the repository to your Documents folder and navigate into it
+        </p>
       </div>
 
       <p style={{ marginTop: 'var(--space-3)', fontSize: '0.9rem', color: 'var(--color-neutral-700)' }}>
         Note: This repo will eventually be moved to GitHub Enterprise
       </p>
 
-      <h3 style={{ marginTop: 'var(--space-4)' }}>Open in VS Code</h3>
+      <h3 style={{ marginTop: 'var(--space-4)' }}>Step 2: Create Your Own Branch</h3>
+      <p>Create a new branch so you can make edits and commits without affecting the main branch.</p>
+
+      <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--space-3)' }}>
+          <code style={{ flex: 1, whiteSpace: 'pre-wrap' }}>
+            git checkout -b my-setup
+          </code>
+          <button
+            type="button"
+            onClick={() => handleCopy('git checkout -b my-setup', 'branch')}
+            style={{
+              padding: '6px 12px',
+              fontSize: '0.85rem',
+              borderRadius: 'var(--radius-sm)',
+              border: '1px solid var(--color-blue-500)',
+              background: copiedCommand === 'branch' ? 'var(--color-green-500)' : 'white',
+              color: copiedCommand === 'branch' ? 'white' : 'var(--color-blue-500)',
+              cursor: 'pointer',
+              fontWeight: 600,
+              transition: 'all 0.2s',
+              whiteSpace: 'nowrap',
+              flexShrink: 0
+            }}
+          >
+            {copiedCommand === 'branch' ? 'Copied!' : 'Copy'}
+          </button>
+        </div>
+        <p style={{ margin: 'var(--space-2) 0 0', fontSize: '0.85rem', color: 'var(--color-neutral-700)' }}>
+          Create and switch to a new branch called "my-setup" (or use your own branch name)
+        </p>
+      </div>
+
+      <div className="callout" style={{ background: '#e3f2fd', borderColor: '#90caf9', color: '#0d47a1', marginTop: 'var(--space-3)' }}>
+        <strong>Why Create a Branch?</strong>
+        <p style={{ margin: '8px 0 0', fontSize: '0.9rem' }}>
+          Working on your own branch allows you to:
+        </p>
+        <ul style={{ margin: '8px 0 0 20px', fontSize: '0.9rem' }}>
+          <li>Make configuration changes specific to your setup</li>
+          <li>Commit your progress without affecting the main branch</li>
+          <li>Easily update from the main branch later with <code>git pull origin main</code></li>
+          <li>Push your branch to share or back up your work</li>
+        </ul>
+      </div>
+
+      <h3 style={{ marginTop: 'var(--space-4)' }}>Step 3: Open in VS Code</h3>
       <ol>
         <li>Open VS Code</li>
         <li>Go to File → Open Folder (or Cmd+O on Mac, Ctrl+O on Windows)</li>
@@ -37,7 +120,7 @@ export default function InstallExtensions() {
         <strong>Extension Popup:</strong> VS Code will automatically detect the workspace recommendations and show a popup asking if you want to install the recommended extensions.
       </div>
 
-      <h3 style={{ marginTop: 'var(--space-4)' }}>Install Recommended Extensions</h3>
+      <h3 style={{ marginTop: 'var(--space-4)' }}>Step 4: Install Recommended Extensions</h3>
       <ol>
         <li>When the popup appears, click <strong>"Install All"</strong> or <strong>"Show Recommendations"</strong></li>
         <li>If you missed the popup:
@@ -84,13 +167,13 @@ export default function InstallExtensions() {
         <div className="callout" style={{ background: '#d4edda', borderColor: '#c3e6cb', color: '#155724', marginTop: 'var(--space-4)' }}>
           <strong>Extensions installed!</strong>
           <p style={{ margin: '8px 0 0' }}>
-            You now have all the essential tools. Continue to Step 12 to configure Git.
+            You now have all the essential tools. Continue to Step 13 to install Cline.
           </p>
         </div>
       )}
 
       <h3 style={{ marginTop: 'var(--space-4)' }}>Note About VSIX Extensions</h3>
-      <p>Some extensions (like eBay Cline from Step 10) need to be installed manually from VSIX files. The standard extensions in this repository will install automatically.</p>
+      <p>Some extensions (like eBay Cline from Step 13) need to be installed manually from VSIX files. The standard extensions in this repository will install automatically.</p>
 
       <div style={{ marginTop: 'var(--space-4)', display: 'flex', gap: 'var(--space-3)' }}>
         <a
@@ -107,6 +190,53 @@ export default function InstallExtensions() {
         >
           See Full Extensions List
         </a>
+      </div>
+
+      <div style={{ marginTop: 'var(--space-4)', paddingTop: 'var(--space-4)', borderTop: '1px solid #e0e0e0', display: 'flex', gap: 'var(--space-3)', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          {!isCompleted ? (
+            <button
+              type="button"
+              onClick={onComplete}
+              disabled={!cloned}
+              style={{
+                fontSize: '1rem',
+                padding: '12px 24px',
+                background: cloned ? '#28a745' : '#ccc',
+                color: 'white',
+                border: 'none',
+                borderRadius: 'var(--radius-md)',
+                cursor: cloned ? 'pointer' : 'not-allowed',
+                fontWeight: 600,
+                transition: 'all 0.2s',
+                opacity: cloned ? 1 : 0.6
+              }}
+            >
+              Mark as Complete
+            </button>
+          ) : (
+            <div style={{ color: '#28a745', fontWeight: 600, fontSize: '1.1rem' }}>
+              ✓ Step Completed
+            </div>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={onNext}
+          style={{
+            fontSize: '1rem',
+            padding: '12px 24px',
+            background: '#0969da',
+            color: 'white',
+            border: 'none',
+            borderRadius: 'var(--radius-md)',
+            cursor: 'pointer',
+            fontWeight: 600,
+            transition: 'all 0.2s'
+          }}
+        >
+          Next Step →
+        </button>
       </div>
     </>
   )

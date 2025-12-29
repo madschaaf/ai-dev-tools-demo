@@ -1,7 +1,20 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { getUsername, getUserInfo, getUserOS } from './UserInfo'
 
 export default function ConfigureMCPs() {
   const [configured, setConfigured] = useState(false)
+  const [username, setUsername] = useState<string>('')
+  const [userEmail, setUserEmail] = useState<string>('')
+  const [userOS, setUserOS] = useState<'mac' | 'windows' | null>(null)
+
+  useEffect(() => {
+    const savedUsername = getUsername()
+    const userInfo = getUserInfo()
+    const os = getUserOS()
+    if (savedUsername) setUsername(savedUsername)
+    if (userInfo?.email) setUserEmail(userInfo.email)
+    if (os) setUserOS(os)
+  }, [])
 
   const mcpServers = [
     {
@@ -16,6 +29,14 @@ export default function ConfigureMCPs() {
       token: 'JIRA_PAT_TOKEN',
       description: 'Jira integration for issue tracking',
       where: 'Jira Settings → Personal Access Tokens',
+      required: true
+    },
+    {
+      name: 'glean-server',
+      token: 'GLEAN_API_TOKEN',
+      description: 'Glean enterprise search integration',
+      where: 'Glean Settings → API Tokens',
+      url: 'https://wiki.corp.ebay.com/pages/viewpage.action?spaceKey=EbayFinancialServices&title=Glean+Agent+MCP+Server',
       required: true
     },
     {
@@ -70,9 +91,37 @@ export default function ConfigureMCPs() {
             <code>cp .mcp/cline_mcp_settings.template.json ~/.mcp/cline_mcp_settings.json</code>
           </div>
         </li>
-        <li>Update the file paths to replace <code>YOUR_USERNAME</code> with your actual username</li>
+        <li>
+          {username ? (
+            <>
+              Update the file paths to replace <code>YOUR_USERNAME</code> with <code>{username}</code>
+              <div style={{ fontSize: '0.85rem', color: 'var(--color-neutral-700)', marginTop: '4px' }}>
+                (Your username from Step 0)
+              </div>
+            </>
+          ) : (
+            <>
+              Update the file paths to replace <code>YOUR_USERNAME</code> with your actual username
+              <div style={{ fontSize: '0.85rem', color: 'var(--color-yellow-500)', marginTop: '4px' }}>
+                💡 Tip: Go back to Step 0 to save your information for auto-fill
+              </div>
+            </>
+          )}
+        </li>
         <li>Replace all placeholder tokens (see list below)</li>
       </ol>
+
+      {username && userOS && (
+        <div className="callout" style={{ background: '#e3f2fd', borderColor: '#90caf9', color: '#0d47a1', marginTop: 'var(--space-3)' }}>
+          <strong>Example path:</strong>
+          <code>
+            {userOS === 'mac'
+              ? `/Users/${username}/ebay-mcp/mcp-tools-servers/git-server/build/index.js`
+              : `C:\\Users\\${username}\\ebay-mcp\\mcp-tools-servers\\git-server\\build\\index.js`
+            }
+          </code>
+        </div>
+      )}
 
       <h3 style={{ marginTop: 'var(--space-4)' }}>Required Tokens and Where to Get Them</h3>
       <p>You'll need to obtain tokens for each MCP server you want to use:</p>
@@ -109,6 +158,18 @@ export default function ConfigureMCPs() {
                   <div style={{ fontSize: '0.85rem', color: 'var(--color-blue-500)' }}>
                     <strong>Where to get it:</strong> {server.where}
                   </div>
+                  {server.url && (
+                    <div style={{ marginTop: '4px' }}>
+                      <a
+                        href={server.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ fontSize: '0.85rem', color: 'var(--color-blue-500)', textDecoration: 'underline' }}
+                      >
+                        View Setup Documentation →
+                      </a>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -127,12 +188,25 @@ export default function ConfigureMCPs() {
       <div className="callout" style={{ background: '#fff3cd', borderColor: '#ffeaa7', color: '#856404', marginTop: 'var(--space-4)' }}>
         <strong>Git Configuration Note:</strong> While setting up MCPs, you should also configure Git with your identity:
         <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)' }}>
-          <code style={{ display: 'block', marginBottom: 'var(--space-2)' }}>
-            git config --global user.name "Your Name"
-          </code>
-          <code style={{ display: 'block' }}>
-            git config --global user.email "your.email@ebay.com"
-          </code>
+          {username && userEmail ? (
+            <>
+              <code style={{ display: 'block', marginBottom: 'var(--space-2)' }}>
+                git config --global user.name "{username}"
+              </code>
+              <code style={{ display: 'block' }}>
+                git config --global user.email "{userEmail}"
+              </code>
+            </>
+          ) : (
+            <>
+              <code style={{ display: 'block', marginBottom: 'var(--space-2)' }}>
+                git config --global user.name "Your Name"
+              </code>
+              <code style={{ display: 'block' }}>
+                git config --global user.email "your.email@ebay.com"
+              </code>
+            </>
+          )}
         </div>
       </div>
 

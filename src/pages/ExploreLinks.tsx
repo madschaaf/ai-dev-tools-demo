@@ -6,6 +6,7 @@ import Cline from './quickLinks/Cline'
 import Obsidian from './quickLinks/Obsidian'
 import MCPServers from './quickLinks/MCPServers'
 import Glean from './quickLinks/Glean'
+import Codex from './quickLinks/Codex'
 import ServiceNow from './quickLinks/ServiceNow'
 import SlackChannels from './quickLinks/SlackChannels'
 import Jira from './quickLinks/Jira'
@@ -57,12 +58,19 @@ const quickLinks = [
     description: 'eBay MCP server documentation', 
     category: 'AI & Development'
   },
-  { 
-    name: 'Glean', 
-    url: 'https://app.glean.com/', 
-    accent: 'var(--color-blue-500)', 
-    description: 'Enterprise search across all tools', 
+  {
+    name: 'Glean',
+    url: 'https://app.glean.com/',
+    accent: 'var(--color-blue-500)',
+    description: 'Enterprise search across all tools',
     category: 'Search'
+  },
+  {
+    name: 'Codex',
+    url: 'https://codex.corp.ebay.com/',
+    accent: 'var(--color-purple-500)',
+    description: 'Code search and navigation tool',
+    category: 'AI & Development'
   },
   { 
     name: 'ServiceNow', 
@@ -138,11 +146,12 @@ const slackChannels = [
 const quickLinkComponents: Record<string, React.ComponentType<any>> = {
   'AI Essentials': AIEssentials,
   'GitHub Personal': GitHubPersonal,
-  'GitHub Enterprise': GitHubEnterprise, 
+  'GitHub Enterprise': GitHubEnterprise,
   'Cline (eBay)': Cline,
   'Obsidian': Obsidian,
   'MCP Servers': MCPServers,
   'Glean': Glean,
+  'Codex': Codex,
   'ServiceNow': ServiceNow,
   'Slack Channels': () => <SlackChannels channels={slackChannels} />,
   'Jira': Jira,

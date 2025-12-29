@@ -1,7 +1,7 @@
-export default function InstallObsidian() {
+export default function InstallObsidian({ onComplete, isCompleted, onNext }: { onComplete: () => void, isCompleted: boolean, onNext: () => void }) {
   return (
     <>
-      <h2>Step 9: Install Obsidian App</h2>
+      <h2>Step 14: Install Obsidian App</h2>
       <p>Install the Obsidian Workflow App on GitHub Enterprise to enable @obsidian and @claude triggers in repositories.</p>
 
       <h3 style={{ marginTop: 'var(--space-4)' }}>What is Obsidian?</h3>
@@ -78,6 +78,51 @@ export default function InstallObsidian() {
         >
           View Documentation
         </a>
+      </div>
+
+      <div style={{ marginTop: 'var(--space-4)', paddingTop: 'var(--space-4)', borderTop: '1px solid #e0e0e0', display: 'flex', gap: 'var(--space-3)', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          {!isCompleted ? (
+            <button
+              type="button"
+              onClick={onComplete}
+              style={{
+                fontSize: '1rem',
+                padding: '12px 24px',
+                background: '#28a745',
+                color: 'white',
+                border: 'none',
+                borderRadius: 'var(--radius-md)',
+                cursor: 'pointer',
+                fontWeight: 600,
+                transition: 'all 0.2s'
+              }}
+            >
+              Mark as Complete
+            </button>
+          ) : (
+            <div style={{ color: '#28a745', fontWeight: 600, fontSize: '1.1rem' }}>
+              ✓ Step Completed
+            </div>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={onNext}
+          style={{
+            fontSize: '1rem',
+            padding: '12px 24px',
+            background: '#0969da',
+            color: 'white',
+            border: 'none',
+            borderRadius: 'var(--radius-md)',
+            cursor: 'pointer',
+            fontWeight: 600,
+            transition: 'all 0.2s'
+          }}
+        >
+          Next Step →
+        </button>
       </div>
     </>
   )

@@ -3,6 +3,7 @@ import NavBar from './components/NavBar'
 import VSCodeExtensions from './pages/VSCodeExtensions'
 import ExploreLinks from './pages/ExploreLinks'
 import StepsGuide from './pages/Steps/StepsGuide.tsx'
+import AISandbox from './pages/AISandbox'
 
 
 // const quickLinks = [
@@ -244,6 +245,7 @@ export default function App() {
         <Routes>
           <Route path="/steps-guide" element={<StepsGuide />} />
           <Route path="/vscode-extensions" element={<VSCodeExtensions />} />
+          <Route path="/ai-sandbox" element={<AISandbox />} />
           <Route path="/explore" element={<ExploreLinks />} />
           <Route path="/" element={<ExploreLinks />} />
         </Routes>
