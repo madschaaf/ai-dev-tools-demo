@@ -36,18 +36,15 @@ export default function SetupProxy() {
         <>
           <h3 style={{ marginTop: 'var(--space-4)' }}>macOS: Automatic Configuration (Recommended)</h3>
 
-          <h4>Step 1: Open Self Service App</h4>
-          <p>Find and open the Self Service app from your Applications or using Spotlight:</p>
-          <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)', marginBottom: 'var(--space-3)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: 'var(--space-2)' }}>
+            <h4 style={{ margin: 0 }}>Step 1: Open Self Service App</h4>
             <img
               src={selfServiceIcon}
-              alt="Self Service app icon in Mac dock"
-              style={{ width: '100%', maxWidth: '600px', borderRadius: 'var(--radius-sm)', border: '1px solid #d0d7de' }}
+              alt="Self Service app icon"
+              style={{ width: '32px', height: '32px', borderRadius: '6px', border: '1px solid #d0d7de' }}
             />
-            <p style={{ margin: 'var(--space-2) 0 0', fontSize: '0.85rem', color: 'var(--color-neutral-700)' }}>
-              Look for the Self Service app icon (multicolor grid icon)
-            </p>
           </div>
+          <p>Find and open the Self Service app from your Applications or using Spotlight (look for the multicolor grid icon).</p>
 
           <h4>Step 2: Log In with Your eBay Credentials</h4>
           <p>If prompted, log in using your eBay username and password.</p>

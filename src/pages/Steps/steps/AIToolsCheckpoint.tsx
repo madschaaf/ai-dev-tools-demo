@@ -123,12 +123,30 @@ export default function AIToolsCheckpoint({ onComplete, isCompleted, onNext }: {
         </p>
       </div>
 
+      <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)' }}>
+        <h4 style={{ margin: 0, fontSize: '1rem', color: 'var(--color-blue-700)' }}>Google Gemini Pro</h4>
+        <p style={{ margin: '8px 0 0', fontSize: '0.9rem' }}>
+          Google's AI assistant with Pro version access through eBay
+        </p>
+        <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: 'var(--color-neutral-700)' }}>
+          <strong>How to use:</strong> Visit{' '}
+          <a href="https://gemini.google.com" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-blue-700)' }}>
+            gemini.google.com
+          </a>{' '}
+          and sign in with eBay credentials
+        </p>
+        <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: 'var(--color-neutral-700)' }}>
+          <strong>Best for:</strong> Multimodal tasks, image analysis, long-context conversations, document processing
+        </p>
+      </div>
+
       <div className="callout" style={{ background: '#fff3cd', borderColor: '#ffeaa7', color: '#856404', marginTop: 'var(--space-4)' }}>
         <strong>Pro Tip: Use the Right Tool for the Job</strong>
         <ul style={{ margin: '8px 0 0 20px', fontSize: '0.9rem' }}>
           <li><strong>Coding tasks:</strong> Use Claude Code CLI or Claude AI website</li>
           <li><strong>eBay-specific questions:</strong> Use Glean extension or website</li>
-          <li><strong>General questions:</strong> Use ChatGPT extension or website</li>
+          <li><strong>General questions:</strong> Use ChatGPT or Google Gemini Pro</li>
+          <li><strong>Image/document analysis:</strong> Use Google Gemini Pro for multimodal tasks</li>
           <li><strong>Quick help while browsing:</strong> Use the Chrome extensions</li>
         </ul>
       </div>

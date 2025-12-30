@@ -5,11 +5,23 @@ export default function InstallExtensions({ onComplete, isCompleted, onNext }: {
   const [cloned, setCloned] = useState(false)
   const [userOS, setUserOS] = useState<'mac' | 'windows' | null>(null)
   const [copiedCommand, setCopiedCommand] = useState<string | null>(null)
+  const [username, setUsername] = useState<string>('')
 
   useEffect(() => {
     const os = getUserOS()
     if (os) {
       setUserOS(os)
+    }
+
+    // Get user's email from localStorage and extract username
+    const savedData = localStorage.getItem('ebay-dev-setup-user-info')
+    if (savedData) {
+      const userData = JSON.parse(savedData)
+      if (userData.email) {
+        // Extract part before @ebay.com
+        const usernameFromEmail = userData.email.split('@')[0]
+        setUsername(usernameFromEmail)
+      }
     }
   }, [])
 
@@ -65,14 +77,20 @@ export default function InstallExtensions({ onComplete, isCompleted, onNext }: {
       <h3 style={{ marginTop: 'var(--space-4)' }}>Step 2: Create Your Own Branch</h3>
       <p>Create a new branch so you can make edits and commits without affecting the main branch.</p>
 
+      {!username && (
+        <div className="callout" style={{ background: '#fff3cd', borderColor: '#ffeaa7', color: '#856404', marginTop: 'var(--space-3)' }}>
+          <strong>Tip:</strong> Go back to Step 0 and enter your eBay email to auto-populate your personalized branch name below.
+        </div>
+      )}
+
       <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--space-3)' }}>
           <code style={{ flex: 1, whiteSpace: 'pre-wrap' }}>
-            git checkout -b my-setup
+            {username ? `git checkout -b practice-${username}` : 'git checkout -b practice-USERNAME'}
           </code>
           <button
             type="button"
-            onClick={() => handleCopy('git checkout -b my-setup', 'branch')}
+            onClick={() => handleCopy(username ? `git checkout -b practice-${username}` : 'git checkout -b practice-USERNAME', 'branch')}
             style={{
               padding: '6px 12px',
               fontSize: '0.85rem',
@@ -91,7 +109,9 @@ export default function InstallExtensions({ onComplete, isCompleted, onNext }: {
           </button>
         </div>
         <p style={{ margin: 'var(--space-2) 0 0', fontSize: '0.85rem', color: 'var(--color-neutral-700)' }}>
-          Create and switch to a new branch called "my-setup" (or use your own branch name)
+          {username
+            ? `Create and switch to a new branch called "practice-${username}"`
+            : 'Enter your email in Step 0 to see your personalized branch name here'}
         </p>
       </div>
 

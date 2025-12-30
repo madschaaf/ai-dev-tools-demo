@@ -54,6 +54,20 @@ export default function AISandbox() {
       icon: '🤖'
     },
     {
+      id: 'gemini-video',
+      name: 'Google Gemini Video Generation',
+      category: 'AI Assistants',
+      description: 'Generate videos with Gemini Pro workspace',
+      icon: '🎥'
+    },
+    {
+      id: 'adobe-ai',
+      name: 'Adobe AI for Developers',
+      category: 'AI Assistants',
+      description: 'Use Adobe AI tools for design and documentation',
+      icon: '🎨'
+    },
+    {
       id: 'prompt-safety',
       name: 'Prompt Safety & RAI',
       category: 'Security',
@@ -326,9 +340,24 @@ export default function AISandbox() {
             <strong>⚠️ RAI Reminder:</strong> Do not use restricted data in these exercises.
           </div>
 
+          <h4 style={{ marginTop: 'var(--space-4)' }}>How to Open Terminal in VS Code:</h4>
+          <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)' }}>
+            <p style={{ margin: '0 0 8px', fontSize: '0.9rem', fontWeight: 600 }}>Mac:</p>
+            <ul style={{ margin: '0 0 12px', fontSize: '0.9rem' }}>
+              <li>Press <kbd style={{ background: '#fff', padding: '2px 6px', borderRadius: '4px', border: '1px solid #d0d7de' }}>⌃ Control</kbd> + <kbd style={{ background: '#fff', padding: '2px 6px', borderRadius: '4px', border: '1px solid #d0d7de' }}>~</kbd> (tilde)</li>
+              <li>Or: Menu → Terminal → New Terminal</li>
+            </ul>
+            <p style={{ margin: '0 0 8px', fontSize: '0.9rem', fontWeight: 600 }}>Windows:</p>
+            <ul style={{ margin: 0, fontSize: '0.9rem' }}>
+              <li>Press <kbd style={{ background: '#fff', padding: '2px 6px', borderRadius: '4px', border: '1px solid #d0d7de' }}>Ctrl</kbd> + <kbd style={{ background: '#fff', padding: '2px 6px', borderRadius: '4px', border: '1px solid #d0d7de' }}>~</kbd> (tilde)</li>
+              <li>Or: Menu → Terminal → New Terminal</li>
+            </ul>
+          </div>
+
           <h4 style={{ marginTop: 'var(--space-4)' }}>Steps:</h4>
           <ol style={{ fontSize: '0.9rem' }}>
-            <li>Open your terminal and run: <code>claude</code></li>
+            <li>Open VS Code's integrated terminal (see shortcuts above)</li>
+            <li>Run: <code>claude</code></li>
             <li>Prompt: "Create a Node.js script that reads a CSV file and outputs JSON"</li>
             <li>Review the generated script</li>
             <li>Ask: "Add unit tests for this script"</li>
@@ -341,7 +370,7 @@ export default function AISandbox() {
           </p>
 
           <p style={{ margin: '12px 0 0', fontSize: '0.85rem' }}>
-            <strong>Repo Practice:</strong> See <code>agents.md</code> and <code>.claude/</code> folder for task files
+            <strong>Repo Practice:</strong> See <code>practice/agents.md</code> and <code>practice/.claude/</code> folder for task files
           </p>
 
           <div className="callout" style={{ background: '#e3f2fd', borderColor: '#90caf9', color: '#0d47a1', marginTop: 'var(--space-4)' }}>
@@ -385,7 +414,7 @@ export default function AISandbox() {
           </div>
 
           <p style={{ margin: '12px 0 0', fontSize: '0.85rem' }}>
-            <strong>Repo Practice:</strong> See <code>sandbox/experiments/</code> for task specs and baseline outputs
+            <strong>Repo Practice:</strong> See <code>practice/sandbox/experiments/</code> for task specs and baseline outputs
           </p>
         </>
       )
@@ -426,7 +455,7 @@ export default function AISandbox() {
           </div>
 
           <p style={{ margin: '12px 0 0', fontSize: '0.85rem' }}>
-            <strong>Repo Practice:</strong> See <code>codex-tasks/</code> for README tasks and quality rubrics
+            <strong>Repo Practice:</strong> See <code>practice/codex-tasks/</code> for README tasks and quality rubrics
           </p>
         </>
       )
@@ -472,7 +501,7 @@ export default function AISandbox() {
           </div>
 
           <p style={{ margin: '12px 0 0', fontSize: '0.85rem' }}>
-            <strong>Repo Practice:</strong> See <code>safety-cases/</code> for adversarial prompts and expected mitigations
+            <strong>Repo Practice:</strong> See <code>practice/safety-cases/</code> for adversarial prompts and expected mitigations
           </p>
 
           <div className="callout" style={{ background: '#e3f2fd', borderColor: '#90caf9', color: '#0d47a1', marginTop: 'var(--space-4)' }}>
@@ -507,7 +536,7 @@ export default function AISandbox() {
             <div style={{ marginLeft: '20px', marginBottom: '4px' }}>• App.tsx - Main app component with routing</div>
             <div style={{ marginLeft: '20px', marginBottom: '4px' }}>• main.tsx - Application entry point</div>
 
-            <div style={{ marginBottom: '8px', marginTop: '16px' }}>📁 <strong>Practice Folders</strong> - Hands-on exercises</div>
+            <div style={{ marginBottom: '8px', marginTop: '16px' }}>📁 <strong>practice/</strong> - Hands-on exercises and learning materials</div>
             <div style={{ marginLeft: '20px', marginBottom: '4px' }}>📁 <strong>sandbox/</strong> - AI model comparison experiments</div>
             <div style={{ marginLeft: '40px', marginBottom: '4px' }}>📁 <strong>experiments/</strong> - Task specs and evaluation rubrics</div>
             <div style={{ marginLeft: '20px', marginBottom: '4px' }}>📁 <strong>cline-scenarios/</strong> - Cline plan & execute exercises</div>
@@ -574,6 +603,301 @@ export default function AISandbox() {
           <div className="callout" style={{ background: '#e3f2fd', borderColor: '#90caf9', color: '#0d47a1', marginTop: 'var(--space-4)' }}>
             <strong>Pro Tip:</strong> Use Cline with the prompt "Explain the structure of this repository and how the components connect" to get an AI-powered overview!
           </div>
+        </>
+      )
+    },
+    'gemini-video': {
+      title: 'Google Gemini Video Generation',
+      content: (
+        <>
+          <h3>Mission: Generate a Hero Video with Google Gemini</h3>
+          <p><strong>Objective:</strong> Use Google Gemini Pro workspace to generate a video and replace the hero section video in your repo.</p>
+
+          <div className="callout" style={{ background: '#fff3cd', borderColor: '#ffeaa7', color: '#856404', marginTop: 'var(--space-3)' }}>
+            <strong>⚠️ RAI Reminder:</strong> Do not use restricted data in these exercises. Follow eBay's Responsible AI guidelines for video generation.
+          </div>
+
+          <h4 style={{ marginTop: 'var(--space-4)' }}>What is Google Gemini Video Generation?</h4>
+          <p>Google Gemini Pro Workspace has AI-powered video generation capabilities that can create videos from text prompts. You can use it to generate marketing videos, demo videos, or in this case, a hero section video for a website.</p>
+
+          <h4 style={{ marginTop: 'var(--space-4)' }}>Task: Replace the Hero Video</h4>
+          <ol style={{ fontSize: '0.9rem' }}>
+            <li><strong>Access Google Gemini:</strong> Visit <a href="https://gemini.google.com" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-blue-700)' }}>gemini.google.com</a> and sign in with your eBay credentials</li>
+            <li><strong>Craft your video prompt:</strong> Think about what would make a good hero video for a developer onboarding guide</li>
+            <li><strong>Generate the video:</strong> Ask Gemini to create a video based on your prompt</li>
+            <li><strong>Download the video:</strong> Save the generated video to your <code>/src/assets/</code> folder</li>
+            <li><strong>Update the code:</strong> Replace the video path in <code>src/App.tsx</code></li>
+          </ol>
+
+          <h4 style={{ marginTop: 'var(--space-4)' }}>Example Video Prompts:</h4>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', marginTop: 'var(--space-3)' }}>
+            <div style={{ border: '1px solid #e1e4e8', borderRadius: 'var(--radius-md)', padding: 'var(--space-3)', background: '#f6f8fa' }}>
+              <div style={{ fontWeight: 600, marginBottom: '8px', color: 'var(--color-blue-500)' }}>
+                Example Prompt 1: Tech-Focused
+              </div>
+              <code style={{ display: 'block', fontSize: '0.9rem', whiteSpace: 'pre-wrap' }}>
+                "Create a 10-second video showing a futuristic AI assistant helping a software developer. Show holographic code snippets, data streams, and a friendly robot character. Modern tech aesthetic with blues and purples. Smooth animations."
+              </code>
+              <button
+                type="button"
+                className="button ghost"
+                onClick={() => navigator.clipboard.writeText("Create a 10-second video showing a futuristic AI assistant helping a software developer. Show holographic code snippets, data streams, and a friendly robot character. Modern tech aesthetic with blues and purples. Smooth animations.")}
+                style={{ marginTop: 'var(--space-2)', fontSize: '0.85rem', padding: '6px 12px' }}
+              >
+                Copy Prompt
+              </button>
+            </div>
+
+            <div style={{ border: '1px solid #e1e4e8', borderRadius: 'var(--radius-md)', padding: 'var(--space-3)', background: '#f6f8fa' }}>
+              <div style={{ fontWeight: 600, marginBottom: '8px', color: 'var(--color-blue-500)' }}>
+                Example Prompt 2: Onboarding Theme
+              </div>
+              <code style={{ display: 'block', fontSize: '0.9rem', whiteSpace: 'pre-wrap' }}>
+                "Create a short video animation showing the journey of a new software engineer. Start with a laptop opening, then show icons of development tools appearing one by one (VS Code, GitHub, Slack). End with a 'Welcome' message. Professional and inspiring tone."
+              </code>
+              <button
+                type="button"
+                className="button ghost"
+                onClick={() => navigator.clipboard.writeText("Create a short video animation showing the journey of a new software engineer. Start with a laptop opening, then show icons of development tools appearing one by one (VS Code, GitHub, Slack). End with a 'Welcome' message. Professional and inspiring tone.")}
+                style={{ marginTop: 'var(--space-2)', fontSize: '0.85rem', padding: '6px 12px' }}
+              >
+                Copy Prompt
+              </button>
+            </div>
+
+            <div style={{ border: '1px solid #e1e4e8', borderRadius: 'var(--radius-md)', padding: 'var(--space-3)', background: '#f6f8fa' }}>
+              <div style={{ fontWeight: 600, marginBottom: '8px', color: 'var(--color-blue-500)' }}>
+                Example Prompt 3: Abstract/Minimal
+              </div>
+              <code style={{ display: 'block', fontSize: '0.9rem', whiteSpace: 'pre-wrap' }}>
+                "Create an abstract video with flowing particles forming into shapes of code brackets, gears, and lightbulbs. Use a gradient color scheme from light blue to purple. Smooth, calming motion. 10 seconds long."
+              </code>
+              <button
+                type="button"
+                className="button ghost"
+                onClick={() => navigator.clipboard.writeText("Create an abstract video with flowing particles forming into shapes of code brackets, gears, and lightbulbs. Use a gradient color scheme from light blue to purple. Smooth, calming motion. 10 seconds long.")}
+                style={{ marginTop: 'var(--space-2)', fontSize: '0.85rem', padding: '6px 12px' }}
+              >
+                Copy Prompt
+              </button>
+            </div>
+          </div>
+
+          <h4 style={{ marginTop: 'var(--space-4)' }}>How to Update the Hero Video in Code:</h4>
+          <p>Once you've generated and downloaded your video, update the code:</p>
+
+          <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)' }}>
+            <p style={{ margin: '0 0 8px', fontSize: '0.9rem', fontWeight: 600 }}>Step 1: Save your video</p>
+            <code style={{ fontSize: '0.9rem', display: 'block', marginBottom: '12px' }}>
+              Save to: /src/assets/my-hero-video.mp4
+            </code>
+
+            <p style={{ margin: '12px 0 8px', fontSize: '0.9rem', fontWeight: 600 }}>Step 2: Find this line in src/App.tsx (around line 235):</p>
+            <code style={{ fontSize: '0.9rem', display: 'block', background: 'white', padding: '8px', borderRadius: '4px', marginBottom: '12px' }}>
+              {'<source src="/src/assets/ai-robot.mp4" type="video/mp4" />'}
+            </code>
+
+            <p style={{ margin: '12px 0 8px', fontSize: '0.9rem', fontWeight: 600 }}>Step 3: Replace with your video path:</p>
+            <code style={{ fontSize: '0.9rem', display: 'block', background: 'white', padding: '8px', borderRadius: '4px' }}>
+              {'<source src="/src/assets/my-hero-video.mp4" type="video/mp4" />'}
+            </code>
+          </div>
+
+          <div className="callout" style={{ background: '#e3f2fd', borderColor: '#90caf9', color: '#0d47a1', marginTop: 'var(--space-4)' }}>
+            <strong>Pro Tip:</strong> Keep videos under 15 seconds for better performance. Gemini can also help you refine your prompts - ask it to suggest improvements to your video description!
+          </div>
+
+          <h4 style={{ marginTop: 'var(--space-4)' }}>Bonus Challenge:</h4>
+          <ul style={{ fontSize: '0.9rem' }}>
+            <li>Generate multiple video variations and compare them</li>
+            <li>Ask Gemini to create a video that matches your website's color scheme</li>
+            <li>Create a looping video that seamlessly repeats</li>
+            <li>Generate both a desktop and mobile version of your hero video</li>
+          </ul>
+
+          <p style={{ marginTop: 'var(--space-3)', fontSize: '0.85rem' }}>
+            <strong>Resources:</strong> Check <code>src/App.tsx</code> lines 229-247 to see how the hero video is currently implemented with both background and robot videos.
+          </p>
+        </>
+      )
+    },
+    'adobe-ai': {
+      title: 'Adobe AI for Developers',
+      content: (
+        <>
+          <h3>Mission: Use Adobe AI Tools for Software Engineering</h3>
+          <p><strong>Objective:</strong> Learn how to use Adobe's AI-powered tools to enhance your development workflow with design assets, documentation, and presentations.</p>
+
+          <div className="callout" style={{ background: '#fff3cd', borderColor: '#ffeaa7', color: '#856404', marginTop: 'var(--space-3)' }}>
+            <strong>⚠️ Access Required:</strong> You need to request Adobe access through Secure Access. Do not use restricted data in these exercises.
+          </div>
+
+          <h4 style={{ marginTop: 'var(--space-4)' }}>What Adobe Tools Are Available?</h4>
+          <p>eBay provides access to Adobe's AI-powered creative suite including:</p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--space-3)', marginTop: 'var(--space-3)' }}>
+            <div style={{ padding: 'var(--space-3)', background: '#f6f8fa', borderRadius: 'var(--radius-md)', borderLeft: '4px solid #FF0000' }}>
+              <div style={{ fontWeight: 700, marginBottom: '8px', fontSize: '1rem' }}>Acrobat Pro</div>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-neutral-700)' }}>
+                AI-powered PDF editing, document review, and automated form creation
+              </p>
+            </div>
+
+            <div style={{ padding: 'var(--space-3)', background: '#f6f8fa', borderRadius: 'var(--radius-md)', borderLeft: '4px solid #FF0000' }}>
+              <div style={{ fontWeight: 700, marginBottom: '8px', fontSize: '1rem' }}>Adobe Express</div>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-neutral-700)' }}>
+                Quick design creation for diagrams, mockups, and social graphics
+              </p>
+            </div>
+
+            <div style={{ padding: 'var(--space-3)', background: '#f6f8fa', borderRadius: 'var(--radius-md)', borderLeft: '4px solid #FF0000' }}>
+              <div style={{ fontWeight: 700, marginBottom: '8px', fontSize: '1rem' }}>Spark Video</div>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-neutral-700)' }}>
+                Create demo videos, tutorials, and training materials
+              </p>
+            </div>
+
+            <div style={{ padding: 'var(--space-3)', background: '#f6f8fa', borderRadius: 'var(--radius-md)', borderLeft: '4px solid #FF0000' }}>
+              <div style={{ fontWeight: 700, marginBottom: '8px', fontSize: '1rem' }}>Generative AI</div>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-neutral-700)' }}>
+                Adobe Firefly for generating images, icons, and design elements
+              </p>
+            </div>
+          </div>
+
+          <h4 style={{ marginTop: 'var(--space-4)' }}>How to Request Access:</h4>
+          <ol style={{ fontSize: '0.9rem' }}>
+            <li>Visit the Secure Access portal</li>
+            <li>Search for "Adobe" in the applications catalog</li>
+            <li>Request access to Adobe Creative Cloud for Enterprise</li>
+            <li>Wait for approval (typically 1-2 business days)</li>
+            <li>Once approved, sign in at <a href="https://www.adobe.com" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-blue-700)' }}>adobe.com</a> with your eBay credentials</li>
+          </ol>
+
+          <h4 style={{ marginTop: 'var(--space-4)' }}>Practice Tasks for Software Engineers:</h4>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', marginTop: 'var(--space-3)' }}>
+            <div style={{ border: '1px solid #e1e4e8', borderRadius: 'var(--radius-md)', padding: 'var(--space-3)', background: '#fff' }}>
+              <div style={{ fontWeight: 600, marginBottom: '8px', color: '#FF0000', fontSize: '1.05rem' }}>
+                Task 1: Generate Architecture Diagrams with Adobe Express
+              </div>
+              <p style={{ margin: '8px 0', fontSize: '0.9rem' }}>
+                Use Adobe Express AI to create system architecture diagrams for your project documentation.
+              </p>
+              <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-sm)', marginTop: 'var(--space-2)' }}>
+                <strong style={{ fontSize: '0.85rem' }}>Steps:</strong>
+                <ol style={{ margin: '8px 0 0 20px', fontSize: '0.85rem' }}>
+                  <li>Open Adobe Express and start with a blank canvas</li>
+                  <li>Use the AI text-to-image feature: "Create a modern microservices architecture diagram with API gateway, services, and databases"</li>
+                  <li>Customize the generated diagram with your service names</li>
+                  <li>Export as PNG or PDF for your README or documentation</li>
+                </ol>
+              </div>
+              <p style={{ margin: '12px 0 0', fontSize: '0.85rem', color: 'var(--color-neutral-700)' }}>
+                <strong>Verify:</strong> You have a professional architecture diagram saved in your project docs
+              </p>
+            </div>
+
+            <div style={{ border: '1px solid #e1e4e8', borderRadius: 'var(--radius-md)', padding: 'var(--space-3)', background: '#fff' }}>
+              <div style={{ fontWeight: 600, marginBottom: '8px', color: '#FF0000', fontSize: '1.05rem' }}>
+                Task 2: AI-Powered PDF Documentation Review with Acrobat Pro
+              </div>
+              <p style={{ margin: '8px 0', fontSize: '0.9rem' }}>
+                Use Acrobat Pro's AI Assistant to summarize and extract key information from technical documentation.
+              </p>
+              <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-sm)', marginTop: 'var(--space-2)' }}>
+                <strong style={{ fontSize: '0.85rem' }}>Steps:</strong>
+                <ol style={{ margin: '8px 0 0 20px', fontSize: '0.85rem' }}>
+                  <li>Open any technical PDF (API docs, specification document, etc.)</li>
+                  <li>Click "AI Assistant" in the right panel</li>
+                  <li>Ask questions like: "Summarize the main API endpoints" or "Extract all configuration options"</li>
+                  <li>Use the AI-generated summary to create quick reference guides</li>
+                </ol>
+              </div>
+              <p style={{ margin: '12px 0 0', fontSize: '0.85rem', color: 'var(--color-neutral-700)' }}>
+                <strong>Verify:</strong> You can quickly extract key information from long technical documents
+              </p>
+            </div>
+
+            <div style={{ border: '1px solid #e1e4e8', borderRadius: 'var(--radius-md)', padding: 'var(--space-3)', background: '#fff' }}>
+              <div style={{ fontWeight: 600, marginBottom: '8px', color: '#FF0000', fontSize: '1.05rem' }}>
+                Task 3: Create Demo Videos with Spark Video
+              </div>
+              <p style={{ margin: '8px 0', fontSize: '0.9rem' }}>
+                Generate a feature demo or onboarding video for your team or stakeholders.
+              </p>
+              <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-sm)', marginTop: 'var(--space-2)' }}>
+                <strong style={{ fontSize: '0.85rem' }}>Steps:</strong>
+                <ol style={{ margin: '8px 0 0 20px', fontSize: '0.85rem' }}>
+                  <li>Open Adobe Spark Video</li>
+                  <li>Choose a template or start from scratch</li>
+                  <li>Add screenshots of your app or code editor</li>
+                  <li>Use AI to generate voiceover narration from your script</li>
+                  <li>Export and share with your team on Slack or in documentation</li>
+                </ol>
+              </div>
+              <p style={{ margin: '12px 0 0', fontSize: '0.85rem', color: 'var(--color-neutral-700)' }}>
+                <strong>Verify:</strong> You have a polished demo video ready to share
+              </p>
+            </div>
+
+            <div style={{ border: '1px solid #e1e4e8', borderRadius: 'var(--radius-md)', padding: 'var(--space-3)', background: '#fff' }}>
+              <div style={{ fontWeight: 600, marginBottom: '8px', color: '#FF0000', fontSize: '1.05rem' }}>
+                Task 4: Generate UI Icons and Assets with Adobe Firefly
+              </div>
+              <p style={{ margin: '8px 0', fontSize: '0.9rem' }}>
+                Use generative AI to create custom icons and design elements for your application.
+              </p>
+              <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-sm)', marginTop: 'var(--space-2)' }}>
+                <strong style={{ fontSize: '0.85rem' }}>Example Prompts:</strong>
+                <ul style={{ margin: '8px 0 0 20px', fontSize: '0.85rem' }}>
+                  <li>"Create a minimalist database icon in blue and white, flat design style"</li>
+                  <li>"Generate a set of developer tool icons: terminal, code editor, git branch"</li>
+                  <li>"Design a loading spinner animation with modern tech aesthetic"</li>
+                </ul>
+              </div>
+              <p style={{ margin: '12px 0 0', fontSize: '0.85rem', color: 'var(--color-neutral-700)' }}>
+                <strong>Verify:</strong> You have custom icons saved as SVG or PNG for your project
+              </p>
+            </div>
+          </div>
+
+          <h4 style={{ marginTop: 'var(--space-4)' }}>Real-World Use Cases:</h4>
+          <ul style={{ fontSize: '0.9rem' }}>
+            <li><strong>PR Reviews:</strong> Use Acrobat AI to summarize design documents before code review</li>
+            <li><strong>Presentations:</strong> Create technical presentation slides quickly with Adobe Express</li>
+            <li><strong>Documentation:</strong> Generate visual diagrams for README files and wikis</li>
+            <li><strong>Onboarding:</strong> Create video walkthroughs for new team members</li>
+            <li><strong>Design Assets:</strong> Generate placeholder images, icons, or UI elements during prototyping</li>
+          </ul>
+
+          <div className="callout" style={{ background: '#e3f2fd', borderColor: '#90caf9', color: '#0d47a1', marginTop: 'var(--space-4)' }}>
+            <strong>Pro Tip:</strong> Adobe AI tools integrate with other Adobe products. Create assets in Firefly, refine in Express, and compile documentation in Acrobat Pro - all with AI assistance at each step!
+          </div>
+
+          <h4 style={{ marginTop: 'var(--space-4)' }}>Best Practices for Engineers:</h4>
+          <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)' }}>
+            <ul style={{ margin: 0, fontSize: '0.9rem' }}>
+              <li><strong>Version Control:</strong> Save design assets in your repo under <code>/docs/assets/</code></li>
+              <li><strong>Consistent Branding:</strong> Use eBay's color palette in all generated designs</li>
+              <li><strong>Accessibility:</strong> When generating icons or UI elements, ensure high contrast ratios</li>
+              <li><strong>File Formats:</strong> Use SVG for icons (scalable), PNG for screenshots, PDF for documentation</li>
+              <li><strong>Team Collaboration:</strong> Share Adobe Express templates with your team for consistent designs</li>
+            </ul>
+          </div>
+
+          <div className="callout" style={{ background: '#fff3cd', borderColor: '#ffeaa7', color: '#856404', marginTop: 'var(--space-4)' }}>
+            <strong>Remember RAI Guidelines:</strong> Always follow eBay's Responsible AI guidelines when generating content. Do not use Adobe AI to generate content that contains restricted data or violates company policies.
+          </div>
+
+          <h4 style={{ marginTop: 'var(--space-4)' }}>Additional Resources:</h4>
+          <ul style={{ fontSize: '0.9rem' }}>
+            <li>100GB cloud storage included with your Adobe account</li>
+            <li>Access to custom fonts library for presentations and documentation</li>
+            <li>Adobe Creative Cloud desktop app for managing all your tools</li>
+            <li>Check internal Adobe documentation on the eBay wiki for best practices</li>
+          </ul>
         </>
       )
     }

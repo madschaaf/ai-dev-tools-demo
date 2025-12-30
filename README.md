@@ -1,13 +1,53 @@
-# eBay Engineering Onboarding Helper
+# AI Dev Tools - eBay Engineering Onboarding Guide
 
-A lightweight React + TypeScript + Vite app that welcomes new engineers and provides quick links and context for common tools: Jira, Airtable, and Sherlock IO. Styling is inspired by eBay Evo foundations, using approachable colors and system fonts.
+A comprehensive React + TypeScript + Vite application designed to help new software engineers at eBay set up their development environment with AI-powered tools and learn how to leverage AI assistants throughout their workflow. This interactive guide walks engineers through installing VS Code extensions, configuring AI tools, and practicing with hands-on exercises.
 
-## Features
+## What This App Does
 
-- Home page: "Get Started as a Software Engineer at eBay"
-- Clickable cards for Jira, Airtable, Sherlock IO
-- Dedicated overview pages describing how each tool pertains to the job
-- Optional backend stub (TypeScript + Express) exposing `/api/resources`
+This onboarding application helps new engineers:
+
+- **Set up VS Code with AI tools** - Step-by-step guide to install and configure essential AI extensions like Cline, GitHub Copilot, and MCP servers
+- **Learn about AI assistants** - Discover the AI tools available at eBay including ChatGPT Enterprise, Claude Code CLI, Google Gemini Pro, and Adobe AI
+- **Practice with AI tools** - Interactive sandbox environment with real-world exercises and examples
+- **Access quick links** - Centralized hub for frequently used development tools and resources
+- **Master VS Code extensions** - Comprehensive guide to recommended extensions for productivity and development
+
+## Key Features
+
+### Getting Started Guide
+A step-by-step checklist that guides new engineers through:
+- Installing Node.js, Git, VS Code, and AI tools
+- Setting up GitHub Enterprise and SSH keys
+- Configuring MCP servers for Jira, Glean, and Confluence integration
+- Joining essential Slack channels
+- Completing AI tool checkpoints to review your setup
+
+### AI Sandbox
+An interactive practice environment where engineers can:
+- **Practice with Cline** - Learn plan & execute workflows with file-scoped changes
+- **Try Glean Search** - Search eBay's knowledge base and cite sources
+- **Use GitHub Copilot** - Practice comment-to-code generation
+- **Experiment with Claude Code CLI** - Generate terminal scripts with tests
+- **Test Google Gemini** - Practice video generation and multimodal tasks
+- **Explore Adobe AI** - Create diagrams, documentation, and design assets
+- **Test MCP Servers** - Validate your MCP server configurations
+- **Learn Prompt Safety** - Understand responsible AI practices and red team exercises
+
+### Explore Links
+Quick access to essential development tools organized by category:
+- **AI Tools** - ChatGPT, Claude, Gemini, Glean, and more
+- **Development Tools** - GitHub, Jira, VS Code, terminal tools
+- **Documentation** - Internal wikis, API docs, and knowledge bases
+- **Communication** - Slack channels and team resources
+- **Learning Resources** - Training materials and best practices
+
+### VS Code Extensions
+A curated list of recommended extensions with:
+- **AI Extensions** - Cline, Copilot, AI Use Case Form, Obsidian
+- **Productivity Extensions** - Formatters, linters, Git tools
+- **Language Support** - TypeScript, Python, Java, and more
+- **Theme & UI** - Customization and visual enhancements
+- Direct installation links and descriptions for each extension
 
 ## Prerequisites
 

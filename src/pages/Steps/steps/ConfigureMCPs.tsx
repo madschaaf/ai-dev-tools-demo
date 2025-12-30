@@ -6,6 +6,7 @@ export default function ConfigureMCPs() {
   const [username, setUsername] = useState<string>('')
   const [userEmail, setUserEmail] = useState<string>('')
   const [userOS, setUserOS] = useState<'mac' | 'windows' | null>(null)
+  const [copiedCommand, setCopiedCommand] = useState<string | null>(null)
 
   useEffect(() => {
     const savedUsername = getUsername()
@@ -15,6 +16,12 @@ export default function ConfigureMCPs() {
     if (userInfo?.email) setUserEmail(userInfo.email)
     if (os) setUserOS(os)
   }, [])
+
+  const handleCopy = (text: string, commandKey: string) => {
+    navigator.clipboard.writeText(text)
+    setCopiedCommand(commandKey)
+    setTimeout(() => setCopiedCommand(null), 2000)
+  }
 
   const mcpServers = [
     {
@@ -73,7 +80,36 @@ export default function ConfigureMCPs() {
       <h3 style={{ marginTop: 'var(--space-4)' }}>Open MCP Setup Wizard</h3>
       <ol>
         <li>Open VS Code</li>
-        <li>Press <kbd>Ctrl+Shift+P</kbd> (Windows/Linux) or <kbd>Cmd+Shift+P</kbd> (Mac)</li>
+        <li>
+          Press{' '}
+          {userOS === 'windows' ? (
+            <>
+              <kbd style={{ background: '#fff', padding: '2px 6px', borderRadius: '4px', border: '1px solid #d0d7de' }}>Ctrl</kbd>
+              +
+              <kbd style={{ background: '#fff', padding: '2px 6px', borderRadius: '4px', border: '1px solid #d0d7de' }}>Shift</kbd>
+              +
+              <kbd style={{ background: '#fff', padding: '2px 6px', borderRadius: '4px', border: '1px solid #d0d7de' }}>P</kbd>
+            </>
+          ) : userOS === 'mac' ? (
+            <>
+              <kbd style={{ background: '#fff', padding: '2px 6px', borderRadius: '4px', border: '1px solid #d0d7de' }}>⌘ Cmd</kbd>
+              +
+              <kbd style={{ background: '#fff', padding: '2px 6px', borderRadius: '4px', border: '1px solid #d0d7de' }}>Shift</kbd>
+              +
+              <kbd style={{ background: '#fff', padding: '2px 6px', borderRadius: '4px', border: '1px solid #d0d7de' }}>P</kbd>
+            </>
+          ) : (
+            <>
+              <kbd style={{ background: '#fff', padding: '2px 6px', borderRadius: '4px', border: '1px solid #d0d7de' }}>Ctrl+Shift+P</kbd> (Windows) or{' '}
+              <kbd style={{ background: '#fff', padding: '2px 6px', borderRadius: '4px', border: '1px solid #d0d7de' }}>Cmd+Shift+P</kbd> (Mac)
+            </>
+          )}
+          {!userOS && (
+            <div style={{ fontSize: '0.85rem', color: 'var(--color-yellow-500)', marginTop: '4px' }}>
+              💡 Tip: Go back to Step 0 to save your OS for personalized shortcuts
+            </div>
+          )}
+        </li>
         <li>Type: <code>MCP: Open MCP Setup Wizard</code></li>
         <li>Press Enter</li>
       </ol>
@@ -85,41 +121,156 @@ export default function ConfigureMCPs() {
       <h3 style={{ marginTop: 'var(--space-4)' }}>Using the Template File</h3>
       <p>The repository includes an example MCP configuration at <code>.mcp/cline_mcp_settings.template.json</code></p>
 
+      <div className="callout" style={{ background: '#e3f2fd', borderColor: '#90caf9', color: '#0d47a1', marginTop: 'var(--space-3)' }}>
+        <strong>Note:</strong> These commands should be run in VS Code's integrated terminal.{' '}
+        {userOS === 'windows' ? (
+          <>
+            Press{' '}
+            <kbd style={{ background: '#fff', padding: '2px 6px', borderRadius: '4px', border: '1px solid #0d47a1' }}>Ctrl</kbd>
+            {' + '}
+            <kbd style={{ background: '#fff', padding: '2px 6px', borderRadius: '4px', border: '1px solid #0d47a1' }}>~</kbd>
+            {' '}to open the terminal.
+          </>
+        ) : userOS === 'mac' ? (
+          <>
+            Press{' '}
+            <kbd style={{ background: '#fff', padding: '2px 6px', borderRadius: '4px', border: '1px solid #0d47a1' }}>⌃ Control</kbd>
+            {' + '}
+            <kbd style={{ background: '#fff', padding: '2px 6px', borderRadius: '4px', border: '1px solid #0d47a1' }}>~</kbd>
+            {' '}to open the terminal.
+          </>
+        ) : (
+          <>
+            Press{' '}
+            <kbd style={{ background: '#fff', padding: '2px 6px', borderRadius: '4px', border: '1px solid #0d47a1' }}>Ctrl+~</kbd> (Windows) or{' '}
+            <kbd style={{ background: '#fff', padding: '2px 6px', borderRadius: '4px', border: '1px solid #0d47a1' }}>Control+~</kbd> (Mac) to open the terminal.
+          </>
+        )}
+      </div>
+
       <ol>
-        <li>Copy the template file to create your configuration:
-          <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)' }}>
-            <code>cp .mcp/cline_mcp_settings.template.json ~/.mcp/cline_mcp_settings.json</code>
+        <li>
+          <strong>Navigate to the repository directory:</strong>
+          <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--space-3)' }}>
+            <code style={{ flex: 1 }}>cd ~/Documents/ai-dev-tools</code>
+            <button
+              type="button"
+              onClick={() => handleCopy('cd ~/Documents/ai-dev-tools', 'cd-repo')}
+              style={{
+                padding: '6px 12px',
+                fontSize: '0.85rem',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--color-blue-500)',
+                background: copiedCommand === 'cd-repo' ? 'var(--color-green-500)' : 'white',
+                color: copiedCommand === 'cd-repo' ? 'white' : 'var(--color-blue-500)',
+                cursor: 'pointer',
+                fontWeight: 600,
+                transition: 'all 0.2s',
+                whiteSpace: 'nowrap',
+                flexShrink: 0
+              }}
+            >
+              {copiedCommand === 'cd-repo' ? 'Copied!' : 'Copy'}
+            </button>
+          </div>
+          <div style={{ fontSize: '0.85rem', color: 'var(--color-neutral-700)', marginTop: '8px' }}>
+            Make sure you're in the ai-dev-tools repository where you cloned it in Step 11
           </div>
         </li>
         <li>
-          {username ? (
-            <>
-              Update the file paths to replace <code>YOUR_USERNAME</code> with <code>{username}</code>
-              <div style={{ fontSize: '0.85rem', color: 'var(--color-neutral-700)', marginTop: '4px' }}>
-                (Your username from Step 0)
-              </div>
-            </>
-          ) : (
-            <>
-              Update the file paths to replace <code>YOUR_USERNAME</code> with your actual username
-              <div style={{ fontSize: '0.85rem', color: 'var(--color-yellow-500)', marginTop: '4px' }}>
-                💡 Tip: Go back to Step 0 to save your information for auto-fill
-              </div>
-            </>
-          )}
+          <strong>Copy the template file to your home directory:</strong>
+          <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--space-3)' }}>
+            <code style={{ flex: 1 }}>cp .mcp/cline_mcp_settings.template.json ~/.mcp/cline_mcp_settings.json</code>
+            <button
+              type="button"
+              onClick={() => handleCopy('cp .mcp/cline_mcp_settings.template.json ~/.mcp/cline_mcp_settings.json', 'cp-template')}
+              style={{
+                padding: '6px 12px',
+                fontSize: '0.85rem',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--color-blue-500)',
+                background: copiedCommand === 'cp-template' ? 'var(--color-green-500)' : 'white',
+                color: copiedCommand === 'cp-template' ? 'white' : 'var(--color-blue-500)',
+                cursor: 'pointer',
+                fontWeight: 600,
+                transition: 'all 0.2s',
+                whiteSpace: 'nowrap',
+                flexShrink: 0
+              }}
+            >
+              {copiedCommand === 'cp-template' ? 'Copied!' : 'Copy'}
+            </button>
+          </div>
+          <div style={{ fontSize: '0.85rem', color: 'var(--color-neutral-700)', marginTop: '8px' }}>
+            This creates your personal MCP configuration file in <code>~/.mcp/</code>
+          </div>
         </li>
-        <li>Replace all placeholder tokens (see list below)</li>
+        <li>
+          <strong>Edit the configuration file:</strong>
+          <div style={{ fontSize: '0.85rem', color: 'var(--color-neutral-700)', marginTop: '8px' }}>
+            Open <code>~/.mcp/cline_mcp_settings.json</code> in VS Code and:
+            <ul style={{ marginTop: '8px', marginBottom: 0 }}>
+              <li>
+                {username ? (
+                  <>
+                    Replace all instances of <code>YOUR_USERNAME</code> with <code>{username}</code>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--color-neutral-700)', marginTop: '4px' }}>
+                      (Your username from Step 0)
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    Replace all instances of <code>YOUR_USERNAME</code> with your actual username
+                    <div style={{ fontSize: '0.85rem', color: 'var(--color-yellow-500)', marginTop: '4px' }}>
+                      💡 Tip: Go back to Step 0 to save your information for auto-fill
+                    </div>
+                  </>
+                )}
+              </li>
+              <li>Replace all placeholder tokens with your actual tokens (see list below)</li>
+            </ul>
+          </div>
+        </li>
       </ol>
 
       {username && userOS && (
         <div className="callout" style={{ background: '#e3f2fd', borderColor: '#90caf9', color: '#0d47a1', marginTop: 'var(--space-3)' }}>
-          <strong>Example path:</strong>
-          <code>
-            {userOS === 'mac'
-              ? `/Users/${username}/ebay-mcp/mcp-tools-servers/git-server/build/index.js`
-              : `C:\\Users\\${username}\\ebay-mcp\\mcp-tools-servers\\git-server\\build\\index.js`
-            }
-          </code>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--space-3)' }}>
+            <div style={{ flex: 1 }}>
+              <strong>Example path:</strong>
+              <br />
+              <code>
+                {userOS === 'mac'
+                  ? `/Users/${username}/ebay-mcp/mcp-tools-servers/git-server/build/index.js`
+                  : `C:\\Users\\${username}\\ebay-mcp\\mcp-tools-servers\\git-server\\build\\index.js`
+                }
+              </code>
+            </div>
+            <button
+              type="button"
+              onClick={() => handleCopy(
+                userOS === 'mac'
+                  ? `/Users/${username}/ebay-mcp/mcp-tools-servers/git-server/build/index.js`
+                  : `C:\\Users\\${username}\\ebay-mcp\\mcp-tools-servers\\git-server\\build\\index.js`,
+                'example-path'
+              )}
+              style={{
+                padding: '6px 12px',
+                fontSize: '0.85rem',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid #0d47a1',
+                background: copiedCommand === 'example-path' ? 'var(--color-green-500)' : 'white',
+                color: copiedCommand === 'example-path' ? 'white' : '#0d47a1',
+                cursor: 'pointer',
+                fontWeight: 600,
+                transition: 'all 0.2s',
+                whiteSpace: 'nowrap',
+                flexShrink: 0
+              }}
+            >
+              {copiedCommand === 'example-path' ? 'Copied!' : 'Copy'}
+            </button>
+          </div>
         </div>
       )}
 
@@ -186,25 +337,112 @@ export default function ConfigureMCPs() {
       </ul>
 
       <div className="callout" style={{ background: '#fff3cd', borderColor: '#ffeaa7', color: '#856404', marginTop: 'var(--space-4)' }}>
-        <strong>Git Configuration Note:</strong> While setting up MCPs, you should also configure Git with your identity:
-        <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)' }}>
+        <strong>Git Configuration Note:</strong> While setting up MCPs, you should also configure Git with your identity.
+        <div style={{ fontSize: '0.85rem', marginTop: '8px' }}>
+          Run these commands in VS Code's terminal (any directory works since they're global settings):
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)', marginTop: 'var(--space-2)' }}>
           {username && userEmail ? (
             <>
-              <code style={{ display: 'block', marginBottom: 'var(--space-2)' }}>
-                git config --global user.name "{username}"
-              </code>
-              <code style={{ display: 'block' }}>
-                git config --global user.email "{userEmail}"
-              </code>
+              <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--space-3)' }}>
+                <code style={{ flex: 1 }}>
+                  git config --global user.name "{username}"
+                </code>
+                <button
+                  type="button"
+                  onClick={() => handleCopy(`git config --global user.name "${username}"`, 'git-name')}
+                  style={{
+                    padding: '6px 12px',
+                    fontSize: '0.85rem',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid #856404',
+                    background: copiedCommand === 'git-name' ? 'var(--color-green-500)' : 'white',
+                    color: copiedCommand === 'git-name' ? 'white' : '#856404',
+                    cursor: 'pointer',
+                    fontWeight: 600,
+                    transition: 'all 0.2s',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0
+                  }}
+                >
+                  {copiedCommand === 'git-name' ? 'Copied!' : 'Copy'}
+                </button>
+              </div>
+              <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--space-3)' }}>
+                <code style={{ flex: 1 }}>
+                  git config --global user.email "{userEmail}"
+                </code>
+                <button
+                  type="button"
+                  onClick={() => handleCopy(`git config --global user.email "${userEmail}"`, 'git-email')}
+                  style={{
+                    padding: '6px 12px',
+                    fontSize: '0.85rem',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid #856404',
+                    background: copiedCommand === 'git-email' ? 'var(--color-green-500)' : 'white',
+                    color: copiedCommand === 'git-email' ? 'white' : '#856404',
+                    cursor: 'pointer',
+                    fontWeight: 600,
+                    transition: 'all 0.2s',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0
+                  }}
+                >
+                  {copiedCommand === 'git-email' ? 'Copied!' : 'Copy'}
+                </button>
+              </div>
             </>
           ) : (
             <>
-              <code style={{ display: 'block', marginBottom: 'var(--space-2)' }}>
-                git config --global user.name "Your Name"
-              </code>
-              <code style={{ display: 'block' }}>
-                git config --global user.email "your.email@ebay.com"
-              </code>
+              <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--space-3)' }}>
+                <code style={{ flex: 1 }}>
+                  git config --global user.name "Your Name"
+                </code>
+                <button
+                  type="button"
+                  onClick={() => handleCopy('git config --global user.name "Your Name"', 'git-name')}
+                  style={{
+                    padding: '6px 12px',
+                    fontSize: '0.85rem',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid #856404',
+                    background: copiedCommand === 'git-name' ? 'var(--color-green-500)' : 'white',
+                    color: copiedCommand === 'git-name' ? 'white' : '#856404',
+                    cursor: 'pointer',
+                    fontWeight: 600,
+                    transition: 'all 0.2s',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0
+                  }}
+                >
+                  {copiedCommand === 'git-name' ? 'Copied!' : 'Copy'}
+                </button>
+              </div>
+              <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--space-3)' }}>
+                <code style={{ flex: 1 }}>
+                  git config --global user.email "your.email@ebay.com"
+                </code>
+                <button
+                  type="button"
+                  onClick={() => handleCopy('git config --global user.email "your.email@ebay.com"', 'git-email')}
+                  style={{
+                    padding: '6px 12px',
+                    fontSize: '0.85rem',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid #856404',
+                    background: copiedCommand === 'git-email' ? 'var(--color-green-500)' : 'white',
+                    color: copiedCommand === 'git-email' ? 'white' : '#856404',
+                    cursor: 'pointer',
+                    fontWeight: 600,
+                    transition: 'all 0.2s',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0
+                  }}
+                >
+                  {copiedCommand === 'git-email' ? 'Copied!' : 'Copy'}
+                </button>
+              </div>
             </>
           )}
         </div>

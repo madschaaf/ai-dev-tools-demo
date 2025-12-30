@@ -87,7 +87,7 @@ export default function PracticeExercises({ onComplete, isCompleted, onNext }: {
         </p>
 
         <p style={{ margin: '12px 0 0', fontSize: '0.85rem' }}>
-          <strong>Repo Practice:</strong> See <code>cline-scenarios/</code> folder for workspace-based exercises with acceptance criteria
+          <strong>Repo Practice:</strong> See <code>practice/cline-scenarios/</code> folder for workspace-based exercises with acceptance criteria
         </p>
       </div>
 
@@ -111,7 +111,7 @@ export default function PracticeExercises({ onComplete, isCompleted, onNext }: {
         </p>
 
         <p style={{ margin: '12px 0 0', fontSize: '0.85rem' }}>
-          <strong>Repo Practice:</strong> See <code>tasks/search-missions.md</code> for scenario briefs requiring citations
+          <strong>Repo Practice:</strong> See <code>practice/tasks/search-missions.md</code> for scenario briefs requiring citations
         </p>
       </div>
 
@@ -137,7 +137,7 @@ export default function PracticeExercises({ onComplete, isCompleted, onNext }: {
         </p>
 
         <p style={{ margin: '12px 0 0', fontSize: '0.85rem' }}>
-          <strong>Repo Practice:</strong> See <code>copilot-katas/</code> for buggy examples to refactor with Copilot
+          <strong>Repo Practice:</strong> See <code>practice/copilot-katas/</code> for buggy examples to refactor with Copilot
         </p>
       </div>
 
@@ -163,7 +163,7 @@ export default function PracticeExercises({ onComplete, isCompleted, onNext }: {
         </p>
 
         <p style={{ margin: '12px 0 0', fontSize: '0.85rem' }}>
-          <strong>Repo Practice:</strong> See <code>agents.md</code> and <code>.claude/</code> folder for task files
+          <strong>Repo Practice:</strong> See <code>practice/agents.md</code> and <code>practice/.claude/</code> folder for task files
         </p>
       </div>
 
@@ -232,7 +232,7 @@ export default function PracticeExercises({ onComplete, isCompleted, onNext }: {
         </p>
 
         <p style={{ margin: '12px 0 0', fontSize: '0.85rem' }}>
-          <strong>Repo Practice:</strong> See <code>mcp/</code> folder for example configs (Confluence, GitHub, REST) and gateway-config.md
+          <strong>Repo Practice:</strong> See <code>practice/mcp/</code> folder for example configs (Confluence, GitHub, REST) and gateway-config.md
         </p>
       </div>
 
@@ -257,7 +257,7 @@ export default function PracticeExercises({ onComplete, isCompleted, onNext }: {
         </p>
 
         <p style={{ margin: '12px 0 0', fontSize: '0.85rem' }}>
-          <strong>Repo Practice:</strong> See <code>sandbox/experiments/</code> for task specs and baseline outputs
+          <strong>Repo Practice:</strong> See <code>practice/sandbox/experiments/</code> for task specs and baseline outputs
         </p>
       </div>
 
@@ -283,7 +283,7 @@ export default function PracticeExercises({ onComplete, isCompleted, onNext }: {
         </p>
 
         <p style={{ margin: '12px 0 0', fontSize: '0.85rem' }}>
-          <strong>Repo Practice:</strong> See <code>codex-tasks/</code> for README tasks and quality rubrics
+          <strong>Repo Practice:</strong> See <code>practice/codex-tasks/</code> for README tasks and quality rubrics
         </p>
       </div>
 
@@ -314,7 +314,7 @@ export default function PracticeExercises({ onComplete, isCompleted, onNext }: {
         </p>
 
         <p style={{ margin: '12px 0 0', fontSize: '0.85rem' }}>
-          <strong>Repo Practice:</strong> See <code>safety-cases/</code> for adversarial prompts and expected mitigations
+          <strong>Repo Practice:</strong> See <code>practice/safety-cases/</code> for adversarial prompts and expected mitigations
         </p>
       </div>
 
@@ -324,7 +324,7 @@ export default function PracticeExercises({ onComplete, isCompleted, onNext }: {
       <h3 style={{ marginTop: 'var(--space-4)' }}>How to Contribute</h3>
       <ol style={{ fontSize: '0.9rem' }}>
         <li>Create a branch from main: <code>git checkout -b add-exercise-name</code></li>
-        <li>Add your exercise to the appropriate folder (e.g., <code>copilot-katas/</code>, <code>cline-scenarios/</code>)</li>
+        <li>Add your exercise to the appropriate folder in <code>practice/</code> (e.g., <code>practice/copilot-katas/</code>, <code>practice/cline-scenarios/</code>)</li>
         <li>Include:
           <ul>
             <li><strong>README.md:</strong> Objective, context, steps, verification criteria</li>
@@ -350,17 +350,17 @@ export default function PracticeExercises({ onComplete, isCompleted, onNext }: {
       <h3 style={{ marginTop: 'var(--space-4)' }}>Repository Structure</h3>
       <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)' }}>
         <pre style={{ margin: 0, fontSize: '0.85rem' }}>{`ai-dev-tools/
-├── sandbox/experiments/     # AI Sandbox model comparisons
-├── cline-scenarios/         # Cline workspace exercises
-├── copilot-katas/          # Copilot refactoring drills
-├── .claude/                # Claude Code task files
-├── mcp/                    # MCP server configs
-├── obsidian-queries/       # GraphQL query packs
-├── domain-katas/           # eBayCoder domain exercises
-├── codex-tasks/            # ChatGPT/Codex tasks
-├── infra-missions/         # Krylov + Tess CLI practice
-├── safety-cases/           # Prompt safety scenarios
-└── agents.md               # Build/run/test commands`}</pre>
+├── src/                         # Application source code
+├── practice/                    # Practice exercises (all in one place!)
+│   ├── sandbox/experiments/     # AI Sandbox model comparisons
+│   ├── cline-scenarios/         # Cline workspace exercises
+│   ├── copilot-katas/          # Copilot refactoring drills
+│   ├── .claude/                # Claude Code task files
+│   ├── mcp/                    # MCP server configs
+│   ├── safety-cases/           # Prompt safety scenarios
+│   └── agents.md               # Build/run/test commands
+├── .mcp/                       # MCP configuration
+└── .vscode/                    # VS Code settings`}</pre>
       </div>
 
       <h3 style={{ marginTop: 'var(--space-4)' }}>Next Steps</h3>

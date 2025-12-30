@@ -17,7 +17,7 @@ export default function NavBar() {
         </div>
 
         <div className="navbar-actions">
-          <Link to="/steps-guide" className="btn-get-started">Get Started</Link>
+          <Link to="/steps-guide" className="btn-get-started">Steps Guide</Link>
         </div>
       </div>
     </nav>

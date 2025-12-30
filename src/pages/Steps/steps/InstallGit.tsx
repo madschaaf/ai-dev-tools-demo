@@ -51,7 +51,7 @@ export default function InstallGit() {
         <>
           <div className="callout" style={{ background: '#e3f2fd', borderColor: '#90caf9', color: '#0d47a1', marginTop: 'var(--space-4)' }}>
             <strong>Mac Users:</strong> Git is typically pre-installed on macOS. You'll use Terminal for all commands throughout this guide. 
-            Note: If you run into issues during installation, type "Claude" in your terminal to get AI-powered help right in the command line.
+            <p><em>Note: If you run into issues during installation, type "Claude" in your terminal to get AI-powered help right in the command line.</em></p>
           </div>
 
           <div className="callout" style={{ background: '#e3f2fd', borderColor: '#90caf9', color: '#0d47a1', marginTop: 'var(--space-3)' }}>

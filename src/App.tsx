@@ -231,14 +231,18 @@ export default function App() {
           <source src="/src/assets/Firefly mp4 video that fades into this image at the end. _It should start with many ideas in the for.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
+        <video autoPlay muted loop className="robot-video">
+          <source src="/src/assets/ai-robot.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
         <div className="hero-overlay">
            <header className="header hero-header">
              <div className="hero-copy">
                <h1>Starting Guide for Software Engineers</h1>
                <p className="subtitle">Support to get all the dev tools you need!</p>
              </div>
-             <Link to="/steps-guide" className="hero-btn-get-started">Get Started</Link>
            </header>
+           <Link to="/steps-guide" className="hero-btn-get-started">Get Started</Link>
         </div>
         </section> 
 

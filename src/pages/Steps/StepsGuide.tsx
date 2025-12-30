@@ -14,9 +14,11 @@ import SetupGitHubEnterprise from './steps/SetupGitHubEnterprise'
 import InstallObsidian from './steps/InstallObsidian'
 import InstallCline from './steps/InstallCline'
 import InstallExtensions from './steps/InstallExtensions'
+import VSCodeExtensionsCheckpoint from './steps/VSCodeExtensionsCheckpoint'
 import ConfigureMCPs from './steps/ConfigureMCPs'
 import ConfigureVSCode from './steps/ConfigureVSCode'
 import JoinSlackChannels from './steps/JoinSlackChannels'
+import FinalAICheckpoint from './steps/FinalAICheckpoint'
 import PracticeExercises from './steps/PracticeExercises'
 
 const steps = [
@@ -127,6 +129,14 @@ const steps = [
     status: 'pending' as const
   },
   {
+    id: 'checkpoint-vscode-extensions',
+    name: '✓ Checkpoint: VS Code Extensions',
+    description: 'Review all AI extensions in your IDE',
+    category: 'AI Tools',
+    status: 'pending' as const,
+    isCheckpoint: true
+  },
+  {
     id: 14,
     name: 'Configure MCPs',
     description: 'Set up MCP servers with tokens and credentials',
@@ -146,6 +156,14 @@ const steps = [
     description: 'Join key Slack channels for support and collaboration',
     category: 'Final Steps',
     status: 'pending' as const
+  },
+  {
+    id: 'checkpoint-final-ai',
+    name: '✓ Checkpoint: Your Complete AI Toolkit',
+    description: 'Review all your AI tools and how to use them',
+    category: 'Final Steps',
+    status: 'pending' as const,
+    isCheckpoint: true
   },
   {
     id: 17,
@@ -173,9 +191,11 @@ const stepComponents: Record<number | string, React.ComponentType<any>> = {
   11: InstallExtensions,
   12: InstallCline,
   13: InstallObsidian,
+  'checkpoint-vscode-extensions': VSCodeExtensionsCheckpoint,
   14: ConfigureMCPs,
   15: ConfigureVSCode,
   16: JoinSlackChannels,
+  'checkpoint-final-ai': FinalAICheckpoint,
   17: PracticeExercises
 }
 
@@ -244,13 +264,34 @@ export default function StepsGuide() {
                               onClick={() => setSelectedStep(step.id)}
                               className={`quick-link-row ${selectedStep === step.id ? 'active' : ''}`}
                               style={step.isCheckpoint ? {
-                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                color: 'white',
-                                borderLeft: '4px solid #ffd700'
+                                background: selectedStep === step.id ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : '#f6f8fa',
+                                color: selectedStep === step.id ? 'white' : '#667eea',
+                                borderLeft: selectedStep === step.id ? '4px solid #ffd700' : '4px solid #667eea',
+                                transition: 'all 0.3s ease'
                               } : isCompleted ? {
                                 background: '#d4edda',
                                 borderLeft: '4px solid #28a745'
                               } : {}}
+                              onMouseEnter={(e) => {
+                                if (step.isCheckpoint && selectedStep !== step.id) {
+                                  e.currentTarget.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                                  e.currentTarget.style.color = 'white'
+                                  const nameElement = e.currentTarget.querySelector('.quick-link-name') as HTMLElement
+                                  const descElement = e.currentTarget.querySelector('.quick-link-desc') as HTMLElement
+                                  if (nameElement) nameElement.style.color = 'white'
+                                  if (descElement) descElement.style.color = 'rgba(255,255,255,0.9)'
+                                }
+                              }}
+                              onMouseLeave={(e) => {
+                                if (step.isCheckpoint && selectedStep !== step.id) {
+                                  e.currentTarget.style.background = '#f6f8fa'
+                                  e.currentTarget.style.color = '#667eea'
+                                  const nameElement = e.currentTarget.querySelector('.quick-link-name') as HTMLElement
+                                  const descElement = e.currentTarget.querySelector('.quick-link-desc') as HTMLElement
+                                  if (nameElement) nameElement.style.color = '#667eea'
+                                  if (descElement) descElement.style.color = ''
+                                }
+                              }}
                             >
                               {!step.isCheckpoint && (
                                 <span className="step-number" style={isCompleted ? { background: '#28a745', color: 'white' } : {}}>
@@ -258,8 +299,8 @@ export default function StepsGuide() {
                                 </span>
                               )}
                               <span className="quick-link-row-main">
-                                <span className="quick-link-name" style={step.isCheckpoint ? { color: 'white', fontWeight: 600 } : {}}>{step.name}</span>
-                                <span className="quick-link-desc" style={step.isCheckpoint ? { color: 'rgba(255,255,255,0.9)' } : {}}>{step.description}</span>
+                                <span className="quick-link-name" style={step.isCheckpoint ? { color: selectedStep === step.id ? 'white' : '#667eea', fontWeight: 600, transition: 'color 0.3s ease' } : {}}>{step.name}</span>
+                                <span className="quick-link-desc" style={step.isCheckpoint ? { color: selectedStep === step.id ? 'rgba(255,255,255,0.9)' : '#666', transition: 'color 0.3s ease' } : {}}>{step.description}</span>
                               </span>
                             </button>
                           </li>

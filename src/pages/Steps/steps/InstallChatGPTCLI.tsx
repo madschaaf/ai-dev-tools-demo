@@ -140,12 +140,12 @@ export default function InstallChatGPTCLI({ onComplete, isCompleted, onNext }: {
                   {copiedCommand === 'terminal-search' ? '✓' : 'Copy'}
                 </button>
               </div>
-      <p style={{ fontSize: '0.9rem', color: 'var(--color-neutral-700)' }}>When you're done, you can exit in several ways:</p>
+      {/* <p style={{ fontSize: '0.9rem', color: 'var(--color-neutral-700)' }}>When you're done, you can exit in several ways:</p>
       <ul style={{ marginTop: 'var(--space-2)', fontSize: '0.9rem' }}>
         <li><strong>Type:</strong> <code>/exit</code> or <code>/quit</code> and press Enter</li>
         <li><strong>Keyboard shortcut:</strong> Press <kbd style={{ background: '#f6f8fa', padding: '2px 6px', borderRadius: '4px', border: '1px solid #d0d7de' }}>Ctrl + C</kbd> (works on both Mac and Windows)</li>
         <li><strong>Close the terminal window</strong> (also ends the session)</li>
-      </ul>
+      </ul> */}
             </>
           ) : userOS === 'windows' ? (
             <>
@@ -171,12 +171,12 @@ export default function InstallChatGPTCLI({ onComplete, isCompleted, onNext }: {
                   {copiedCommand === 'gitbash-search' ? '✓' : 'Copy'}
                 </button>
               </div>
-      <p style={{ fontSize: '0.9rem', color: 'var(--color-neutral-700)' }}>When you're done, you can exit in several ways:</p>
+      {/* <p style={{ fontSize: '0.9rem', color: 'var(--color-neutral-700)' }}>When you're done, you can exit in several ways:</p>
       <ul style={{ marginTop: 'var(--space-2)', fontSize: '0.9rem' }}>
         <li><strong>Type:</strong> <code>/exit</code> or <code>/quit</code> and press Enter</li>
         <li><strong>Keyboard shortcut:</strong> Press <kbd style={{ background: '#f6f8fa', padding: '2px 6px', borderRadius: '4px', border: '1px solid #d0d7de' }}>Ctrl + C</kbd> (works on both Mac and Windows)</li>
         <li><strong>Close the terminal window</strong> (also ends the session)</li>
-      </ul>
+      </ul> */}
             </>
           ) : (
             <p style={{ margin: 0 }}>Open your terminal application</p>
@@ -369,6 +369,72 @@ export default function InstallChatGPTCLI({ onComplete, isCompleted, onNext }: {
         </div>
         <p style={{ margin: 'var(--space-2) 0 0', fontSize: '0.85rem', color: 'var(--color-neutral-700)' }}>
           Should output the Claude Code CLI version number
+        </p>
+      </div>
+
+      <h3 style={{ marginTop: 'var(--space-4)' }}>End Claude Code CLI Session</h3>
+      <p style={{ fontSize: '0.9rem', color: 'var(--color-neutral-700)', marginBottom: 'var(--space-2)' }}>
+        When you're done using Claude Code CLI, you can exit in several ways:
+      </p>
+
+      <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)' }}>
+        <h4 style={{ margin: '0 0 12px', fontSize: '0.95rem' }}>Option 1: Type an exit command</h4>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--space-3)' }}>
+            <code style={{ flex: 1 }}>/exit</code>
+            <button
+              type="button"
+              onClick={() => handleCopy('/exit', 'exit-1')}
+              style={{
+                padding: '6px 12px',
+                fontSize: '0.85rem',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--color-blue-500)',
+                background: copiedCommand === 'exit-1' ? 'var(--color-green-500)' : 'white',
+                color: copiedCommand === 'exit-1' ? 'white' : 'var(--color-blue-500)',
+                cursor: 'pointer',
+                fontWeight: 600,
+                transition: 'all 0.2s',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {copiedCommand === 'exit-1' ? 'Copied!' : 'Copy'}
+            </button>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--space-3)' }}>
+            <code style={{ flex: 1 }}>/quit</code>
+            <button
+              type="button"
+              onClick={() => handleCopy('/quit', 'exit-2')}
+              style={{
+                padding: '6px 12px',
+                fontSize: '0.85rem',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--color-blue-500)',
+                background: copiedCommand === 'exit-2' ? 'var(--color-green-500)' : 'white',
+                color: copiedCommand === 'exit-2' ? 'white' : 'var(--color-blue-500)',
+                cursor: 'pointer',
+                fontWeight: 600,
+                transition: 'all 0.2s',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {copiedCommand === 'exit-2' ? 'Copied!' : 'Copy'}
+            </button>
+          </div>
+        </div>
+
+        <h4 style={{ margin: 'var(--space-3) 0 8px', fontSize: '0.95rem' }}>Option 2: Keyboard shortcut</h4>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+          <p style={{ margin: 0, fontSize: '0.9rem' }}>
+            Press <kbd style={{ background: '#fff', padding: '2px 6px', borderRadius: '4px', border: '1px solid #d0d7de' }}>Ctrl + C</kbd>
+          </p>
+          <span style={{ fontSize: '0.85rem', color: 'var(--color-neutral-700)' }}>(works on both Mac and Windows)</span>
+        </div>
+
+        <h4 style={{ margin: 'var(--space-3) 0 8px', fontSize: '0.95rem' }}>Option 3: Close the terminal</h4>
+        <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-neutral-700)' }}>
+          Closing the terminal window will also end the Claude Code CLI session
         </p>
       </div>
 
