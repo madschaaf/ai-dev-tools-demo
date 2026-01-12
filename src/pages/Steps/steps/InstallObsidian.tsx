@@ -1,11 +1,15 @@
 export default function InstallObsidian({ onComplete, isCompleted, onNext }: { onComplete: () => void, isCompleted: boolean, onNext: () => void }) {
   return (
     <>
-      <h2>Step 14: Install Obsidian App</h2>
+      <h2>Step 14: Install Obsidian Workflow GitHub App</h2>
       <p>Install the Obsidian Workflow App on GitHub Enterprise to enable @obsidian and @claude triggers in repositories.</p>
 
-      <h3 style={{ marginTop: 'var(--space-4)' }}>What is Obsidian?</h3>
-      <p>Obsidian is an AI-powered workflow tool that integrates with GitHub to provide automated code assistance, refactoring, and issue resolution using Claude AI.</p>
+      <div className="callout" style={{ background: '#fff3cd', borderColor: '#ffeaa7', color: '#856404', marginTop: 'var(--space-3)' }}>
+        <strong>⚠️ Note:</strong> This is the Obsidian <em>Workflow GitHub App</em>, not Obsidian.md (the note-taking app). For the note-taking app setup, see the next step.
+      </div>
+
+      <h3 style={{ marginTop: 'var(--space-4)' }}>What is the Obsidian Workflow App?</h3>
+      <p>The Obsidian Workflow App is an AI-powered GitHub bot that integrates with GitHub Enterprise to provide automated code assistance, refactoring, and issue resolution using Claude AI.</p>
 
       <h3 style={{ marginTop: 'var(--space-4)' }}>Installation Steps</h3>
       <ol>
@@ -34,6 +38,28 @@ export default function InstallObsidian({ onComplete, isCompleted, onNext }: { o
         <li>Confirm "Obsidian Workflow App" appears in the list</li>
         <li>Verify Issues/PR webhooks are enabled (this is the default)</li>
       </ol>
+
+      <h3 style={{ marginTop: 'var(--space-4)' }}>Using the Obsidian Dashboard UI</h3>
+      <p>Create and manage team workflows through the web interface:</p>
+      <ol>
+        <li>Navigate to{' '}
+          <a href="https://obsidian.vip.qa.ebay.com/" target="_blank" rel="noopener noreferrer">
+            https://obsidian.vip.qa.ebay.com/
+          </a>
+        </li>
+        <li>Log in with your corporate credentials</li>
+        <li>Use the Dashboard to:
+          <ul>
+            <li><strong>Create Team Workflows:</strong> Configure AI workflows using UI controls (no files needed)</li>
+            <li><strong>Manage Associations:</strong> Link repositories or JIRA projects to workflows</li>
+            <li><strong>Select MCP Servers:</strong> Use checkboxes to add servers and tools</li>
+          </ul>
+        </li>
+      </ol>
+
+      <div className="callout" style={{ background: '#e3f2fd', borderColor: '#90caf9', color: '#0d47a1', marginTop: 'var(--space-3)' }}>
+        <strong>Dashboard vs. Files:</strong> Team Workflows created in the Dashboard UI don't need .mcp.json or settings.json files - everything is configured through the web interface and stored centrally.
+      </div>
 
       <h3 style={{ marginTop: 'var(--space-4)' }}>Test the Installation</h3>
       <p>Try using Obsidian in a repository:</p>

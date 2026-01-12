@@ -4,7 +4,29 @@ export default function ConfigureVSCode() {
       <h2>Step 13: Configure VS Code Settings</h2>
       <p>Update your VS Code settings.json file with eBay-specific configurations for optimal development experience.</p>
 
-      <h3 style={{ marginTop: 'var(--space-4)' }}>Open Settings.json</h3>
+      <div className="callout" style={{ background: '#d4edda', borderColor: '#c3e6cb', color: '#155724', marginTop: 'var(--space-3)' }}>
+        <strong>🚀 Quick Setup Option:</strong> The automated setup script can configure this for you!
+        <div style={{ marginTop: '12px', background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', color: '#24292f' }}>
+          <code style={{ fontSize: '0.9rem' }}>npm run setup-mcp</code>
+        </div>
+        <div style={{ fontSize: '0.9rem', marginTop: '8px' }}>
+          Choose option 3 (VS Code Settings) or option 5 (All) from the menu.
+          <br /><strong>Continue reading below for manual setup.</strong>
+        </div>
+      </div>
+
+      <h3 style={{ marginTop: 'var(--space-4)' }}>Option 1: Automated Setup (Recommended)</h3>
+      <ol>
+        <li>Run <code>npm run setup-mcp</code> from the terminal</li>
+        <li>Choose option 3 for VS Code Settings only, or option 5 for all configurations</li>
+        <li>The script will backup your existing settings and copy the template</li>
+        <li>Restart VS Code for changes to take effect</li>
+      </ol>
+
+      <h3 style={{ marginTop: 'var(--space-4)' }}>Option 2: Manual Setup</h3>
+      <p>If you prefer to manually configure or want to merge with existing settings:</p>
+
+      <h4>Step 1: Open Settings.json</h4>
       <ol>
         <li>Open VS Code</li>
         <li>Press <kbd>Cmd+Shift+P</kbd> (Mac) or <kbd>Ctrl+Shift+P</kbd> (Windows)</li>
@@ -12,7 +34,10 @@ export default function ConfigureVSCode() {
         <li>Press Enter to open settings.json</li>
       </ol>
 
-      <h3 style={{ marginTop: 'var(--space-4)' }}>Required Settings</h3>
+      <h4 style={{ marginTop: 'var(--space-3)' }}>Step 2: View Template File</h4>
+      <p>The template is located at <code>.mcp/vscode_settings.template.json</code> in this repository.</p>
+
+      <h4 style={{ marginTop: 'var(--space-3)' }}>Step 3: Add Required Settings</h4>
       <p>Add or update these settings in your settings.json file:</p>
 
       <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-3)', overflowX: 'auto' }}>

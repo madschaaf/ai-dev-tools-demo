@@ -35,8 +35,6 @@ export default function InstallGit() {
     setTimeout(() => setCopiedCommand(null), 2000)
   }
 
-  const chatgptCommand = 'npm install -g chatgpt-cli'
-
   return (
     <>
       <h2>Step 7: Install Git</h2>

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export default function PracticeExercises({ onComplete, isCompleted, onNext }: { onComplete: () => void, isCompleted: boolean, onNext: () => void }) {
+export default function PracticeExercises({ onComplete, isCompleted }: { onComplete: () => void, isCompleted: boolean }) {
   const [copiedCommand, setCopiedCommand] = useState<string | null>(null)
 
   const handleCopy = (text: string, commandKey: string) => {

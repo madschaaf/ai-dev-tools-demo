@@ -3,10 +3,10 @@
     "git-server": {
       "command": "node",
       "args": [
-        "/Users/YOUR_USERNAME/ebay-mcp/mcp-tools-servers/git-server/build/src/index.js"
+        "/Users/jdoe/ebay-mcp/mcp-tools-servers/git-server/build/src/index.js"
       ],
       "env": {
-        "GITHUB_TOKEN": "REPLACE_WITH_YOUR_GITHUB_TOKEN",
+        "GITHUB_TOKEN": "ghp_1234567890abcdefghijklmnopqrstuvwxyz",
         "GITHUB_API_URL": "https://github.corp.ebay.com/api/v3",
         "NODE_TLS_REJECT_UNAUTHORIZED": "0"
       },
@@ -24,12 +24,12 @@
     "wiki-server": {
       "command": "node",
       "args": [
-        "/Users/YOUR_USERNAME/ebay-mcp/mcp-tools-servers/wiki-server/build/index.js"
+        "/Users/jdoe/ebay-mcp/mcp-tools-servers/wiki-server/build/index.js"
       ],
       "env": {
         "CONFLUENCE_BASE_URL": "https://wiki.corp.ebay.com",
-        "CONFLUENCE_TOKEN": "REPLACE_WITH_YOUR_WIKI_TOKEN",
-        "CONFLUENCE_USERNAME": "YOUR_EMAIL@ebay.com",
+        "CONFLUENCE_TOKEN": "ATBBBasicAuth1234567890abcdefghijklmnopqrstuvwxyz",
+        "CONFLUENCE_USERNAME": "jdoe@ebay.com",
         "CONFLUENCE_HOST": "https://wiki.corp.ebay.com",
         "NO_PROXY": "localhost,127.0.0.1,.vip.ebay.com,.corp.ebay.com,.ebayc3.com",
         "no_proxy": "localhost,127.0.0.1,.vip.ebay.com,.corp.ebay.com,.ebayc3.com",
@@ -53,40 +53,21 @@
     "jira-server": {
       "command": "node",
       "args": [
-        "/Users/YOUR_USERNAME/ebay-mcp/mcp-tools-servers/jira-server/build/index.js"
+        "/Users/jdoe/ebay-mcp/mcp-tools-servers/jira-server/build/index.js"
       ],
       "env": {
         "JIRA_HOME": "https://jirap.corp.ebay.com",
-        "JIRA_PAT": "REPLACE_WITH_YOUR_JIRA_PAT",
+        "JIRA_PAT": "MjA1NzE4OTk2NTU5OmFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6MTIzNDU2Nzg5MA==",
         "NODE_TLS_REJECT_UNAUTHORIZED": "0",
         "NO_PROXY": "localhost,127.0.0.1,.vip.ebay.com,.corp.ebay.com,.ebayc3.com",
         "no_proxy": "localhost,127.0.0.1,.vip.ebay.com,.corp.ebay.com,.ebayc3.com"
       },
       "disabled": false,
       "autoApprove": [
-        "jira_issues"
-      ]
-    },
-    "apidiscovery-server": {
-      "url": "https://apicatlogservice6cont.stratus.qa.ebay.com/sse",
-      "transportType": "sse",
-      "timeout": 60,
-      "disabled": false,
-      "autoApprove": []
-    },
-    "pulse-api": {
-      "url": "https://pulseremotemcp1.vip.qa.ebay.com/mcp",
-      "type": "streamableHttp",
-      "timeout": 60,
-      "disabled": false,
-      "alwaysAllow": [
-        "getDeliveryPerfByTeamName",
-        "getDeliveryPerfByDomainName",
-        "getDeliveryPerfByVPName",
-        "getAppReleaseMetricsConsolidated",
-        "getDeliveryPerfAllOrgs",
-        "getAccessibilityAllVPs",
-        "getBugReductionTargetAllVPs"
+        "search_issues",
+        "get_ticket",
+        "create_ticket",
+        "edit_ticket"
       ]
     }
   }

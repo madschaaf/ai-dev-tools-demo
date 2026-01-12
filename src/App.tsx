@@ -1,9 +1,10 @@
-import { Routes, Route, Link, NavLink} from 'react-router-dom'
+import { Routes, Route, Link } from 'react-router-dom'
 import NavBar from './components/NavBar'
 import VSCodeExtensions from './pages/VSCodeExtensions'
 import ExploreLinks from './pages/ExploreLinks'
 import StepsGuide from './pages/Steps/StepsGuide.tsx'
 import AISandbox from './pages/AISandbox'
+import UseCases from './pages/UseCases'
 
 
 // const quickLinks = [
@@ -239,7 +240,7 @@ export default function App() {
            <header className="header hero-header">
              <div className="hero-copy">
                <h1>Starting Guide for Software Engineers</h1>
-               <p className="subtitle">Support to get all the dev tools you need!</p>
+               <p className="subtitle">Get AI support throughout your engineering journey!</p>
              </div>
            </header>
            <Link to="/steps-guide" className="hero-btn-get-started">Get Started</Link>
@@ -250,6 +251,7 @@ export default function App() {
           <Route path="/steps-guide" element={<StepsGuide />} />
           <Route path="/vscode-extensions" element={<VSCodeExtensions />} />
           <Route path="/ai-sandbox" element={<AISandbox />} />
+          <Route path="/use-cases" element={<UseCases />} />
           <Route path="/explore" element={<ExploreLinks />} />
           <Route path="/" element={<ExploreLinks />} />
         </Routes>

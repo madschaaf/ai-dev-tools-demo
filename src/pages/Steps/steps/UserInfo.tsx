@@ -5,16 +5,80 @@ interface UserData {
   lastName: string
   email: string
   os: 'mac' | 'windows' | ''
+  role: string
 }
 
-export default function UserInfo({ onComplete, isCompleted, onNext }: { onComplete: () => void, isCompleted: boolean, onNext: () => void }) {
+interface UserInfoProps {
+  onComplete: () => void
+  isCompleted: boolean
+  onNext: () => void
+  onRoleSelect?: (role: string) => void
+  selectedRole?: string | null
+}
+
+export default function UserInfo({ onComplete, isCompleted, onNext, onRoleSelect, selectedRole }: UserInfoProps) {
   const [userData, setUserData] = useState<UserData>({
     firstName: '',
     lastName: '',
     email: '',
-    os: ''
+    os: '',
+    role: ''
   })
   const [saved, setSaved] = useState(false)
+
+  const roles = [
+    {
+      id: 'frontend',
+      name: 'Frontend Engineer',
+      description: 'Build user interfaces with React, Marko, and eBay Skin',
+      icon: '💅',
+      tools: ['Marko', 'eBay Skin', 'React', 'Figma MCP']
+    },
+    {
+      id: 'backend',
+      name: 'Backend Engineer',
+      description: 'Build APIs and server-side applications',
+      icon: '⚙️',
+      tools: ['Node.js', 'Java', 'Python', 'Databases']
+    },
+    {
+      id: 'ios',
+      name: 'iOS Developer',
+      description: 'Build native iOS applications with Swift/SwiftUI',
+      icon: '📱',
+      tools: ['Xcode', 'Swift', 'SwiftUI', 'iOS SDK']
+    },
+    {
+      id: 'android',
+      name: 'Android Developer',
+      description: 'Build native Android applications with Kotlin',
+      icon: '🤖',
+      tools: ['Android Studio', 'Kotlin', 'Jetpack Compose']
+    },
+    {
+      id: 'fullstack',
+      name: 'Full Stack Engineer',
+      description: 'Work across frontend and backend technologies',
+      icon: '🚀',
+      tools: ['React', 'Node.js', 'Databases', 'APIs']
+    },
+    {
+      id: 'datascience',
+      name: 'Data Scientist',
+      description: 'Analyze data and build machine learning models',
+      icon: '📊',
+      tools: ['Python', 'Jupyter', 'Pandas', 'ML Frameworks']
+    },
+    {
+      id: 'test',
+      name: 'Test Engineer',
+      description: 'Ensure quality through testing and automation',
+      icon: '🧪',
+      tools: ['Test Frameworks', 'Automation', 'CI/CD']
+    }
+  ]
+
+  const activeRoleId = selectedRole ?? userData.role
 
   useEffect(() => {
     // Load saved data on mount
@@ -25,8 +89,15 @@ export default function UserInfo({ onComplete, isCompleted, onNext }: { onComple
     }
   }, [])
 
+  const handleRoleSelection = (roleId: string) => {
+    setUserData({ ...userData, role: roleId })
+    if (onRoleSelect) {
+      onRoleSelect(roleId)
+    }
+  }
+
   const handleSave = () => {
-    if (userData.firstName && userData.lastName && userData.email) {
+    if (userData.firstName && userData.lastName && userData.email && userData.os && userData.role) {
       localStorage.setItem('ebay-dev-setup-user-info', JSON.stringify(userData))
       setSaved(true)
     }
@@ -34,11 +105,11 @@ export default function UserInfo({ onComplete, isCompleted, onNext }: { onComple
 
   const handleClear = () => {
     localStorage.removeItem('ebay-dev-setup-user-info')
-    setUserData({ firstName: '', lastName: '', email: '', os: '' })
+    setUserData({ firstName: '', lastName: '', email: '', os: '', role: '' })
     setSaved(false)
   }
 
-  const isValid = userData.firstName.trim() && userData.lastName.trim() && userData.email.trim() && userData.os
+  const isValid = userData.firstName.trim() && userData.lastName.trim() && userData.email.trim() && userData.os && userData.role
 
   return (
     <>
@@ -140,6 +211,56 @@ export default function UserInfo({ onComplete, isCompleted, onNext }: { onComple
           </p>
         </div>
 
+        <div>
+          <label style={{ display: 'block', fontWeight: 600, marginBottom: '12px' }}>
+            Engineering Role
+          </label>
+          <p style={{ margin: '0 0 12px', fontSize: '0.9rem', color: 'var(--color-neutral-700)' }}>
+            Select your role to get tailored setup steps and tools
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--space-2)' }}>
+            {roles.map((role) => (
+              <button
+                key={role.id}
+                type="button"
+                onClick={() => handleRoleSelection(role.id)}
+                style={{
+                  textAlign: 'left',
+                  padding: 'var(--space-2)',
+                  background: activeRoleId === role.id ? '#e3f2fd' : '#fff',
+                  border: activeRoleId === role.id ? '2px solid #1976d2' : '1px solid #e1e4e8',
+                  borderRadius: 'var(--radius-sm)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  fontFamily: 'inherit'
+                }}
+                onMouseEnter={(e) => {
+                  if (activeRoleId !== role.id) {
+                    e.currentTarget.style.borderColor = '#1976d2'
+                    e.currentTarget.style.background = '#f5f5f5'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (activeRoleId !== role.id) {
+                    e.currentTarget.style.borderColor = '#e1e4e8'
+                    e.currentTarget.style.background = '#fff'
+                  }
+                }}
+              >
+                <div style={{ fontSize: '1.5rem', marginBottom: '4px' }}>{role.icon}</div>
+                <div style={{ fontWeight: 600, fontSize: '0.9rem', marginBottom: '2px' }}>
+                  {role.name}
+                  {activeRoleId === role.id && <span style={{ marginLeft: '6px', color: '#1976d2' }}>✓</span>}
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#666' }}>{role.description}</div>
+              </button>
+            ))}
+          </div>
+          <div className="callout" style={{ background: '#fff3cd', borderColor: '#ffeaa7', color: '#856404', marginTop: 'var(--space-2)', padding: 'var(--space-2)', fontSize: '0.85rem' }}>
+            <strong>Note:</strong> All engineers complete core steps (Node.js, Git, VS Code, etc.). Your role adds specific tools.
+          </div>
+        </div>
+
         <div style={{ display: 'flex', gap: 'var(--space-3)', marginTop: 'var(--space-2)' }}>
           <button
             type="button"
@@ -189,7 +310,8 @@ export default function UserInfo({ onComplete, isCompleted, onNext }: { onComple
             <p style={{ margin: 0, marginBottom: '8px' }}><strong>Name:</strong> {userData.firstName} {userData.lastName}</p>
             <p style={{ margin: 0, marginBottom: '8px' }}><strong>Email:</strong> {userData.email}</p>
             <p style={{ margin: 0, marginBottom: '8px' }}><strong>Username:</strong> {userData.email.split('@')[0]}</p>
-            <p style={{ margin: 0 }}><strong>Operating System:</strong> {userData.os === 'mac' ? 'macOS' : 'Windows'}</p>
+            <p style={{ margin: 0, marginBottom: '8px' }}><strong>Operating System:</strong> {userData.os === 'mac' ? 'macOS' : 'Windows'}</p>
+            <p style={{ margin: 0 }}><strong>Role:</strong> {roles.find(r => r.id === userData.role)?.name || userData.role}</p>
           </div>
         </div>
       )}

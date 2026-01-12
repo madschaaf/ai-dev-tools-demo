@@ -49,6 +49,65 @@ A curated list of recommended extensions with:
 - **Theme & UI** - Customization and visual enhancements
 - Direct installation links and descriptions for each extension
 
+## MCP Server Configuration
+
+This repository includes templates and guides for configuring Model Context Protocol (MCP) servers to connect your AI agents with eBay internal tools.
+
+### Quick Setup
+
+**🚀 Automated Setup (Recommended):**
+```bash
+cd .mcp
+./setup.sh
+```
+The setup script will:
+- Detect your platform (macOS/Linux)
+- Guide you through configuration options
+- Copy the appropriate template files
+- Backup existing configurations
+- Provide next steps and helpful links
+
+**📋 Manual Setup:**
+
+**For Claude Desktop App:**
+```bash
+mkdir -p ~/Library/Application\ Support/Claude
+cp .mcp/claude_desktop_config.example.json ~/Library/Application\ Support/Claude/claude_desktop_config.json
+```
+
+**For VS Code with Cline:**
+```bash
+cp .mcp/cline_mcp_settings.template.json ~/Library/Application\ Support/Code/User/globalStorage/ebay.ebay-cline/settings/cline_mcp_settings.json
+```
+
+**For IntelliJ IDEA with GitHub Copilot:**
+```bash
+mkdir -p ~/.config/github-copilot/intellij
+cp .mcp/intellij_mcp_settings.template.json ~/.config/github-copilot/intellij/mcp.json
+```
+
+After copying, edit the configuration files to replace:
+- `YOUR_USERNAME` or `jdoe` → Your Mac username (e.g., `madschaaf`)
+- `REPLACE_WITH_YOUR_GITHUB_TOKEN` → Your GitHub personal access token
+- `REPLACE_WITH_YOUR_WIKI_TOKEN` → Your Confluence API token
+- `YOUR_EMAIL@ebay.com` or `jdoe@ebay.com` → Your eBay email address
+- `REPLACE_WITH_YOUR_JIRA_PAT` → Your JIRA personal access token
+
+**📖 Documentation:**
+- **Setup Guide:** [.mcp/SETUP_GUIDE.md](.mcp/SETUP_GUIDE.md) - Detailed setup instructions and troubleshooting
+- **Configuration Examples:** [.mcp/CONFIGURATION_EXAMPLES.md](.mcp/CONFIGURATION_EXAMPLES.md) - Visual examples, common mistakes, and security best practices
+- **Example Files:**
+  - [.mcp/config.json.example](.mcp/config.json.example) - Environment variables only
+  - [.mcp/claude_desktop_config.example.json](.mcp/claude_desktop_config.example.json) - Complete Claude Desktop configuration
+
+### Available MCP Servers
+
+- **git-server** - GitHub Enterprise integration (branches, PRs, commits, issues)
+- **wiki-server** - Confluence Wiki integration (read/write pages, attachments)
+- **jira-server** - JIRA ticket management (create, edit, search tickets)
+- **apidiscovery-server** - eBay API discovery and documentation
+- **pulse-api** - Engineering metrics and analytics
+
 ## Prerequisites
 
 - Node.js 18+ (recommended) and npm
@@ -93,4 +152,3 @@ npm run preview
 - `src/components/SiteCard.tsx`: Card component used on the home grid
 - `src/styles/theme.css`: Lightweight theme using CSS variables
 - `src/server/index.ts`: Optional Express server with `/api/resources`
-

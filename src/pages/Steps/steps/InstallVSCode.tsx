@@ -19,7 +19,6 @@ export default function InstallVSCode({ onComplete, isCompleted, onNext }: { onC
     setCopiedCommand(commandKey)
     setTimeout(() => setCopiedCommand(null), 2000)
   }
-
   const brewInstallCommand = 'brew install --cask visual-studio-code'
   const chocoInstallCommand = 'choco install vscode -y'
   const wingetInstallCommand = 'winget install Microsoft.VisualStudioCode'
@@ -74,6 +73,33 @@ export default function InstallVSCode({ onComplete, isCompleted, onNext }: { onC
         <>
           <div className="callout" style={{ background: '#e3f2fd', borderColor: '#90caf9', color: '#0d47a1', marginTop: 'var(--space-3)' }}>
             <strong>Mac Users:</strong> For the best experience on eBay-managed Macs, use the download installer (Option 2 below).
+          </div>
+
+          <p style={{ marginTop: 'var(--space-3)', fontSize: '0.9rem' }}>
+            If you prefer Homebrew, you can also install VS Code with this command:
+          </p>
+          <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--space-3)' }}>
+              <code style={{ flex: 1 }}>{brewInstallCommand}</code>
+              <button
+                type="button"
+                onClick={() => handleCopy(brewInstallCommand, 'brew')}
+                style={{
+                  padding: '6px 12px',
+                  fontSize: '0.85rem',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--color-blue-500)',
+                  background: copiedCommand === 'brew' ? 'var(--color-green-500)' : 'white',
+                  color: copiedCommand === 'brew' ? 'white' : 'var(--color-blue-500)',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  transition: 'all 0.2s',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {copiedCommand === 'brew' ? 'Copied!' : 'Copy'}
+              </button>
+            </div>
           </div>
         </>
       )}

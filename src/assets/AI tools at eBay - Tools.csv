@@ -1,0 +1,66 @@
+Tool Name,Resource Link,Type,Contacts,Comments,Column 1,Column 2,Column 3,Column 4,Column 5,Column 6,Column 7,Column 8,Column 9,Column 10,Column 11,Column 12,Column 13,Column 14,Column 15,Column 16,Column 17,Column 18,Column 19,Column 20,Column 21,Column 22
+ML Platform ( Krylov),https://pages.github.corp.ebay.com/taichi/doc-center/docs/introduction/ml-platform-101/,Platform,Slack: #krylov-support,,,,,,,,,,,,,,,,,,,,,,,
+AI Sandbox,https://pages.github.corp.ebay.com/aisandbox/docs/,Platform,Slack: #genai-dev,HubTV : https://hubtv.corp.ebay.com/#/media/zJd3Gm,,,,,,,,,,,,,,,,,,,,,,
+Glean Agents,https://wiki.corp.ebay.com/pages/viewpage.action?spaceKey=innovation&title=Glean+Agent+Onboarding+Instruction,Platform,,,,,,,,,,,,,,,,,,,,,,,,
+Athena Large Language Model fine-tuning framework,https://wiki.corp.ebay.com/display/COREAI/Athena+Large+Language+Model+fine-tuning+framework,Platform,,"A fully managed framework, integrated into eBay's ML platforms, that enables teams to fine tune and deploy fine-tuned Large Language Models with ease and speed.",,,,,,,,,,,,,,,,,,,,,,
+Spring AI ,https://spring.io/projects/spring-ai,Platform,,,,,,,,,,,,,,,,,,,,,,,,
+CoreAI LLM Foundry,( see AI Sandbox ) ,Platform,( see AI Sandbox ) ,THIRD GENERATION of our in-house Lilium models,,,,,,,,,,,,,,,,,,,,,,
+Obsidian Platform,https://pages.github.corp.ebay.com/obsidian/docs/,Platform,"Slack: #obsidian-ai-community
+
+","Access to platform: https://obsidiangraphqlmcp.stratus.qa.ebay.com/ 
+
+Official docs: https://pages.github.corp.ebay.com/obsidian/docs/ ",,,,,,,,,,,,,,,,,,,,,,
+Glean (Enterprise search and HubGPT assistants),https://app.glean.com/,Enterprise Search,"Slack: #community-hubgpt
+Slack: #community-glean
+
+","Powers Hub search and part of HubGPT platform
+Glean Apps https://help.glean.com/en/articles/8666681-how-glean-apps-work
+https://wiki.corp.ebay.com/display/innovation/HubGPT+Platform+Assistant+Onboarding+Process 
+
+https://app.glean.com/chat/apps",,,,,,,,,,,,,,,,,,,,,,
+GitHub Copilot,https://pages.github.corp.ebay.com/DevGenAI/copilot-doc/,Coding Assistant,Slack: #community-copilot,"primary coding assistant for Intellij and VS Code
+https://go/copilot ",,,,,,,,,,,,,,,,,,,,,,
+eBayCoder,https://pages.github.corp.ebay.com/DevGenAI/ebaycoder-site/,Coding Assistant,"Slack: #community-ebaycoder
+","eBay domain-focused AI code assistant. It understands eBay code context and provides specialized support for initiatives like the RaptorIO upgrade and contract-first migration.
+https://pages.github.corp.ebay.com/DevGenAI/ebaycoder-site/docs/guide/contract-first/",,,,,,,,,,,,,,,,,,,,,,
+eBay Cline,https://pages.github.corp.ebay.com/DevGenAI/cline-ebay/,Coding Assistant,Slack: #community-ebay-cline,https://go/ebaycline ,,,,,,,,,,,,,,,,,,,,,,
+Poolside AI,https://wiki.corp.ebay.com/display/PDV/Poolside.AI,Coding Assistant,"Slack: #customer-ebay-poolside-externalExternal
+
+","upcoming tool for AI development similar to Cursor - in beta
+
+Installation : https://ebay-eng.slack.com/archives/C07LMJ3MX5J/p1730994844370269?thread_ts=1730993965.462099&cid=C07LMJ3MX5J",,,,,,,,,,,,,,,,,,,,,,
+Google Gemini,"https://hub.corp.ebay.com/site/itss/page/googlegemini/
+https://gemini.google.com/app ",Coding Assistant,Slack: #community-google-workspace,,,,,,,,,,,,,,,,,,,,,,,
+Textio,https://hub.corp.ebay.com/site/people/page/hiring-textio,Coding Assistant,,,,,,,,,,,,,,,,,,,,,,,,
+API Discovery assistant,https://cloud.ebay.com/app-specs,Coding Assistant,"Slack:  #api-discovery
+Support: #apicatalog-support","Go to HubGPT internal. Based on the API prompt, API specific ones will be auto routed to API Discovery, alternatively you can choose ‘API Discovery” assistant from the drop down",,,,,,,,,,,,,,,,,,,,,,
+Cursor,https://wiki.corp.ebay.com/display/AITOOLS/Best+Practices,Coding Assistant,Slack: community-cursor,Currently an open pilot for many dev teams,,,,,,,,,,,,,,,,,,,,,,
+V0 ( pilot ) ,https://ebay-eng.slack.com/archives/C098FLELMS8/p1755015499579639,Coding Assistant,"Slack: #community-vercel-v0
+
+",Vibe Coding tool for non technical eBay users,,,,,,,,,,,,,,,,,,,,,,
+Claude Code,https://wiki.corp.ebay.com/display/ESIHOME/Claude+Code+Installation+and+Setup+Guide,Coding Assistant,"Slack: #community-claude-code
+
+Claude code stats: http://go/claudecodestats ",Command Line access to Anthropic models.,,,,,,,,,,,,,,,,,,,,,,
+MCP Servers at eBay,https://github.corp.ebay.com/DevGenAI/ebay-mcp,Code Repository,Slack: #community-ebay-cline,Model Context Protocol allows AI's to learn new tools in a standards based way. We already have some MCP's for internal services like GIT,,,,,,,,,,,,,,,,,,,,,,
+Global AI Context,https://github.corp.ebay.com/DevGenAI/global-ai-context,Code Repository,#context-engineering,"Workflows, AI Agents, and Context for best practices at ebay",,,,,,,,,,,,,,,,,,,,,,
+"HubGPT Platform (Internal tools, chatbots)",https://hubgpt.corp.ebay.com/?mode=internal,Assistant Platform,Slack: #community-hubgpt,"HubGPT Assistants Onboarding: https://wiki.corp.ebay.com/display/innovation/HubGPT+Platform+Assistant+Onboarding+Process
+FAQ: https://hub.corp.ebay.com/site/cpt/page/coreai-faq 
+News: https://hub.corp.ebay.com/site/news/feed/hubnews/post/67a3d93c5e4d884e4170ed3e",,,,,,,,,,,,,,,,,,,,,,
+Agent X (Site facing),https://github.corp.ebay.com/CoreAI/agent-x/blob/main/README.md,Assistant Platform,Slack: #agentx,"upcoming agentic tool for eBay from Core AI
+https://go/agentx",,,,,,,,,,,,,,,,,,,,,,
+ChatGPT Enterprise,https://chatgpt.com/,Assistant Platform,Slack: #chatgpt-enterprise-support,,,,,,,,,,,,,,,,,,,,,,,
+Deepsights,"https://hub.corp.ebay.com/site/growthcentral/feed/news/post/6756fbf0db5db5611a995d13 
+https://go/deepsights 
+",Assistant Platform,Slack: #deepsights-ai,,,,,,,,,,,,,,,,,,,,,,,
+AI Voiceover ,https://docs.google.com/videos/u/0/,Application,,Allows you to create a realistic voice to speak over your google video demos,,,,,,,,,,,,,,,,,,,,,,
+Zoom AI,,Application,,The AI model that transcribes Zoom meetings,,,,,,,,,,,,,,,,,,,,,,
+Agentic Search MVP & Orchestration,https://wiki.corp.ebay.com/display/innovation/HubGPT+Platform+Assistant+Onboarding+Process,Assistant Platform,Slack: #community-hubgpt; Email: ai-hubgpt-admin@ebay.com,"Multi-turn agentic search and orchestration flows. Launched Q4 2025; onboarding via wiki, pilot ongoing.",,,,,,,,,,,,,,,,,,,,,,
+Seller AI Copilot (XFN Agentic Capabilities),https://hubtv.corp.ebay.com/#/groups/k0xZB4,Assistant Platform,Slack: #seller-copilot; Email: seller-copilot-support@ebay.com,"Agentic seller workflow automation suite, including handover for complex tasks. Video onboarding and Q&A on HubTV. Production pilot.",,,,,,,,,,,,,,,,,,,,,,
+Self-Service Tool – AI Enablement,https://ebayinc.service-now.com/aiintake,Platform,Slack: #genai-dev; Email: ai-intake@ebay.com,AI-powered self-service toolkit for VAS and related platforms. Submit onboarding/support tickets via ServiceNow portal. In rollout phase.,,,,,,,,,,,,,,,,,,,,,,
+Agentic PayOps Platform,https://github.corp.ebay.com/DevGenAI/ebay-mcp,Platform,Slack: #payops-ai; Email: payops-agent-support@ebay.com,Automated payment chatbots and dispute flows leveraging MCP. Pilot live Q4 2025; technical docs and MCP guides available.,,,,,,,,,,,,,,,,,,,,,,
+Content Generation Agentic Flows,https://wiki.corp.ebay.com/display/PROMOTEDLISTINGS/AI+Tools+Reference,Application,Slack: #content-ai; Email: marketing-ai-tools@ebay.com,Marketing content campaign flows using agentic/ReAct patterns. Early onboarding via wiki; contact team for GA/feature access.,,,,,,,,,,,,,,,,,,,,,,
+LLM Prompt Security / Monitoring Tooling,https://wiki.corp.ebay.com/display/COREAI/Athena+Large+Language+Model+fine-tuning+framework,Security & Monitoring,Slack: #coreai-security; Email: llm-security-team@ebay.com,Prompt injection security and LLM monitoring. Athena fine-tuning framework docs include onboarding. Protects eBay’s AI deployments.,,,,,,,,,,,,,,,,,,,,,,
+Glean MCP Agent Server,https://developers.glean.com/guides/mcp/,Application,Slack: #community-glean; Email: glean-support@ebay.com,"Natural language API automation via MCP, with Claude/Cline integration. Supported channels and guides; coming to production Q4 2025.",,,,,,,,,,,,,,,,,,,,,,
+LLM Hybrid Models & Automated Optimizers,https://pages.github.corp.ebay.com/aisandbox/docs/Application%20developer%20SDK/#models-supported,Platform,Slack: #genai-dev; Email: ai-model-ops@ebay.com,Rule+LLM POC and automated inference SDK pilots for hybrid models. AI Sandbox doc page contains onboarding/process.,,,,,,,,,,,,,,,,,,,,,,
+"Model Portfolio Expansions (LLMs, VLMs, etc)",https://ebayinc.service-now.com/aiintake,Platform,Slack: #genai-dev; Email: ai-intake@ebay.com,"New internal models: Lilium3, eLlama3, Athena VLM. Intake portal tracks updates and onboarding for latest portfolio.",,,,,,,,,,,,,,,,,,,,,,
+Regulator/Compliance AI Agent,https://wiki.corp.ebay.com/display/COREAI/,Application,Slack: #regcompliance-ai; Email: regulatory-ai-support@ebay.com,Policy explanation and regulatory Q&A agent. Pilot status; core onboarding wiki lists point of contact and tool documentation.,,,,,,,,,,,,,,,,,,,,,,

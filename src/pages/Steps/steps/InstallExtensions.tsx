@@ -129,6 +129,36 @@ export default function InstallExtensions({ onComplete, isCompleted, onNext }: {
       </div>
 
       <h3 style={{ marginTop: 'var(--space-4)' }}>Step 3: Open in VS Code</h3>
+
+      <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--space-3)' }}>
+          <code style={{ flex: 1, whiteSpace: 'pre-wrap' }}>
+            {userOS === 'mac' ? 'code .' : userOS === 'windows' ? 'code .' : 'code .'}
+          </code>
+          <button
+            type="button"
+            onClick={() => handleCopy('code .', 'open-vscode')}
+            style={{
+              padding: '6px 12px',
+              fontSize: '0.85rem',
+              borderRadius: 'var(--radius-sm)',
+              border: '1px solid var(--color-blue-500)',
+              background: copiedCommand === 'open-vscode' ? 'var(--color-green-500)' : 'white',
+              color: copiedCommand === 'open-vscode' ? 'white' : 'var(--color-blue-500)',
+              cursor: 'pointer',
+              fontWeight: 600,
+              transition: 'all 0.2s',
+              whiteSpace: 'nowrap',
+              flexShrink: 0
+            }}
+          >
+            {copiedCommand === 'open-vscode' ? 'Copied!' : 'Copy'}
+          </button>
+        </div>
+        <p style={{ margin: 'var(--space-2) 0 0', fontSize: '0.85rem', color: 'var(--color-neutral-700)' }}>
+          {'Command to open the cloned repository in VS Code or open it manually as described below'}
+        </p>
+      </div>
       <ol>
         <li>Open VS Code</li>
         <li>Go to File → Open Folder (or Cmd+O on Mac, Ctrl+O on Windows)</li>
@@ -168,6 +198,59 @@ export default function InstallExtensions({ onComplete, isCompleted, onNext }: {
       <p style={{ marginTop: 'var(--space-3)' }}>
         These extensions are pre-configured in the repository's <code>.vscode/extensions.json</code> file.
       </p>
+
+      <h3 style={{ marginTop: 'var(--space-4)' }}>Step 5: Install Dependencies</h3>
+      <p>Open your terminal in VS Code by pressing <kbd>{userOS === 'mac' ? 'Ctrl + ~' : 'Ctrl + ~'}</kbd></p>
+
+      <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--space-3)' }}>
+          <code style={{ flex: 1, whiteSpace: 'pre-wrap' }}>
+            npm install
+          </code>
+          <button
+            type="button"
+            onClick={() => handleCopy('npm install', 'npm-install')}
+            style={{
+              padding: '6px 12px',
+              fontSize: '0.85rem',
+              borderRadius: 'var(--radius-sm)',
+              border: '1px solid var(--color-blue-500)',
+              background: copiedCommand === 'npm-install' ? 'var(--color-green-500)' : 'white',
+              color: copiedCommand === 'npm-install' ? 'white' : 'var(--color-blue-500)',
+              cursor: 'pointer',
+              fontWeight: 600,
+              transition: 'all 0.2s',
+              whiteSpace: 'nowrap',
+              flexShrink: 0
+            }}
+          >
+            {copiedCommand === 'npm-install' ? 'Copied!' : 'Copy'}
+          </button>
+        </div>
+        <p style={{ margin: 'var(--space-2) 0 0', fontSize: '0.85rem', color: 'var(--color-neutral-700)' }}>
+          Install all project dependencies
+        </p>
+      </div>
+
+      <div className="callout" style={{ background: '#d4edda', borderColor: '#c3e6cb', color: '#155724', marginTop: 'var(--space-3)' }}>
+        <strong>What happens after install?</strong>
+        <p style={{ margin: '8px 0 0', fontSize: '0.9rem' }}>
+          The postinstall script will display a message with instructions for configuring MCP servers.
+          You'll set those up in a later step using the <code>npm run setup-mcp</code> command.
+        </p>
+      </div>
+
+      <div className="callout" style={{ background: '#e3f2fd', borderColor: '#90caf9', color: '#0d47a1', marginTop: 'var(--space-3)' }}>
+        <strong>Available npm Commands:</strong>
+        <ul style={{ margin: '8px 0 0 20px', fontSize: '0.9rem' }}>
+          <li><code>npm run dev</code> - Start both client and server (to run this app locally)</li>
+          <li><code>npm run server</code> - Start only the server</li>
+          <li><code>npm run build</code> - Build the project for production</li>
+          <li><code>npm run setup-mcp</code> - Configure MCP servers (covered in a later step)</li>
+        </ul>
+      </div>
+
+
 
       <div style={{ marginTop: 'var(--space-3)' }}>
         <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', cursor: 'pointer' }}>

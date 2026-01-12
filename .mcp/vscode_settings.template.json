@@ -1,0 +1,47 @@
+{
+  "http.proxyStrictSSL": false,
+  "files.autoSave": "afterDelay",
+
+  "github-enterprise.hosts": [
+    "github.corp.ebay.com"
+  ],
+  "github-authentication.useElectronFetch": false,
+
+  "github.copilot.chat.anthropic.thinking.enabled": true,
+  "github.copilot.chat.alternateGptPrompt.enabled": true,
+  "github.copilot.chat.languageContext.typescript.enabled": true,
+  "github.copilot.chat.languageContext.typescript.includeDocumentation": true,
+  "github.copilot.nextEditSuggestions.enabled": true,
+
+  "claude-code.environmentVariables": [
+    {
+      "name": "ANTHROPIC_API_KEY",
+      "value": "$(npx @ebay/claude-code-token@latest get_token)"
+    },
+    {
+      "name": "CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS",
+      "value": "1"
+    },
+    {
+      "name": "ANTHROPIC_MODEL",
+      "value": "hubgpt-chat-completions-claude-sonnet-4-5"
+    },
+    {
+      "name": "ANTHROPIC_BASE_URL",
+      "value": "https://platformgateway2.vip.ebay.com/hubgptgatewaysvc/v1/anthropic"
+    },
+    {
+      "name": "CLAUDE_CODE_API_KEY_HELPER_TTL_MS",
+      "value": "360000000"
+    },
+    {
+      "name": "DISABLE_TELEMETRY",
+      "value": "1"
+    },
+    {
+      "name": "ANTHROPIC_LOG",
+      "value": "debug"
+    }
+  ],
+  "claudeCode.preferredLocation": "panel"
+}

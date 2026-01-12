@@ -1,0 +1,76 @@
+{
+  "servers": {
+    "git-server": {
+      "command": "node",
+      "args": [
+        "/Users/YOUR_USERNAME/ebay-mcp/mcp-tools-servers/git-server/build/src/index.js"
+      ],
+      "disabled": false,
+      "autoApprove": [
+        "github_branches",
+        "github_commits",
+        "github_content",
+        "github_search",
+        "github_pull_requests",
+        "github_repositories",
+        "github_issues"
+      ],
+      "env": {
+        "GITHUB_TOKEN": "REPLACE_WITH_YOUR_GITHUB_TOKEN",
+        "GITHUB_API_URL": "https://github.corp.ebay.com/api/v3",
+        "NODE_TLS_REJECT_UNAUTHORIZED": "0"
+      }
+    },
+    "wiki-server": {
+      "command": "node",
+      "args": [
+        "/Users/YOUR_USERNAME/ebay-mcp/mcp-tools-servers/wiki-server/build/index.js"
+      ],
+      "disabled": false,
+      "autoApprove": [
+        "get_page_by_id",
+        "get_page_by_title",
+        "get_page_with_storage_format",
+        "get_child_pages",
+        "create_wiki_page",
+        "update_wiki_page",
+        "search_wiki",
+        "list_wiki_attachments",
+        "download_wiki_attachment",
+        "upload_wiki_attachment"
+      ],
+      "env": {
+        "CONFLUENCE_BASE_URL": "https://wiki.corp.ebay.com",
+        "CONFLUENCE_TOKEN": "REPLACE_WITH_YOUR_WIKI_TOKEN",
+        "CONFLUENCE_USERNAME": "YOUR_EMAIL@ebay.com",
+        "CONFLUENCE_HOST": "https://wiki.corp.ebay.com",
+        "NO_PROXY": "localhost,127.0.0.1,.vip.ebay.com,.corp.ebay.com,.ebayc3.com",
+        "no_proxy": "localhost,127.0.0.1,.vip.ebay.com,.corp.ebay.com,.ebayc3.com",
+        "NODE_TLS_REJECT_UNAUTHORIZED": "0",
+        "WIKI_MAX_CONTENT_FILES": "15"
+      }
+    },
+    "jira-server": {
+      "command": "node",
+      "args": [
+        "/Users/YOUR_USERNAME/ebay-mcp/mcp-tools-servers/jira-server/build/index.js"
+      ],
+      "disabled": false,
+      "autoApprove": [
+        "search_issues",
+        "get_ticket",
+        "create_ticket",
+        "edit_ticket",
+        "get_comments",
+        "add_comment"
+      ],
+      "env": {
+        "JIRA_HOME": "https://jirap.corp.ebay.com",
+        "JIRA_PAT": "REPLACE_WITH_YOUR_JIRA_PAT",
+        "NODE_TLS_REJECT_UNAUTHORIZED": "0",
+        "NO_PROXY": "localhost,127.0.0.1,.vip.ebay.com,.corp.ebay.com,.ebayc3.com",
+        "no_proxy": "localhost,127.0.0.1,.vip.ebay.com,.corp.ebay.com,.ebayc3.com"
+      }
+    }
+  }
+}

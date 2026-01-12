@@ -4,7 +4,9 @@
     "adpyke.vscode-sql-formatter",
     "andrepimenta.claude-code-chat",
     "anthropic.claude-code",
+    "dbaeumer.vscode-eslint",
     "ebay.ebay-cline",
+    "eamodio.gitlens",
     "esbenp.prettier-vscode",
     "github.codespaces",
     "github.copilot",
@@ -14,6 +16,7 @@
     "github.vscode-pull-request-github",
     "inferrinizzard.prettier-sql-vscode",
     "linhmtran168.mac-ca-vscode",
+    "marko-js.marko-vscode",
     "ms-azuretools.vscode-azure-github-copilot",
     "ms-azuretools.vscode-azure-mcp-server",
     "ms-azuretools.vscode-azureresourcegroups",
@@ -29,6 +32,7 @@
     "ms-vscode.azure-repos",
     "ms-vscode.remote-repositories",
     "semanticworkbenchteam.mcp-server-vscode",
+    "stylelint.vscode-stylelint",
     "bluetext100.bluetext-setup",
     "tal7aouy.rainbow-bracket"
   ]
