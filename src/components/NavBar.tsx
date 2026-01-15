@@ -15,6 +15,8 @@ export default function NavBar() {
           <NavLink to="/vscode-extensions" className="nav-link">VS Code Extensions</NavLink>
           <NavLink to="/ai-sandbox" className="nav-link">AI Sandbox</NavLink>
           <NavLink to="/use-cases" className="nav-link">Use Cases</NavLink>
+          <NavLink to="/use-case-prototype" className="nav-link">Use Case Prototype</NavLink>
+          <NavLink to="/all-steps" className="nav-link">All Steps</NavLink>
         </div>
 
         <div className="navbar-actions">

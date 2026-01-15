@@ -5,6 +5,8 @@ import ExploreLinks from './pages/ExploreLinks'
 import StepsGuide from './pages/Steps/StepsGuide.tsx'
 import AISandbox from './pages/AISandbox'
 import UseCases from './pages/UseCases'
+import UseCasePrototype from './pages/UseCasePrototype'
+import AllSteps from './pages/Steps/AllSteps.tsx'
 
 
 // const quickLinks = [
@@ -252,8 +254,10 @@ export default function App() {
           <Route path="/vscode-extensions" element={<VSCodeExtensions />} />
           <Route path="/ai-sandbox" element={<AISandbox />} />
           <Route path="/use-cases" element={<UseCases />} />
+          <Route path="/use-case-prototype" element={<UseCasePrototype />} />
           <Route path="/explore" element={<ExploreLinks />} />
           <Route path="/" element={<ExploreLinks />} />
+          <Route path="/all-steps" element={<AllSteps />} />
         </Routes>
       </div>
     </>
