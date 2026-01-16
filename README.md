@@ -114,6 +114,36 @@ After copying, edit the configuration files to replace:
 
 ## Quick start
 
+### 🚀 Option 1: GitHub Codespaces (Easiest!)
+
+**One-click cloud development - no local setup required!**
+
+1. Go to the repository on GitHub: `https://github.corp.ebay.com/madschaaf/ai-dev-tools`
+2. Click the green **"Code"** button
+3. Click the **"Codespaces"** tab
+4. Click **"Create codespace on main"**
+
+**That's it!** The Codespace will automatically:
+- ✅ Install Node.js 20 and all dependencies
+- ✅ Configure VS Code with recommended extensions
+- ✅ Start the dev server on port 5173
+- ✅ Forward ports so you can preview the app
+- ✅ Set up ESLint and Prettier for code quality
+
+**Access your app:**
+- The dev server starts automatically at `http://localhost:5173`
+- Click "Open in Browser" when VS Code notifies you
+- Or use the "Ports" tab to open the preview
+
+**Benefits:**
+- 🌐 Works on any device (no local install needed)
+- 🔄 Consistent environment for all developers
+- 💾 Automatic configuration and setup
+- 🔌 Pre-configured VS Code extensions
+- 🚀 Ready to code in ~60 seconds
+
+### 💻 Option 2: Local Development
+
 Install dependencies and start the client:
 
 ```bash
