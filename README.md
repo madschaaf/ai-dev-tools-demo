@@ -108,60 +108,186 @@ After copying, edit the configuration files to replace:
 - **apidiscovery-server** - eBay API discovery and documentation
 - **pulse-api** - Engineering metrics and analytics
 
-## Prerequisites
+## 🚀 Getting Started - Complete Setup Guide
 
-- Node.js 18+ (recommended) and npm
+Follow these steps to get the AI Dev Tools application running on your machine.
 
-## Quick start
+### Prerequisites
 
-### 🚀 Option 1: GitHub Codespaces (Easiest!)
+Before you begin, make sure you have these installed:
 
-**One-click cloud development - no local setup required!**
+1. **Node.js 18 or higher**
+   - Check if installed: `node --version`
+   - Download: [https://nodejs.org/](https://nodejs.org/) (LTS version recommended)
+   - Verify npm is installed: `npm --version`
 
-1. Go to the repository on GitHub: `https://github.corp.ebay.com/madschaaf/ai-dev-tools`
-2. Click the green **"Code"** button
-3. Click the **"Codespaces"** tab
-4. Click **"Create codespace on main"**
+2. **Git**
+   - Check if installed: `git --version`
+   - Download: [https://git-scm.com/downloads](https://git-scm.com/downloads)
 
-**That's it!** The Codespace will automatically:
-- ✅ Install Node.js 20 and all dependencies
-- ✅ Configure VS Code with recommended extensions
-- ✅ Start the dev server on port 5173
-- ✅ Forward ports so you can preview the app
-- ✅ Set up ESLint and Prettier for code quality
+3. **A code editor** (VS Code recommended)
+   - Download: [https://code.visualstudio.com/](https://code.visualstudio.com/)
 
-**Access your app:**
-- The dev server starts automatically at `http://localhost:5173`
-- Click "Open in Browser" when VS Code notifies you
-- Or use the "Ports" tab to open the preview
+### Step 1: Clone the Repository
 
-**Benefits:**
-- 🌐 Works on any device (no local install needed)
-- 🔄 Consistent environment for all developers
-- 💾 Automatic configuration and setup
-- 🔌 Pre-configured VS Code extensions
-- 🚀 Ready to code in ~60 seconds
+Open your terminal and run:
 
-### 💻 Option 2: Local Development
+```bash
+# Navigate to where you want to store the project
+cd ~/Documents  # or your preferred location
 
-Install dependencies and start the client:
+# Clone the repository
+git clone git@github.corp.ebay.com:madschaaf/ai-dev-tools.git
+
+# Navigate into the project folder
+cd ai-dev-tools
+```
+
+**✅ Success Check:** You should see a message saying "Cloning into 'ai-dev-tools'..." followed by download progress.
+
+### Step 2: Install Dependencies
+
+Install all required packages:
 
 ```bash
 npm install
+```
+
+**⏱️ Expected time:** 1-2 minutes
+
+**✅ Success Check:** You should see:
+- "added XXX packages" message
+- No error messages (warnings are okay)
+- A `node_modules` folder created in your project
+
+**Common Issues:**
+- ❌ "npm: command not found" → Install Node.js (see Prerequisites)
+- ❌ Permission errors → Try `sudo npm install` (Mac/Linux) or run terminal as Administrator (Windows)
+
+### Step 3: Start the Development Server
+
+Run the application:
+
+```bash
 npm run dev
 ```
 
-Start the optional backend in another terminal:
+**✅ Success Check:** You should see:
+```
+VITE v5.x.x  ready in XXX ms
+
+➜  Local:   http://localhost:5173/
+➜  Network: use --host to expose
+➜  press h + enter to show help
+```
+
+### Step 4: View the Application
+
+Open your web browser and go to:
+
+```
+http://localhost:5173
+```
+
+**🎉 You should see:** The AI Dev Tools homepage with:
+- Navigation bar with links (Home, Explore Links, AI Sandbox, etc.)
+- Grid of tool cards
+- Welcome message and features
+
+### Step 5: (Optional) Start the Backend Server
+
+The frontend works standalone, but some features require the backend. In a **new terminal window**:
 
 ```bash
+# Navigate to the project folder (if not already there)
+cd ai-dev-tools
+
+# Start the backend server
 npm run server
 ```
 
-Or run both in one go:
+**✅ Success Check:** You should see:
+```
+Server running on http://localhost:3000
+```
+
+**Tip:** Keep both terminals running - one for frontend (port 5173), one for backend (port 3000)
+
+### Alternative: Run Both Servers Together
+
+Instead of Steps 3-5, you can run both servers with one command:
 
 ```bash
 npm run start
 ```
+
+This starts:
+- ✅ Frontend on `http://localhost:5173`
+- ✅ Backend on `http://localhost:3000`
+
+## 🎯 Quick Reference Commands
+
+```bash
+# Install dependencies
+npm install
+
+# Start frontend only
+npm run dev
+
+# Start backend only
+npm run server
+
+# Start both frontend and backend
+npm run start
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+## 🔧 Troubleshooting
+
+### Port Already in Use
+
+If you see "Port 5173 is already in use":
+
+```bash
+# Find and kill the process using the port (Mac/Linux)
+lsof -ti:5173 | xargs kill -9
+
+# Or use a different port
+npm run dev -- --port 3001
+```
+
+### Dependencies Not Installing
+
+```bash
+# Clear npm cache and try again
+npm cache clean --force
+rm -rf node_modules package-lock.json
+npm install
+```
+
+### Page Not Loading
+
+1. Check terminal for errors
+2. Make sure the dev server is running
+3. Try refreshing the browser (Cmd+R or Ctrl+R)
+4. Try clearing browser cache or using incognito mode
+
+### Changes Not Appearing
+
+- The dev server has hot reload - changes should appear automatically
+- If not, try saving the file again or restart the dev server (Ctrl+C, then `npm run dev`)
+
+## 💡 Development Tips
+
+- **Auto-save in VS Code:** File → Auto Save (recommended for development)
+- **View Console Logs:** Right-click page → Inspect → Console tab
+- **Hot Reload:** Changes to code automatically update the browser
+- **Stop Server:** Press `Ctrl+C` in the terminal
 
 ## Build & preview
 
