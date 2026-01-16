@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import '../styles/theme.css';
 import { DYNAMIC_STEPS, type DynamicStep } from './Steps/DynamicSteps/stepsData';
+import AIAutofillUpload, { type AutofillData } from '../components/AIAutofillUpload';
+import AIAutofillModal, { type AutofillOption } from '../components/AIAutofillModal';
 
 // Import step components from DynamicSteps
 import RequestAccess from './Steps/DynamicSteps/RequestAccess';
@@ -49,7 +51,8 @@ export default function UseCasePrototype() {
   const [businessUnit, setBusinessUnit] = useState('');
   const [codingLanguage, setCodingLanguage] = useState('');
   const [ide, setIde] = useState('');
-  const [aiTools, setAiTools] = useState<string[]>([]);
+  const [toolsAndTechnologies, setToolsAndTechnologies] = useState<string[]>([]);
+  // const [toolsAndTechnologies, setToolsAndTechnologies] = useState<string[]>([]);
   const [toolSearchTerm, setToolSearchTerm] = useState('');
   const [showToolDropdown, setShowToolDropdown] = useState(false);
   const [estimatedTime, setEstimatedTime] = useState('');
@@ -77,6 +80,163 @@ export default function UseCasePrototype() {
   const [editStepTitle, setEditStepTitle] = useState('');
   const [editStepDescription, setEditStepDescription] = useState('');
   const [stepComments, setStepComments] = useState<{[key: string]: string}>({});
+  
+  // AI Autofill state
+  const [autofillData, setAutofillData] = useState<AutofillData | null>(null);
+  const [autofillSource, setAutofillSource] = useState<{ type: 'link' | 'file'; value: string } | null>(null);
+  const [showAutofillModal, setShowAutofillModal] = useState(false);
+  const [isAutofillOpen, setIsAutofillOpen] = useState(false);
+
+  const handleAutofillReady = (data: AutofillData, source: { type: 'link' | 'file'; value: string }) => {
+    setAutofillData(data);
+    setAutofillSource(source);
+    setShowAutofillModal(true);
+  };
+
+  const handleAutofillConfirm = (option: AutofillOption['value']) => {
+    if (option === 'cancel' || !autofillData) {
+      setShowAutofillModal(false);
+      setAutofillData(null);
+      setAutofillSource(null);
+      return;
+    }
+
+    // Apply autofill data based on selected option
+    if (option === 'overwrite') {
+      // Step 1: Set business unit first (required for conditional UI)
+      if (autofillData.businessUnit) setBusinessUnit(autofillData.businessUnit);
+      
+      // DEBUG: Log what we received from backend
+      console.log('🔍 Autofill data received:', {
+        businessUnit: autofillData.businessUnit,
+        codingLanguage: autofillData.codingLanguage,
+        ide: autofillData.ide
+      });
+      
+      // Step 2: Auto-check "uses IDE/programming language" checkbox if detected
+      // Use setTimeout to ensure checkbox state updates before dependent fields
+      if (autofillData.codingLanguage || autofillData.ide) {
+        console.log('✅ Checking isForDevelopers checkbox because language/IDE detected');
+        setIsForDevelopers(true);
+        
+        // Delay setting language/IDE to allow checkbox to render first
+        setTimeout(() => {
+          console.log('⏱️ Setting language/IDE values after delay');
+          if (autofillData.codingLanguage) setCodingLanguage(autofillData.codingLanguage);
+          if (autofillData.ide) setIde(autofillData.ide);
+        }, 50);
+      } else {
+        console.log('❌ No language or IDE detected, checkbox will NOT be checked');
+      }
+      
+      // Step 3: Set all general information
+      if (autofillData.useCaseName) setUseCaseName(autofillData.useCaseName);
+      if (autofillData.useCaseLeadName) setUseCaseLeadName(autofillData.useCaseLeadName);
+      if (autofillData.teamMembers) setTeamMembers(autofillData.teamMembers);
+      if (autofillData.briefOverview) setBriefOverview(autofillData.briefOverview);
+      
+      // Step 4: Set tools and technologies
+      if (autofillData.toolsAndTechnologies) setToolsAndTechnologies(autofillData.toolsAndTechnologies);
+      
+      // Step 5: Set related links
+      if (autofillData.relatedLinks) setRelatedLinks(autofillData.relatedLinks);
+
+      // Step 6: Set additional information fields
+      if (autofillData.technicalDetails) setTechnicalDetails(autofillData.technicalDetails);
+      if (autofillData.dataRequirements) setDataRequirements(autofillData.dataRequirements);
+      if (autofillData.implementationSteps) setImplementationSteps(autofillData.implementationSteps);
+      if (autofillData.categories) setCategories(autofillData.categories);
+      if (autofillData.estimatedTime) setEstimatedTime(autofillData.estimatedTime);
+      if (autofillData.searchTags) setSearchTags(autofillData.searchTags);
+      
+      // Step 7: Handle additional steps
+      if (autofillData.additionalSteps) {
+        setCustomStepsText(autofillData.additionalSteps);
+      }
+    }
+    // } else if (option === 'keep-both') {
+    //   // NEW: Keep both - prioritize user input, append AI suggestions as notes
+    //   // For text fields: keep user input, add AI as note at the end
+    //   if (autofillData.briefOverview) {
+    //     setBriefOverview(prev => prev ? `${prev}\n\n---Note from AI Analysis---\n${autofillData.briefOverview}` : (autofillData.briefOverview || ''));
+    //   }
+    //   if (autofillData.technicalDetails) {
+    //     setTechnicalDetails(prev => prev ? `${prev}\n\n---Note from AI Analysis---\n${autofillData.technicalDetails}` : (autofillData.technicalDetails || ''));
+    //   }
+    //   if (autofillData.dataRequirements) {
+    //     setDataRequirements(prev => prev ? `${prev}\n\n---Note from AI Analysis---\n${autofillData.dataRequirements}` : (autofillData.dataRequirements || ''));
+    //   }
+    //   if (autofillData.implementationSteps) {
+    //     setImplementationSteps(prev => prev ? `${prev}\n\n---Note from AI Analysis---\n${autofillData.implementationSteps}` : (autofillData.implementationSteps || ''));
+    //   }
+    
+      
+    //   // For dropdown fields: keep user selection, ignore AI suggestion
+    //   // (This implements the requirement: "if user selects keep both for any dropdown it will keep what the user entered")
+    //   // Only apply AI values if user hasn't selected anything
+    //   if (!codingLanguage && autofillData.codingLanguage) setCodingLanguage(autofillData.codingLanguage);
+    //   if (!ide && autofillData.ide) setIde(autofillData.ide);
+    //   if (!businessUnit && autofillData.businessUnit) setBusinessUnit(autofillData.businessUnit);
+      
+    //   // For arrays, merge unique values (user values take precedence)
+    //   if (autofillData.categories) setCategories(prev => [...new Set([...prev, ...autofillData.categories!])]);
+    //   if (autofillData.toolsAndTechnologies) setToolsAndTechnologies(prev => [...new Set([...prev, ...autofillData.toolsAndTechnologies!])]);
+    //   if (autofillData.searchTags) setSearchTags(prev => [...new Set([...prev, ...autofillData.searchTags!])]);
+    //   if (autofillData.relatedLinks) setRelatedLinks(prev => [...prev, ...autofillData.relatedLinks!]);
+      
+    //   // NEW: Handle tools and technologies
+    //   if (autofillData.toolsAndTechnologies) {
+    //     setToolsAndTechnologies(prev => [...new Set([...prev, ...autofillData.toolsAndTechnologies!])]);
+    //   }
+      
+    //   // NEW: Handle additional steps - append to existing
+    //   if (autofillData.additionalSteps) {
+    //     setCustomStepsText(prev => prev ? `${prev}\n${autofillData.additionalSteps}` : (autofillData.additionalSteps || ''));
+    //   }
+    // } else if (option === 'empty-only') {
+    //   // Only fill empty fields
+    //   if (!useCaseName && autofillData.useCaseName) setUseCaseName(autofillData.useCaseName);
+    //   if (!briefOverview && autofillData.briefOverview) setBriefOverview(autofillData.briefOverview);
+    //   if (!technicalDetails && autofillData.technicalDetails) setTechnicalDetails(autofillData.technicalDetails);
+    //   if (!dataRequirements && autofillData.dataRequirements) setDataRequirements(autofillData.dataRequirements);
+    //   if (!implementationSteps && autofillData.implementationSteps) setImplementationSteps(autofillData.implementationSteps);
+    //   if (!codingLanguage && autofillData.codingLanguage) setCodingLanguage(autofillData.codingLanguage);
+    //   if (!ide && autofillData.ide) setIde(autofillData.ide);
+    //   if (!businessUnit && autofillData.businessUnit) setBusinessUnit(autofillData.businessUnit);
+    //   if (!estimatedTime && autofillData.estimatedTime) setEstimatedTime(autofillData.estimatedTime);
+    //   if (categories.length === 0 && autofillData.categories) setCategories(autofillData.categories);
+    //   if (toolsAndTechnologies.length === 0 && autofillData.toolsAndTechnologies) setToolsAndTechnologies(autofillData.toolsAndTechnologies);
+    //   if (searchTags.length === 0 && autofillData.searchTags) setSearchTags(autofillData.searchTags);
+    //   if (relatedLinks.length === 0 && autofillData.relatedLinks) setRelatedLinks(autofillData.relatedLinks);
+      
+    //   // NEW: Handle tools and technologies
+    //   if (toolsAndTechnologies.length === 0 && autofillData.toolsAndTechnologies) {
+    //     setToolsAndTechnologies(autofillData.toolsAndTechnologies);
+    //   }
+      
+    //   // NEW: Handle additional steps
+    //   if (!customStepsText && autofillData.additionalSteps) {
+    //     setCustomStepsText(autofillData.additionalSteps);
+    //   }
+      
+    //   // NEW: Auto-check IDE checkbox if language/IDE detected
+    //   if (!usesDevTools && (autofillData.codingLanguage || autofillData.ide)) {
+    //     setUsesDevTools(true);
+    //   }
+    // }
+
+    // NEW: Auto-trigger Generate Steps if GitHub repo with Global Technology
+    if (autofillData.shouldAutoGenerateSteps && autofillData.businessUnit === 'Global Technology') {
+      // Use setTimeout to ensure state updates are processed first
+      setTimeout(() => {
+        generateSteps();
+      }, 100);
+    }
+
+    setShowAutofillModal(false);
+    setAutofillData(null);
+    setAutofillSource(null);
+  };
 
   const generateSteps = () => {
     const steps: Step[] = [];
@@ -90,10 +250,10 @@ export default function UseCasePrototype() {
     const needsLocalAdmin = businessUnit === 'Engineering' || 
                            codingLanguage || 
                            ide || 
-                           aiTools.length > 0;
+                           toolsAndTechnologies.length > 0;
     
     // Secure Access Logic
-    if (aiTools.includes('GitHub Copilot')) {
+    if (toolsAndTechnologies.includes('GitHub Copilot')) {
       // For GitHub Copilot, only need eBay GitHub Enterprise access
       secureAccessItems.push('GitHub Enterprise');
     }
@@ -150,7 +310,7 @@ export default function UseCasePrototype() {
     }
 
     // Setup GitHub personal account
-    if (aiTools.includes('GitHub Copilot')) {
+    if (toolsAndTechnologies.includes('GitHub Copilot')) {
       const githubSetup = PREDEFINED_STEPS.find(s => s.id === 'setup-github-personal');
       const copilotSetup = PREDEFINED_STEPS.find(s => s.id === 'setup-github-copilot');
       if (githubSetup) steps.push(githubSetup);
@@ -313,21 +473,21 @@ export default function UseCasePrototype() {
   const AVAILABLE_TOOLS = ['GitHub Copilot', 'Cursor', 'Claude', 'ChatGPT', 'Cline', 'V0', 'Windsurf', 'Aider'];
   
   const filteredTools = AVAILABLE_TOOLS.filter(tool => 
-    !aiTools.includes(tool) && 
+    !toolsAndTechnologies.includes(tool) && 
     tool.toLowerCase().includes(toolSearchTerm.toLowerCase())
   );
 
   const addTool = (toolName: string) => {
     const trimmedTool = toolName.trim();
-    if (trimmedTool && !aiTools.includes(trimmedTool)) {
-      setAiTools([...aiTools, trimmedTool]);
+    if (trimmedTool && !toolsAndTechnologies.includes(trimmedTool)) {
+      setToolsAndTechnologies([...toolsAndTechnologies, trimmedTool]);
       setToolSearchTerm('');
       setShowToolDropdown(false);
     }
   };
 
   const removeTool = (toolName: string) => {
-    setAiTools(aiTools.filter(t => t !== toolName));
+    setToolsAndTechnologies(toolsAndTechnologies.filter(t => t !== toolName));
     if (toolName === 'Cursor') {
       setIsIdeAlsoAiTool(false);
     }
@@ -349,13 +509,13 @@ export default function UseCasePrototype() {
       case 'request-secure-access':
         // Pass dynamic access items based on selected tools
         const accessItems = [];
-        if (aiTools.includes('GitHub Copilot')) {
+        if (toolsAndTechnologies.includes('GitHub Copilot')) {
           accessItems.push(
             { key: 'github', name: 'eBay GitHub Access', description: 'Access to GitHub Enterprise (github.corp.ebay.com)' },
             { key: 'copilot', name: 'github-emu-copilot', description: 'Access to GitHub Copilot AI assistant' }
           );
         }
-        if (aiTools.includes('Jira') || businessUnit === 'Engineering') {
+        if (toolsAndTechnologies.includes('Jira') || businessUnit === 'Engineering') {
           accessItems.push({ key: 'jira', name: 'CORP Citrix Jira Access', description: 'Access to Jira for project management' });
         }
         return <RequestAccess accessItems={accessItems} userName={useCaseLeadName} />;
@@ -412,6 +572,22 @@ export default function UseCasePrototype() {
       </div>
 
       <h1>Submit a Use Case</h1>
+
+      {/* AI Autofill Upload Component */}
+      <AIAutofillUpload 
+        onAutofillReady={handleAutofillReady}
+      />
+
+      {/* AI Autofill Modal */}
+      <AIAutofillModal
+        isOpen={showAutofillModal}
+        onClose={() => setShowAutofillModal(false)}
+        onConfirm={handleAutofillConfirm}
+        hasExistingData={
+          !!useCaseName || !!briefOverview || !!technicalDetails ||
+          categories.length > 0 || toolsAndTechnologies.length > 0
+        }
+      />
 
       {/* General Information Section */}
       <div style={{
@@ -714,7 +890,7 @@ export default function UseCasePrototype() {
                   setIde(e.target.value);
                   // Check if IDE is also an AI tool
                   if (e.target.value === 'Cursor') {
-                    setIsIdeAlsoAiTool(aiTools.includes('Cursor'));
+                    setIsIdeAlsoAiTool(toolsAndTechnologies.includes('Cursor'));
                   } else {
                     setIsIdeAlsoAiTool(false);
                   }
@@ -771,7 +947,7 @@ export default function UseCasePrototype() {
           
           {/* Selected Tools */}
           <div style={{ marginBottom: '10px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-            {aiTools.map(tool => (
+            {toolsAndTechnologies.map(tool => (
               <div
                 key={tool}
                 style={{

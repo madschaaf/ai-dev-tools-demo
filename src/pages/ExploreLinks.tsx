@@ -245,6 +245,14 @@ export default function ExploreLinks() {
   const [categoryFilter, setCategoryFilter] = useState('All Types')
   const [sortBy, setSortBy] = useState<'name' | 'type'>('name')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+  const [searchFields, setSearchFields] = useState({
+    name: true,
+    description: true,
+    category: true,
+    type: true,
+    contacts: true,
+    url: false
+  })
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
@@ -259,12 +267,37 @@ export default function ExploreLinks() {
 
   const activeLink = quickLinks.find((l) => l.name === selectedLink) ?? null
 
+  // Enhanced keyword search function
+  const searchInTool = (link: typeof quickLinks[0], keywords: string[]): boolean => {
+    const csvTool = aiToolsFromCSV.find(t => t.name === link.name)
+    
+    // Build searchable content based on selected fields
+    const searchableContent: string[] = []
+    
+    if (searchFields.name) searchableContent.push(link.name.toLowerCase())
+    if (searchFields.description) searchableContent.push(link.description.toLowerCase())
+    if (searchFields.category) searchableContent.push(link.category.toLowerCase())
+    if (searchFields.type && csvTool?.type) searchableContent.push(csvTool.type.toLowerCase())
+    if (searchFields.contacts && csvTool?.contacts) searchableContent.push(csvTool.contacts.toLowerCase())
+    if (searchFields.url) searchableContent.push(link.url.toLowerCase())
+    
+    // Always include tags in search (if they exist)
+    if (csvTool?.tags) {
+      searchableContent.push(csvTool.tags.join(' ').toLowerCase())
+    }
+    
+    const combinedContent = searchableContent.join(' ')
+    
+    // Check if ALL keywords are found (AND logic)
+    return keywords.every(keyword => combinedContent.includes(keyword))
+  }
+
   // Filter links based on search query and category filter
   let filteredLinks = quickLinks.filter(link => {
-    const matchesSearch = link.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      link.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      link.category.toLowerCase().includes(searchQuery.toLowerCase())
-
+    // Split search query into keywords and filter empty strings
+    const keywords = searchQuery.toLowerCase().trim().split(/\s+/).filter(k => k.length > 0)
+    
+    const matchesSearch = keywords.length === 0 || searchInTool(link, keywords)
     const matchesCategory = categoryFilter === 'All Types' || link.category === categoryFilter
 
     return matchesSearch && matchesCategory
@@ -413,13 +446,51 @@ export default function ExploreLinks() {
               </button>
               {!sidebarCollapsed && (
                 <>
-                  <input
-                    type="text"
-                    className="tool-search"
-                    placeholder="Search tools..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type="text"
+                      className="tool-search"
+                      placeholder="Search by keywords (e.g., copilot code assistant)..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      style={{ paddingRight: '80px' }}
+                    />
+                    {searchQuery && (
+                      <div style={{
+                        position: 'absolute',
+                        right: '8px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        display: 'flex',
+                        gap: '4px',
+                        alignItems: 'center'
+                      }}>
+                        <span style={{
+                          fontSize: '0.75rem',
+                          color: 'var(--color-neutral-500)',
+                          fontWeight: '500'
+                        }}>
+                          {filteredLinks.length} {filteredLinks.length === 1 ? 'result' : 'results'}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setSearchQuery('')}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            padding: '4px',
+                            cursor: 'pointer',
+                            color: 'var(--color-neutral-500)',
+                            fontSize: '1rem',
+                            lineHeight: 1
+                          }}
+                          title="Clear search"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    )}
+                  </div>
                   <div className="sidebar-actions">
                     <button type="button" className="button-add-tool" onClick={() => setIsModalOpen(true)}>+ Add Tool</button>
                     <select
@@ -440,49 +511,151 @@ export default function ExploreLinks() {
                       <option>Observability</option>
                     </select>
                   </div>
+                  
+                  {/* Search Fields Filter */}
+                  <details style={{ 
+                    marginTop: '12px', 
+                    padding: '8px 12px', 
+                    backgroundColor: 'var(--color-neutral-50)', 
+                    borderRadius: 'var(--radius-md)',
+                    fontSize: '0.875rem'
+                  }}>
+                    <summary style={{ 
+                      cursor: 'pointer', 
+                      fontWeight: '500',
+                      userSelect: 'none',
+                      marginBottom: '8px'
+                    }}>
+                      🔍 Search Fields
+                    </summary>
+                    <div style={{ 
+                      display: 'grid', 
+                      gap: '6px',
+                      paddingLeft: '4px'
+                    }}>
+                      {Object.entries(searchFields).map(([field, enabled]) => (
+                        <label key={field} style={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: '6px',
+                          cursor: 'pointer'
+                        }}>
+                          <input
+                            type="checkbox"
+                            checked={enabled}
+                            onChange={(e) => setSearchFields({ 
+                              ...searchFields, 
+                              [field]: e.target.checked 
+                            })}
+                            style={{ cursor: 'pointer' }}
+                          />
+                          <span style={{ 
+                            textTransform: 'capitalize',
+                            fontSize: '0.8125rem'
+                          }}>
+                            {field}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </details>
                 </>
               )}
             </div>
 
             {!sidebarCollapsed && (
               <>
-                <div className="tools-list-container">
-                  <table className="tools-table">
-                    <thead>
-                      <tr>
-                        <th
-                          onClick={() => handleSort('name')}
-                          style={{ cursor: 'pointer', userSelect: 'none' }}
-                          title="Click to sort by Tool Name"
-                        >
-                          Tool Name {sortBy === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
-                        </th>
-                        <th
-                          onClick={() => handleSort('type')}
-                          style={{ cursor: 'pointer', userSelect: 'none' }}
-                          title="Click to sort by Type"
-                        >
-                          Type {sortBy === 'type' && (sortOrder === 'asc' ? '↑' : '↓')}
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredLinks.map((link) => (
-                        <tr
-                          key={link.name}
-                          className={selectedLink === link.name ? 'selected' : ''}
-                          onClick={() => {
-                            setSelectedLink(link.name)
-                            sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                          }}
-                        >
-                          <td className="tool-name-cell">{link.name}</td>
-                          <td className="tool-type-cell">{link.category}</td>
+                {/* Search Tips - shown when searching */}
+                {searchQuery && filteredLinks.length > 0 && (
+                  <div style={{
+                    padding: '8px 12px',
+                    backgroundColor: 'var(--color-blue-50)',
+                    borderLeft: '3px solid var(--color-blue-500)',
+                    fontSize: '0.8125rem',
+                    marginBottom: '12px',
+                    borderRadius: 'var(--radius-sm)'
+                  }}>
+                    <strong>💡 Tip:</strong> Use multiple keywords for precise results 
+                    (e.g., "copilot code" finds tools matching both terms)
+                  </div>
+                )}
+                
+                {/* No Results Message */}
+                {filteredLinks.length === 0 && (
+                  <div style={{
+                    padding: '24px 16px',
+                    textAlign: 'center',
+                    color: 'var(--color-neutral-500)'
+                  }}>
+                    <div style={{ fontSize: '2rem', marginBottom: '8px' }}>🔍</div>
+                    <div style={{ fontWeight: '500', marginBottom: '4px' }}>No tools found</div>
+                    <div style={{ fontSize: '0.875rem' }}>
+                      Try different keywords or adjust your search fields
+                    </div>
+                    {searchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSearchQuery('')
+                          setCategoryFilter('All Types')
+                        }}
+                        style={{
+                          marginTop: '12px',
+                          padding: '6px 12px',
+                          backgroundColor: 'var(--color-blue-500)',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: 'var(--radius-md)',
+                          cursor: 'pointer',
+                          fontSize: '0.875rem'
+                        }}
+                      >
+                        Clear filters
+                      </button>
+                    )}
+                  </div>
+                )}
+                
+                {/* Tools Table */}
+                {filteredLinks.length > 0 && (
+                  <div className="tools-list-container">
+                    <table className="tools-table">
+                      <thead>
+                        <tr>
+                          <th
+                            onClick={() => handleSort('name')}
+                            style={{ cursor: 'pointer', userSelect: 'none' }}
+                            title="Click to sort by Tool Name"
+                          >
+                            Tool Name {sortBy === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
+                          </th>
+                          <th
+                            onClick={() => handleSort('type')}
+                            style={{ cursor: 'pointer', userSelect: 'none' }}
+                            title="Click to sort by Type"
+                          >
+                            Type {sortBy === 'type' && (sortOrder === 'asc' ? '↑' : '↓')}
+                          </th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody>
+                        {filteredLinks.map((link) => (
+                          <tr
+                            key={link.name}
+                            className={selectedLink === link.name ? 'selected' : ''}
+                            onClick={() => {
+                              setSelectedLink(link.name)
+                              sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                            }}
+                          >
+                            <td className="tool-name-cell">{link.name}</td>
+                            <td className="tool-type-cell">{link.category}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
                 <div className="sidebar-footer">
                   <a 
                     href="https://docs.google.com/spreadsheets/d/1HuvlTUHrDs2XU_kIVUJ5IkbM7UfE4dRJD48l_L2WLhs/edit?gid=0#gid=0"

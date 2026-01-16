@@ -6,6 +6,7 @@ export interface AITool {
   comments: string
   category: string
   accent: string
+  tags?: string[]  // Optional searchable tags
 }
 
 export interface InfoResource {
@@ -49,7 +50,8 @@ export const aiToolsFromCSV: AITool[] = [
     contacts: 'Slack: #krylov-support',
     comments: '',
     category: 'AI & Development',
-    accent: '#667eea'
+    accent: '#667eea',
+    tags: ['ml', 'machine learning', 'platform', 'training', 'model deployment', 'data-support', 'backend']
   },
   {
     name: 'AI Sandbox',
@@ -58,7 +60,8 @@ export const aiToolsFromCSV: AITool[] = [
     contacts: 'Slack: #genai-dev',
     comments: '',
     category: 'AI & Development',
-    accent: '#f59e0b'
+    accent: '#f59e0b',
+    tags: ['sandbox', 'testing', 'development', 'ai platform', 'experimentation', 'data-support', 'full-stack']
   },
   {
     name: 'Glean Agents',
@@ -67,7 +70,8 @@ export const aiToolsFromCSV: AITool[] = [
     contacts: '',
     comments: '',
     category: 'AI & Development',
-    accent: 'var(--color-blue-500)'
+    accent: 'var(--color-blue-500)',
+    tags: ['chatbot', 'helper', 'search', 'enterprise search', 'ai assistant', 'knowledge base', 'agent']
   },
   {
     name: 'Athena LLM Fine-tuning',
@@ -76,7 +80,8 @@ export const aiToolsFromCSV: AITool[] = [
     contacts: '',
     comments: 'A fully managed framework, integrated into eBay\'s ML platforms, that enables teams to fine tune and deploy fine-tuned Large Language Models with ease and speed.',
     category: 'AI & Development',
-    accent: '#8b5cf6'
+    accent: '#8b5cf6',
+    tags: ['llm', 'fine-tuning', 'model training', 'data-support', 'backend']
   },
   {
     name: 'Spring AI',
@@ -85,7 +90,8 @@ export const aiToolsFromCSV: AITool[] = [
     contacts: '',
     comments: '',
     category: 'AI & Development',
-    accent: '#10b981'
+    accent: '#10b981',
+    tags: ['backend', 'java', 'spring', 'framework', 'api integration']
   },
   {
     name: 'Obsidian Platform',
@@ -94,7 +100,8 @@ export const aiToolsFromCSV: AITool[] = [
     contacts: 'Slack: #obsidian-ai-community',
     comments: '',
     category: 'AI & Development',
-    accent: '#8b5cf6'
+    accent: '#8b5cf6',
+    tags: ['knowledge management', 'documentation', 'notes', 'full-stack']
   },
   {
     name: 'GitHub Copilot',
@@ -103,7 +110,8 @@ export const aiToolsFromCSV: AITool[] = [
     contacts: 'Slack: #community-copilot',
     comments: '',
     category: 'AI & Development',
-    accent: '#000000'
+    accent: '#000000',
+    tags: ['chatbot', 'helper', 'coding', 'code completion', 'ai assistant', 'autocomplete', 'intellisense', 'frontend', 'backend', 'full-stack', 'testing']
   },
   {
     name: 'eBayCoder',
@@ -112,7 +120,8 @@ export const aiToolsFromCSV: AITool[] = [
     contacts: 'Slack: #community-ebaycoder',
     comments: '',
     category: 'AI & Development',
-    accent: '#3665F3'
+    accent: '#3665F3',
+    tags: ['chatbot', 'helper', 'coding', 'ai assistant', 'code completion', 'internal tool', 'frontend', 'backend', 'full-stack']
   },
   {
     name: 'eBay Cline',
@@ -121,16 +130,8 @@ export const aiToolsFromCSV: AITool[] = [
     contacts: 'Slack: #community-ebay-cline',
     comments: '',
     category: 'AI & Development',
-    accent: '#7c3aed'
-  },
-  {
-    name: 'Poolside AI',
-    url: 'https://wiki.corp.ebay.com/display/PDV/Poolside.AI',
-    type: 'Coding Assistant',
-    contacts: 'Slack: #customer-ebay-poolside-external',
-    comments: '',
-    category: 'AI & Development',
-    accent: '#00C9A7'
+    accent: '#7c3aed',
+    tags: ['chatbot', 'helper', 'coding', 'ai agent', 'automation', 'autonomous', 'task automation', 'frontend', 'backend', 'full-stack', 'testing']
   },
   {
     name: 'Google Gemini',
@@ -139,7 +140,8 @@ export const aiToolsFromCSV: AITool[] = [
     contacts: 'Slack: #community-google-workspace',
     comments: '',
     category: 'AI & Development',
-    accent: '#4285F4'
+    accent: '#4285F4',
+    tags: ['chatbot', 'helper', 'ai assistant', 'coding', 'google', 'multimodal', 'llm', 'frontend', 'backend', 'full-stack']
   },
   {
     name: 'Textio',
@@ -148,7 +150,8 @@ export const aiToolsFromCSV: AITool[] = [
     contacts: '',
     comments: '',
     category: 'Work Management',
-    accent: 'var(--color-green-500)'
+    accent: 'var(--color-green-500)',
+    tags: ['writing assistant', 'hiring', 'job descriptions', 'ai writing']
   },
   {
     name: 'API Discovery Assistant',
@@ -157,7 +160,8 @@ export const aiToolsFromCSV: AITool[] = [
     contacts: 'Slack: #api-discovery\nSupport: #apicatalog-support',
     comments: '',
     category: 'AI & Development',
-    accent: '#667eea'
+    accent: '#667eea',
+    tags: ['chatbot', 'helper', 'api', 'discovery', 'search', 'documentation', 'integration', 'backend', 'testing', 'full-stack']
   },
   {
     name: 'Claude Code',
@@ -166,7 +170,8 @@ export const aiToolsFromCSV: AITool[] = [
     contacts: 'Slack: #community-claude-code\nClaude code stats: http://go/claudecodestats',
     comments: '',
     category: 'AI & Development',
-    accent: '#D4A574'
+    accent: '#D4A574',
+    tags: ['chatbot', 'helper', 'coding', 'ai assistant', 'code generation', 'refactoring', 'debugging', 'frontend', 'backend', 'full-stack', 'testing']
   },
   {
     name: 'HubGPT Platform',
@@ -175,7 +180,8 @@ export const aiToolsFromCSV: AITool[] = [
     contacts: 'Slack: #community-hubgpt',
     comments: '',
     category: 'AI & Development',
-    accent: '#10b981'
+    accent: '#10b981',
+    tags: ['chatbot', 'helper', 'ai assistant', 'conversational', 'gpt', 'chatgpt', 'llm']
   },
   {
     name: 'ChatGPT Enterprise',
@@ -184,52 +190,18 @@ export const aiToolsFromCSV: AITool[] = [
     contacts: 'Slack: #chatgpt-enterprise-support',
     comments: '',
     category: 'AI & Development',
-    accent: '#00A67E'
+    accent: '#00A67E',
+    tags: ['chatbot', 'helper', 'ai assistant', 'conversational', 'gpt', 'llm', 'openai']
   },
   {
-    name: 'Deepsights',
-    url: 'https://hub.corp.ebay.com/site/growthcentral/feed/news/post/6756fbf0db5db5611a995d13',
-    type: 'Assistant Platform',
-    contacts: 'Slack: #deepsights-ai',
-    comments: 'https://go/deepsights',
+    name: 'Poolside AI',
+    url: 'https://wiki.corp.ebay.com/display/PDV/Poolside.AI',
+    type: 'Coding Assistant',
+    contacts: 'Slack: #customer-ebay-poolside-external',
+    comments: '',
     category: 'AI & Development',
-    accent: '#667eea'
-  },
-  {
-    name: 'AI Voiceover',
-    url: 'https://docs.google.com/videos/u/0/',
-    type: 'Application',
-    contacts: '',
-    comments: 'Allows you to create a realistic voice to speak over your google video demos',
-    category: 'Design',
-    accent: 'var(--color-red-500)'
-  },
-  {
-    name: 'Zoom AI',
-    url: '',
-    type: 'Application',
-    contacts: '',
-    comments: 'The AI model that transcribes Zoom meetings',
-    category: 'Communication',
-    accent: '#2D8CFF'
-  },
-  {
-    name: 'Seller AI Copilot',
-    url: 'https://hubtv.corp.ebay.com/#/groups/k0xZB4',
-    type: 'Assistant Platform',
-    contacts: 'Slack: #seller-copilot\nEmail: seller-copilot-support@ebay.com',
-    comments: 'Agentic seller workflow automation suite, including handover for complex tasks. Video onboarding and Q&A on HubTV. Production pilot.',
-    category: 'AI & Development',
-    accent: '#f59e0b'
-  },
-  {
-    name: 'Self-Service AI Enablement',
-    url: 'https://ebayinc.service-now.com/aiintake',
-    type: 'Platform',
-    contacts: 'Slack: #genai-dev\nEmail: ai-intake@ebay.com',
-    comments: 'AI-powered self-service toolkit for VAS and related platforms. Submit onboarding/support tickets via ServiceNow portal. In rollout phase.',
-    category: 'Support',
-    accent: 'var(--color-yellow-500)'
+    accent: '#00C9A7',
+    tags: ['chatbot', 'helper', 'coding', 'ai assistant', 'code generation', 'pair programming', 'frontend', 'backend', 'full-stack']
   },
   {
     name: 'Content Generation Flows',
@@ -265,7 +237,8 @@ export const aiToolsFromCSV: AITool[] = [
     contacts: 'Slack: #genai-dev\nEmail: ai-model-ops@ebay.com',
     comments: 'Rule+LLM POC and automated inference SDK pilots for hybrid models. AI Sandbox doc page contains onboarding/process.',
     category: 'AI & Development',
-    accent: '#8b5cf6'
+    accent: '#8b5cf6',
+    tags: ['llm', 'hybrid models', 'inference', 'data-support', 'backend']
   },
   {
     name: 'Model Portfolio (LLMs, VLMs)',
@@ -274,7 +247,8 @@ export const aiToolsFromCSV: AITool[] = [
     contacts: 'Slack: #genai-dev\nEmail: ai-intake@ebay.com',
     comments: 'New internal models: Lilium3, eLlama3, Athena VLM. Intake portal tracks updates and onboarding for latest portfolio.',
     category: 'AI & Development',
-    accent: '#f59e0b'
+    accent: '#f59e0b',
+    tags: ['llm', 'vlm', 'models', 'vision', 'data-support', 'backend']
   },
   {
     name: 'Regulator/Compliance AI',
