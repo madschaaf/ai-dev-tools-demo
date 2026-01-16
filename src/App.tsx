@@ -6,6 +6,7 @@ import StepsGuide from './pages/Steps/StepsGuide.tsx'
 import AISandbox from './pages/AISandbox'
 import UseCases from './pages/UseCases'
 import UseCasePrototype from './pages/UseCasePrototype'
+import Workflow from './pages/Workflow'
 import AllSteps from './pages/Steps/AllSteps.tsx'
 
 
@@ -254,6 +255,7 @@ export default function App() {
           <Route path="/vscode-extensions" element={<VSCodeExtensions />} />
           <Route path="/ai-sandbox" element={<AISandbox />} />
           <Route path="/use-cases" element={<UseCases />} />
+          <Route path="/workflow" element={<Workflow />} />
           <Route path="/use-case-prototype" element={<UseCasePrototype />} />
           <Route path="/explore" element={<ExploreLinks />} />
           <Route path="/" element={<ExploreLinks />} />

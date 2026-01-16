@@ -17,6 +17,104 @@ function parseGitHubUrl(url: string): { owner: string; repo: string; isEnterpris
   return null;
 }
 
+// Check if repository is accessible (public or authenticated access)
+async function checkRepositoryAccess(owner: string, repo: string, isEnterprise: boolean): Promise<{
+  accessible: boolean;
+  isPrivate: boolean;
+  statusCode: number;
+  message: string;
+}> {
+  try {
+    const baseUrl = isEnterprise 
+      ? (process.env.GITHUB_API_URL || 'https://github.corp.ebay.com/api/v3')
+      : 'https://api.github.com';
+    
+    const url = `${baseUrl}/repos/${owner}/${repo}`;
+    
+    const headers: Record<string, string> = {
+      'Accept': 'application/vnd.github.v3+json',
+      'User-Agent': 'AI-Dev-Tools-Autofill'
+    };
+    
+    // Add authentication token if available
+    const hasToken = !!process.env.GITHUB_TOKEN;
+    if (hasToken) {
+      headers['Authorization'] = `Bearer ${process.env.GITHUB_TOKEN}`;
+    }
+    
+    console.log('🔐 [ACCESS CHECK] Checking repository access:', { owner, repo, hasToken });
+    
+    const response = await fetch(url, { headers });
+    
+    // Handle different status codes
+    if (response.ok) {
+      const data = await response.json();
+      console.log('✅ [ACCESS CHECK] Repository accessible, private:', data.private);
+      return {
+        accessible: true,
+        isPrivate: data.private || false,
+        statusCode: 200,
+        message: 'Repository is accessible'
+      };
+    }
+    
+    // 404 - Repository not found or private without access
+    if (response.status === 404) {
+      console.log('🔒 [ACCESS CHECK] Repository not found or private (404)');
+      return {
+        accessible: false,
+        isPrivate: true,
+        statusCode: 404,
+        message: hasToken 
+          ? 'Repository not found or you do not have access to it'
+          : 'This repository is private. Connect GitHub to analyze it.'
+      };
+    }
+    
+    // 401 - Unauthorized (bad token or missing authentication)
+    if (response.status === 401) {
+      console.log('🔒 [ACCESS CHECK] Unauthorized (401) - Invalid or missing token');
+      return {
+        accessible: false,
+        isPrivate: true,
+        statusCode: 401,
+        message: 'GitHub authentication failed. Please check your GITHUB_TOKEN.'
+      };
+    }
+    
+    // 403 - Forbidden (rate limit or insufficient permissions)
+    if (response.status === 403) {
+      console.log('🔒 [ACCESS CHECK] Forbidden (403) - Rate limit or permissions');
+      return {
+        accessible: false,
+        isPrivate: true,
+        statusCode: 403,
+        message: hasToken
+          ? 'Access forbidden. Check token permissions or rate limits.'
+          : 'This repository is private. Connect GitHub to analyze it.'
+      };
+    }
+    
+    // Other errors
+    console.log('❌ [ACCESS CHECK] Unexpected error:', response.status, response.statusText);
+    return {
+      accessible: false,
+      isPrivate: true,
+      statusCode: response.status,
+      message: `Unable to access repository: ${response.statusText}`
+    };
+    
+  } catch (error) {
+    console.error('❌ [ACCESS CHECK] Network or DNS error:', error);
+    return {
+      accessible: false,
+      isPrivate: true,
+      statusCode: 0,
+      message: 'Unable to reach GitHub server. Check network connection or VPN.'
+    };
+  }
+}
+
 // Fetch file content from GitHub
 async function fetchGitHubFile(owner: string, repo: string, path: string, isEnterprise: boolean): Promise<string | null> {
   try {
@@ -579,6 +677,24 @@ router.post('/analyze-link', async (req, res) => {
       }
 
       console.log('📦 [AUTOFILL] Repository info:', repoInfo);
+
+      // MVP: Check repository accessibility first
+      const accessCheck = await checkRepositoryAccess(repoInfo.owner, repoInfo.repo, repoInfo.isEnterprise);
+      
+      if (!accessCheck.accessible) {
+        console.log('🔒 [AUTOFILL] Repository not accessible:', accessCheck.message);
+        return res.status(accessCheck.statusCode || 403).json({ 
+          error: accessCheck.message,
+          isPrivate: accessCheck.isPrivate,
+          suggestion: accessCheck.statusCode === 401 
+            ? 'Please add a valid GITHUB_TOKEN to your .env file'
+            : accessCheck.statusCode === 0
+            ? 'Ensure you are connected to the eBay network/VPN to access enterprise repositories'
+            : 'This repository requires authentication. Configure GitHub access to analyze private repositories.'
+        });
+      }
+      
+      console.log('✅ [AUTOFILL] Repository accessible, proceeding with analysis...');
 
       // Fetch multiple repository files for comprehensive analysis
       const files = await fetchRepositoryFiles(repoInfo.owner, repoInfo.repo, repoInfo.isEnterprise);
