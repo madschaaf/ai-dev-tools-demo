@@ -266,35 +266,6 @@ ssh-add ~/.ssh/id_ed25519
     ]
   },
   {
-    id: 'install-python',
-    title: 'Install Python',
-    description: 'Download and install Python from python.org. Add to PATH and verify with: python --version',
-    category: 'install',
-    detailedContent: `Python is a versatile programming language used for many development tasks.
-
-**Installation**
-1. Go to python.org
-2. Download latest stable version
-3. Run installer
-4. IMPORTANT: Check "Add Python to PATH"
-5. Complete installation
-
-**Verification**
-\`\`\`bash
-python --version
-pip --version
-\`\`\`
-
-**Setup Virtual Environments**
-\`\`\`bash
-python -m venv myenv
-source myenv/bin/activate  # On Windows: myenv\\Scripts\\activate
-\`\`\``,
-    links: [
-      { label: 'Python Official Site', url: 'https://www.python.org/' }
-    ]
-  },
-  {
     id: 'install-java',
     title: 'Install Java JDK',
     description: 'Download and install Java Development Kit. Set JAVA_HOME environment variable.',
@@ -348,6 +319,73 @@ dotnet run
 \`\`\``,
     links: [
       { label: '.NET Downloads', url: 'https://dotnet.microsoft.com/download' }
+    ]
+  },
+  {
+    id: 'install-python',
+    title: 'Install Python',
+    description: 'Download and install Python 3.12+ from python.org. Includes pip package manager and IDLE. Verify with: python --version',
+    category: 'install',
+    detailedContent: `Python is a versatile programming language widely used for data analysis, machine learning, automation, web development, and scripting.
+
+**Why Python?**
+- Easy to Learn - Clean, readable syntax
+- Extensive Libraries - Rich ecosystem for data science, ML, web dev
+- pip Package Manager - Simple package installation
+- Automation - Perfect for scripts and workflow automation
+- Cross-Platform - Runs on Windows, Mac, Linux
+- Industry Standard - Used in AI/ML, data analysis, backend development
+
+**Installation Options**
+
+**Mac (via Homebrew):**
+\`\`\`bash
+brew install python@3.12
+\`\`\`
+
+**Windows (via winget):**
+\`\`\`bash
+winget install Python.Python.3.12
+\`\`\`
+
+**Windows (via Chocolatey):**
+\`\`\`bash
+choco install python -y
+\`\`\`
+
+**Verification**
+\`\`\`bash
+python --version
+pip --version
+\`\`\`
+
+**Create Virtual Environment**
+\`\`\`bash
+python -m venv myproject
+source myproject/bin/activate  # Mac/Linux
+myproject\\Scripts\\activate    # Windows
+\`\`\`
+
+**Common Use Cases**
+- 📊 Data Analysis: Analyze spreadsheets, visualize trends
+- 🤖 Machine Learning: Build AI models, train algorithms
+- 🌐 Web Development: Build websites and APIs (Django, Flask)
+- 🔄 Automation: Automate repetitive tasks, process files
+- 🔬 Scientific Computing: Simulations, calculations, research`,
+    links: [
+      { label: 'Python Official Site', url: 'https://www.python.org/' },
+      { label: 'Python Tutorial', url: 'https://docs.python.org/3/tutorial/' },
+      { label: 'pip Guide', url: 'https://pip.pypa.io/en/stable/getting-started/' }
+    ],
+    requirements: [
+      'Internet connection for download',
+      'Administrator access for installation'
+    ],
+    commonIssues: [
+      'Windows: Ensure "Add Python to PATH" is checked during installation',
+      'Mac: May need to use python3 and pip3 commands instead of python and pip',
+      'Command not found: Restart terminal or IDE after installation',
+      'Permission errors: Use virtual environments to avoid system-wide installations'
     ]
   }
 ];
