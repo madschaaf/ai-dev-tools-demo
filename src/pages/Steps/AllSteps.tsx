@@ -4,6 +4,7 @@ import VerifySecurity from './steps/VerifySecurity'
 import InstallChromeGlean from './steps/InstallChromeGlean'
 import InstallGit from './steps/InstallGit'
 import InstallNode from './steps/InstallNode'
+import InstallPython from '../Steps/DynamicSteps/InstallPython'
 import InstallChatGPTCLI from './steps/InstallChatGPTCLI'
 import InstallVSCode from './steps/InstallVSCode'
 import AIToolsCheckpoint from './steps/AIToolsCheckpoint'
@@ -66,6 +67,14 @@ const baseSteps = [
     id: 4,
     name: 'Install Node.js',
     description: 'Install Node.js via terminal or download',
+    category: 'Installs',
+    status: 'pending' as const,
+    aiTools: []
+  },
+  {
+    id: 'install-python',
+    name: 'Install Python',
+    description: 'Install Python 3.12+ with pip package manager',
     category: 'Installs',
     status: 'pending' as const,
     aiTools: []
@@ -280,6 +289,7 @@ const stepComponents: Record<number | string, React.ComponentType<any>> = {
   2: RequestAccess,
   3: InstallChromeGlean,
   4: InstallNode,
+  'install-python': InstallPython,
   5: InstallChatGPTCLI,
   6: InstallGit,
   7: InstallVSCode,
