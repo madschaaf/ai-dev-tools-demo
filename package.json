@@ -8,6 +8,7 @@
     "deploy": "gh-pages -d dist",
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "deploy:pages": "npm run build && npx gh-pages -d dist -b gh-pages --remote githubDemo",
     "lint": "eslint .",
     "preview": "vite preview",
     "server": "ts-node -P tsconfig.server.json src/server/index.ts",

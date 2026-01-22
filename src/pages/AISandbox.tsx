@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import heroVideo from '../assets/Firefly mp4 video that fades into this image at the end. _It should start with many ideas in the for.mp4'
+import robotVideo from '../assets/ai-robot.mp4'
 
 export default function AISandbox() {
   const [selectedPractice, setSelectedPractice] = useState<string | null>('cline-prompts')
@@ -519,7 +521,7 @@ Keep it clean and readable as a backdrop behind white text.`}
               In VS Code, open <code>src/App.tsx</code>.
             </li>
             <li>
-              Find the first hero video block:
+              Find the first hero video block in App.tsx (imports section):
               <div
                 style={{
                   marginTop: 'var(--space-2)',
@@ -529,15 +531,12 @@ Keep it clean and readable as a backdrop behind white text.`}
                 }}
               >
                 <code style={{ fontSize: '0.85rem', display: 'block', whiteSpace: 'pre-wrap' }}>
-                  {`<video autoPlay muted loop className="hero-video">
-  <source src="/src/assets/Firefly mp4 video that fades into this image at the end. _It should start with many ideas in the for.mp4" type="video/mp4" />
-  Your browser does not support the video tag.
-</video>`}
+                  {`import heroVideo from './assets/Firefly mp4 video that fades into this image at the end. _It should start with many ideas in the for.mp4'`}
                 </code>
               </div>
             </li>
             <li>
-              Update the <code>src</code> attribute to point to your new file, for example:
+              Replace the import with your new video file:
               <div
                 style={{
                   marginTop: 'var(--space-2)',
@@ -547,7 +546,7 @@ Keep it clean and readable as a backdrop behind white text.`}
                 }}
               >
                 <code style={{ fontSize: '0.85rem', display: 'block', whiteSpace: 'pre-wrap' }}>
-                  {`<source src="/src/assets/my-gemini-hero.mp4" type="video/mp4" />`}
+                  {`import heroVideo from './assets/my-gemini-hero.mp4'`}
                 </code>
               </div>
             </li>
