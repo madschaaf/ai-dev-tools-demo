@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import heroVideo from '../assets/Firefly mp4 video that fades into this image at the end. _It should start with many ideas in the for.mp4'
+import heroVideo from '../assets/ai-ideas.mp4'
 import robotVideo from '../assets/ai-robot.mp4'
 
 export default function AISandbox() {
