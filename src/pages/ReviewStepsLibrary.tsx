@@ -554,12 +554,10 @@ export default function ReviewStepsLibrary() {
     }
   }
 
-  // If use cases mode is selected, render ReviewUseCaseLibrary instead
-  if (libraryMode === 'usecases') {
-    return <ReviewUseCaseLibrary onSwitchToSteps={() => setLibraryMode('steps' as const)} />
-  }
-
-  return (
+  // Render appropriate library based on mode
+  return libraryMode === 'usecases' ? (
+    <ReviewUseCaseLibrary onSwitchToSteps={() => setLibraryMode('steps')} />
+  ) : (
     <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
       {/* Toggle Between Libraries */}
       <div style={{
@@ -575,34 +573,34 @@ export default function ReviewStepsLibrary() {
           gap: '0.25rem'
         }}>
           <button
-            onClick={() => setLibraryMode('steps' as const)}
+            onClick={() => setLibraryMode('steps')}
             style={{
               padding: '0.75rem 2rem',
-              background: libraryMode === 'steps' ? '#fff' : 'transparent',
+              background: '#fff',
               border: 'none',
               borderRadius: 'var(--radius-md)',
               cursor: 'pointer',
               fontSize: '0.875rem',
               fontWeight: 600,
-              color: libraryMode === 'steps' ? 'var(--color-primary)' : '#6b7280',
-              boxShadow: libraryMode === 'steps' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+              color: 'var(--color-primary)',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
               transition: 'all 0.2s'
             }}
           >
             📝 Review Steps
           </button>
           <button
-            onClick={() => setLibraryMode('usecases' as const)}
+            onClick={() => setLibraryMode('usecases')}
             style={{
               padding: '0.75rem 2rem',
-              background: libraryMode === 'usecases' ? '#fff' : 'transparent',
+              background: 'transparent',
               border: 'none',
               borderRadius: 'var(--radius-md)',
               cursor: 'pointer',
               fontSize: '0.875rem',
               fontWeight: 600,
-              color: libraryMode === 'usecases' ? 'var(--color-primary)' : '#6b7280',
-              boxShadow: libraryMode === 'usecases' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+              color: '#6b7280',
+              boxShadow: 'none',
               transition: 'all 0.2s'
             }}
           >
