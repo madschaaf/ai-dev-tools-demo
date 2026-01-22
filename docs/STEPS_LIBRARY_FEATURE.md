@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Steps Library is a comprehensive peer-review system for managing development steps and use cases. It provides a Jira-style Kanban board interface with a dual-approval workflow, comment threads, and use case association tracking.
+The Steps Library is a comprehensive peer-review system for managing development steps and use cases. It provides a Jira-style Kanban board interface with a single-approval workflow by AI Team members, comment threads, and use case association tracking.
 
 ## Features
 
@@ -12,8 +12,14 @@ Four status columns organize steps through their lifecycle:
 
 - **Steps for Review** (Blue) - New or edited steps awaiting initial review
 - **Needs Clarification** (Orange) - Steps with active comment threads requiring author response
-- **Approved** (Green) - Steps that have received 2 approvals from team members
+- **Approved** (Green) - Steps that have received 1 approval from an AI Team member
 - **Rejected** (Red) - Steps that don't meet standards with documented justification
+
+**Column Sorting:**
+- All columns are automatically sorted by **Last Modified** date
+- Most recently modified steps appear at the top
+- When a comment is added, the step's `lastModified` date is updated, moving it to the top of the "Needs Clarification" column
+- This ensures active discussions and recent changes are always visible
 
 ### 2. Search and Filtering
 
@@ -50,9 +56,9 @@ Filters can be combined and are easily cleared with a single button.
 - Explains why step was not approved
 
 **Approvals Tracking:**
-- Shows current approval count (X/2)
+- Shows approval status (approved by AI Team member)
 - Lists who approved and when
-- Visual indication of approval progress
+- Visual indication when approved
 
 **Comments Section:**
 - Threaded comment system
@@ -90,11 +96,10 @@ Filters can be combined and are easily cleared with a single button.
 
 ### 5. Peer Review Workflow
 
-**2-Approval System:**
-- Requires two unique reviewers to approve
+**1-Approval System:**
+- Requires one AI Team member to approve
 - Author cannot approve their own step
-- Same reviewer cannot approve twice
-- Second approval automatically moves step to "Approved" status
+- Single approval automatically moves step to "Approved" status
 
 **Review Protection:**
 - If an AI Team member edits a step, they cannot approve it
@@ -158,7 +163,7 @@ The system currently uses mock data for demonstration:
 
 **4 Sample Steps:**
 1. **STEP001**: Install VS Code (in review)
-2. **STEP002**: Configure Git (approved with 2 approvals)
+2. **STEP002**: Configure Git (approved by AI Team)
 3. **STEP003**: Install Python (needs clarification)
 4. **STEP004**: Setup Docker (rejected - outdated)
 
@@ -235,10 +240,11 @@ Uses React useState hooks for:
 - `rejectionReason`: Rejection justification
 - `showHistoryModal`: History modal visibility
 
-### Filtering Logic
+### Filtering and Sorting Logic
 
 Uses `useMemo` for performance:
 
+**Filtering:**
 ```typescript
 const filteredSteps = useMemo(() => {
   return steps.filter(step => {
@@ -251,6 +257,28 @@ const filteredSteps = useMemo(() => {
 }, [steps, searchTerm, selectedTags, selectedLanguages, selectedCategories])
 ```
 
+**Sorting by Last Modified:**
+```typescript
+const stepsByStatus = useMemo(() => {
+  const sortByLastModified = (steps: Step[]) => 
+    [...steps].sort((a, b) => b.lastModified.getTime() - a.lastModified.getTime())
+  
+  return {
+    review: sortByLastModified(filteredSteps.filter(s => s.status === 'review')),
+    clarification: sortByLastModified(filteredSteps.filter(s => s.status === 'clarification')),
+    approved: sortByLastModified(filteredSteps.filter(s => s.status === 'approved')),
+    rejected: sortByLastModified(filteredSteps.filter(s => s.status === 'rejected'))
+  }
+}, [filteredSteps])
+```
+
+**Comment Updates:**
+When a comment is added:
+- Step's `lastModified` timestamp is updated to current time
+- Step moves to "Needs Clarification" column
+- Automatic re-sorting places it at the top of that column
+- Ensures recently commented steps get immediate visibility
+
 ### Approval Workflow
 
 ```typescript
@@ -262,10 +290,8 @@ const handleApprove = (step: Step) => {
   // Add approval
   const newApproval = { userId, userName, timestamp }
   
-  // Auto-move to approved if 2nd approval
-  if (updatedStep.approvals.length >= 2) {
-    updatedStep.status = 'approved'
-  }
+  // Auto-move to approved immediately with 1 approval
+  updatedStep.status = 'approved'
 }
 ```
 
@@ -330,7 +356,7 @@ Uses inline styles with CSS variables from the theme:
 - [ ] Click on step card opens modal
 - [ ] Modal shows all step details
 - [ ] Approve button adds approval
-- [ ] Second approval moves to Approved column
+- [ ] Single approval moves to Approved column
 - [ ] Author cannot approve own step
 - [ ] Duplicate approval prevented
 - [ ] Clarification moves to correct column

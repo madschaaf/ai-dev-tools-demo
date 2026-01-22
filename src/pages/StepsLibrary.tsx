@@ -152,14 +152,8 @@ git config --global core.autocrlf input`,
     approvals: [
       {
         userId: 'user003',
-        userName: 'Bob Johnson',
+        userName: 'Bob Johnson (AI Team)',
         timestamp: new Date('2026-01-17'),
-        useCaseIds: [] // Approved for all use cases
-      },
-      {
-        userId: 'user004',
-        userName: 'Alice Williams',
-        timestamp: new Date('2026-01-18'),
         useCaseIds: [] // Approved for all use cases
       }
     ],
@@ -173,13 +167,13 @@ git config --global core.autocrlf input`,
       },
       {
         date: new Date('2026-01-17'),
-        modifiedBy: 'Bob Johnson',
-        action: 'Approved (1/2)'
+        modifiedBy: 'Bob Johnson (AI Team)',
+        action: 'Approved by AI Team Member'
       },
       {
-        date: new Date('2026-01-18'),
-        modifiedBy: 'Alice Williams',
-        action: 'Approved (2/2)',
+        date: new Date('2026-01-17'),
+        modifiedBy: 'Bob Johnson (AI Team)',
+        action: 'Step Approved',
         columnChange: 'approved'
       }
     ]
@@ -332,13 +326,18 @@ export default function StepsLibrary() {
     })
   }, [steps, searchTerm, selectedTags, selectedLanguages, selectedCategories])
 
-  // Group steps by status
-  const stepsByStatus = useMemo(() => ({
-    review: filteredSteps.filter(s => s.status === 'review'),
-    clarification: filteredSteps.filter(s => s.status === 'clarification'),
-    approved: filteredSteps.filter(s => s.status === 'approved'),
-    rejected: filteredSteps.filter(s => s.status === 'rejected')
-  }), [filteredSteps])
+  // Group steps by status and sort by lastModified (most recent first)
+  const stepsByStatus = useMemo(() => {
+    const sortByLastModified = (steps: Step[]) => 
+      [...steps].sort((a, b) => b.lastModified.getTime() - a.lastModified.getTime())
+    
+    return {
+      review: sortByLastModified(filteredSteps.filter(s => s.status === 'review')),
+      clarification: sortByLastModified(filteredSteps.filter(s => s.status === 'clarification')),
+      approved: sortByLastModified(filteredSteps.filter(s => s.status === 'approved')),
+      rejected: sortByLastModified(filteredSteps.filter(s => s.status === 'rejected'))
+    }
+  }, [filteredSteps])
 
   // Handlers
   const handleApprove = (step: Step, useCaseIds: string[] = []) => {
@@ -362,22 +361,17 @@ export default function StepsLibrary() {
     const updatedStep = {
       ...step,
       approvals: [...step.approvals, newApproval],
+      status: 'approved' as const, // Move to approved immediately with 1 approval
       history: [...step.history, {
         date: new Date(),
         modifiedBy: currentUser.name,
-        action: `Approved (${step.approvals.length + 1}/2)`
-      }]
-    }
-
-    // If this is the second approval, move to approved
-    if (updatedStep.approvals.length >= 2) {
-      updatedStep.status = 'approved'
-      updatedStep.history.push({
+        action: 'Approved by AI Team Member'
+      }, {
         date: new Date(),
         modifiedBy: currentUser.name,
         action: 'Step Approved',
         columnChange: 'approved'
-      })
+      }]
     }
 
     updateStep(updatedStep)
@@ -413,25 +407,27 @@ export default function StepsLibrary() {
   const handleAddComment = (step: Step) => {
     if (!newComment.trim()) return
 
+    const now = new Date()
     const comment: StepComment = {
       id: `c${Date.now()}`,
       userId: currentUser.id,
       userName: currentUser.name,
       content: newComment,
-      timestamp: new Date(),
+      timestamp: now,
       lineNumber: selectedLine || undefined
     }
 
     const updatedStep = {
       ...step,
       comments: [...step.comments, comment],
+      lastModified: now, // Update lastModified to move to top of column
       status: 'clarification' as const, // Move to clarification when comment added
       history: [...step.history, {
-        date: new Date(),
+        date: now,
         modifiedBy: currentUser.name,
         action: selectedLine ? `Added comment on line ${selectedLine}` : 'Added comment'
       }, {
-        date: new Date(),
+        date: now,
         modifiedBy: currentUser.name,
         action: 'Needs Clarification',
         columnChange: 'clarification'
@@ -956,7 +952,7 @@ function StepModal({
             {/* Approvals */}
             {step.approvals.length > 0 && (
               <div style={{ marginBottom: '1.5rem' }}>
-                <h3>Approvals ({step.approvals.length}/2)</h3>
+                <h3>Approvals ({step.approvals.length}/1)</h3>
                 {step.approvals.map((approval: any, idx: number) => {
                   // Determine approval scope
                   const isAllUseCases = approval.useCaseIds.length === 0
@@ -1116,7 +1112,7 @@ function StepModal({
                       opacity: step.authorId === currentUser.id || step.approvals.some((a: any) => a.userId === currentUser.id) ? 0.5 : 1
                     }}
                   >
-                    ✓ Approve ({step.approvals.length}/2) ▼
+                    ✓ Approve ({step.approvals.length}/1) ▼
                   </button>
                   
                   {/* Approval Dropdown */}
@@ -1459,7 +1455,7 @@ function KanbanColumn({
                 fontSize: '0.75rem',
                 color: '#10b981'
               }}>
-                ✓ {step.approvals.length}/2 approvals
+                ✓ Approved by AI Team
               </div>
             )}
             {step.comments.length > 0 && (

@@ -1,125 +1,210 @@
 # Pre-Configured Steps Database Schema
 
+This schema supports the Steps Library peer review workflow with 1-approval system by AI Team members.
+
 ## Core Schema
+
+> **Note:** Blue field names indicate fields that are **editable by users** through the UI. All other fields are system-managed and saved in the database.
 
 ```typescript
 interface PreConfiguredStep {
-  // Identification & Versioning
-  id: string;                          // Unique identifier (UUID)
-  version: number;                     // Version number for tracking changes
-  status: 'draft' | 'active' | 'deprecated' | 'archived';
+  // Identification
+  id: string;                          // Unique identifier (UUID) e.g., "Step-173838383"
   
-  // Content
-  title: string;                       // Display name (max 100 chars)
-  description: string;                 // Brief summary (max 500 chars)
-  detailedContent?: string;            // Full markdown content
+  // Approval Workflow (Steps Library)
+  created_by: string;                  // Origin: "AI Team" or "Other"
+  approved_by: string | null;          // AI team member who approved (e.g., "Alex Ali")
+  approval_date: Date | null;          // Timestamp of approval (e.g., "01/20/26")
+  last_modified: Date;                 // Timestamp of most recent modification (e.g., "01/19/26")
+  modified_by: string;                 // Who last modified: "AI Team" or individual name (e.g., "Mike Jones")
+  count_modified: number;              // Incremented ONLY if modified by someone outside AI team
   
-  // Categorization & Discovery
+  // Content (USER EDITABLE)
+  title: string;                       // Step title (e.g., "Install Node.js")
+  brief_description: string;           // Short explanation of what the step is or why it exists
+  detailed_content: DetailedContentItem[]; // List of content items with optional copy-to-clipboard
+  tags: string[];                      // Searchable/categorical labels (e.g., ["node.js", "JavaScript", "npm"])
+  
+  // Categorization
   category: 'security' | 'access' | 'admin' | 'install' | 'setup' | 'config' | 'practice';
-  tags: string[];                      // Additional searchable tags
-  targetRoles?: string[];              // Who should see this (e.g., ['developer', 'designer'])
+  language?: string;                   // Programming language (e.g., "JavaScript", "Python", "Bash")
+  ide?: string[];                      // IDE requirements (e.g., ["VS Code", "Terminal"])
+  targetRoles?: string[];              // Who should see this (e.g., ["developer", "designer"])
   
-  // Metadata
-  createdBy: string;                   // User ID or team (e.g., 'ai-team', 'user-123')
-  createdByType: 'ai-team' | 'use-case-lead' | 'employee';
-  createdAt: Date;                     // Timestamp
-  updatedBy: string;                   // Last modifier ID
-  updatedByType: 'ai-team' | 'use-case-lead' | 'employee';
-  lastModified: Date;                  // Last update timestamp
+  // Review Status (Steps Library)
+  status: 'review' | 'clarification' | 'approved' | 'rejected';
+  rejection_reason?: string;           // Required if status is 'rejected'
   
-  // Ordering & Dependencies
-  defaultOrder?: number;               // Default sequence in step list
+  // Optional Enhanced Features
   prerequisites?: string[];            // IDs of steps that must be completed first
-  relatedSteps?: string[];             // IDs of related/similar steps
-  
-  // Rich Content
-  links?: Array<{
-    label: string;
-    url: string;
-    type?: 'documentation' | 'tool' | 'portal' | 'external';
-  }>;
-  requirements?: string[];             // What's needed before this step
-  commonIssues?: string[];             // Known problems and solutions
-  
-  // User Experience
-  estimatedTime?: number;              // Minutes to complete
-  difficultyLevel?: 'beginner' | 'intermediate' | 'advanced';
-  completionCriteria?: string[];       // How to verify completion
-  
-  // Context Filters
-  applicableIDE?: string[];            // ['vscode', 'cursor', 'intellij']
-  applicableLanguage?: string[];       // ['javascript', 'python', 'java']
-  applicablePlatform?: string[];       // ['windows', 'mac', 'linux']
-  businessUnit?: string[];             // ['global-technology', 'growth']
-  
-  // Usage & Analytics
-  usageCount?: number;                 // How many times used
-  successRate?: number;                // Percentage of successful completions
-  lastUsed?: Date;                     // Most recent usage
-  
-  // Approval & Quality
-  approvedBy?: string;                 // Approver ID
-  approvedAt?: Date;                   // Approval timestamp
-  reviewedBy?: string[];               // List of reviewers
-  qualityScore?: number;               // 1-5 rating
-  
-  // Localization (future)
-  locale?: string;                     // 'en-US', 'es-ES', etc.
-  translations?: Record<string, {      // Translation map
-    title: string;
-    description: string;
-    detailedContent?: string;
-  }>;
+  related_steps?: string[];            // IDs of related/similar steps
+  estimated_time?: number;             // Minutes to complete
+  difficulty_level?: 'beginner' | 'intermediate' | 'advanced';
+  use_case_ids?: string[];            // Associated use cases
 }
 ```
 
-## Additional Supporting Tables
+## Supporting Schemas
 
-### Step Comments
+### Detailed Content Item
+
+```typescript
+interface DetailedContentItem {
+  label?: string;                      // Optional short label (e.g., "Option A")
+  text: string;                        // The instruction text shown to the user
+  copy_to_clipboard?: boolean;         // Whether this item shows a copy button (default: false)
+}
+```
+
+### Step Comments (Steps Library)
+
 ```typescript
 interface StepComment {
   id: string;
-  stepId: string;                      // Reference to step
-  userId: string;
-  userType: 'ai-team' | 'use-case-lead' | 'employee';
-  comment: string;
-  createdAt: Date;
-  updatedAt?: Date;
-  isInternal?: boolean;                // Internal team note vs public
+  step_id: string;                     // Reference to step
+  user_id: string;
+  user_name: string;
+  content: string;
+  timestamp: Date;
+  line_number?: number;                // Optional line reference for code comments
 }
 ```
 
-### Step Usage History
+### Step History (Steps Library Audit Trail)
+
 ```typescript
-interface StepUsageHistory {
+interface StepHistory {
   id: string;
-  stepId: string;
-  useCaseId?: string;                  // Which use case used this step
-  userId: string;
-  usedAt: Date;
-  completed: boolean;
-  timeSpent?: number;                  // Minutes
-  feedback?: string;
-  rating?: number;                     // 1-5 stars
+  step_id: string;
+  date: Date;
+  modified_by: string;
+  action: string;                      // e.g., "Created", "Approved by AI Team Member", "Rejected"
+  title_change?: string;               // If title was changed
+  column_change?: string;              // Status transition (e.g., "review" → "approved")
 }
 ```
 
-### Step Change Log
+### Step Approvals (Steps Library)
+
 ```typescript
-interface StepChangeLog {
+interface StepApproval {
   id: string;
-  stepId: string;
-  version: number;
-  changedBy: string;
-  changedAt: Date;
-  changeType: 'created' | 'updated' | 'deprecated' | 'archived';
-  changes: Record<string, {
-    old: any;
-    new: any;
-  }>;
-  reason?: string;                     // Why the change was made
+  step_id: string;
+  user_id: string;
+  user_name: string;
+  timestamp: Date;
+  use_case_ids: string[];              // Empty array = approved for all use cases
+                                       // Specific IDs = approved for those use cases only
 }
 ```
+
+
+## Example JSON
+
+Based on the user's original schema structure:
+
+```json
+{
+  "id": "Step-173838383",
+  "created_by": "AI Team",
+  "approved_by": "Alex Ali",
+  "approval_date": "2026-01-20T00:00:00Z",
+  "last_modified": "2026-01-19T00:00:00Z",
+  "modified_by": "Mike Jones",
+  "count_modified": 1,
+  
+  "title": "Install Node.js",
+  "brief_description": "Node.js is a JavaScript runtime that allows you to run JavaScript on your computer, not just in the browser. It includes npm (Node Package Manager) for installing JavaScript packages and libraries.",
+  "detailed_content": [
+    {
+      "label": "Option A:",
+      "text": "Using Winget (Windows Package Manager):",
+      "copy_to_clipboard": false
+    },
+    {
+      "text": "winget install OpenJS.NodeJS.LTS",
+      "copy_to_clipboard": true
+    },
+    {
+      "label": "Option B:",
+      "text": "Using Homebrew (macOS):",
+      "copy_to_clipboard": false
+    },
+    {
+      "text": "brew install node",
+      "copy_to_clipboard": true
+    }
+  ],
+  "tags": ["node.js", "npm", "JavaScript", "TypeScript"],
+  
+  "category": "install",
+  "language": "JavaScript",
+  "ide": ["VS Code", "Terminal"],
+  
+  "status": "approved",
+  
+  "prerequisites": ["install-local-admin"],
+  "estimated_time": 10,
+  "difficulty_level": "beginner",
+  "use_case_ids": ["UC001", "UC002"]
+}
+```
+
+## Example UI
+
+**After user saves the configured step:**
+
+---
+
+### Install Node.js
+
+Node.js is a JavaScript runtime that allows you to run JavaScript on your computer, not just in the browser. It includes npm (Node Package Manager) for installing JavaScript packages and libraries.
+
+**Option A:** Using Winget (Windows Package Manager):
+```
+winget install OpenJS.NodeJS.LTS
+```
+[📋 Copy]
+
+**Option B:** Using Homebrew (macOS):
+```
+brew install node
+```
+[📋 Copy]
+
+**Tags:**
+`node.js` `npm` `JavaScript` `TypeScript`
+
+**Details:**
+- **Created by:** AI Team
+- **Approved by:** Alex Ali (01/20/26)
+- **Last modified:** 01/19/26 by Mike Jones
+- **Category:** Install
+- **Estimated time:** 10 minutes
+- **Difficulty:** Beginner
+
+---
+
+## Steps Library Integration
+
+This schema integrates with the Steps Library peer review workflow:
+
+### Review Workflow Fields
+- **status**: Tracks current review state (review → clarification → approved/rejected)
+- **approved_by**: AI Team member who approved
+- **approval_date**: When approval was granted
+- **rejection_reason**: Required justification if rejected
+
+### Audit Trail
+- **created_by**: Original author (AI Team or individual)
+- **modified_by**: Last person to make changes
+- **last_modified**: Timestamp for sorting (most recent first in columns)
+- **count_modified**: Tracks modifications by non-AI Team members
+
+### Sorting & Organization
+- Steps automatically sorted by `last_modified` (most recent first)
+- When comments added, `last_modified` updates → moves to top of column
+- Ensures active discussions remain visible
 
 ## Key Additions to Your Original Schema
 
