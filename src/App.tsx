@@ -10,6 +10,10 @@ import Workflow from './pages/Workflow'
 import AllSteps from './pages/Steps/AllSteps.tsx'
 import StepsLibrary from './pages/StepsLibrary'
 
+// Import video assets using Vite's import system
+import heroVideo from './assets/Firefly mp4 video that fades into this image at the end. _It should start with many ideas in the for.mp4'
+import robotVideo from './assets/ai-robot.mp4'
+
 
 // const quickLinks = [
 //   { 
@@ -233,11 +237,11 @@ export default function App() {
       <div className="container">
        <section className="quick-links-section hero">
         <video autoPlay muted loop className="hero-video">
-          <source src="/src/assets/Firefly mp4 video that fades into this image at the end. _It should start with many ideas in the for.mp4" type="video/mp4" />
+          <source src={heroVideo} type="video/mp4" />
           Your browser does not support the video tag.
         </video>
         <video autoPlay muted loop className="robot-video">
-          <source src="/src/assets/ai-robot.mp4" type="video/mp4" />
+          <source src={robotVideo} type="video/mp4" />
           Your browser does not support the video tag.
         </video>
         <div className="hero-overlay">
