@@ -12,7 +12,7 @@ interface RequestAccessProps {
   userEmail?: string;
 }
 
-export default function RequestAccess({ accessItems = [], userName, userEmail }: RequestAccessProps) {
+export default function RequestAccess({ accessItems = [], userName }: RequestAccessProps) {
   const [copiedItem, setCopiedItem] = useState<string | null>(null)
   const [requestedItems, setRequestedItems] = useState<Record<string, boolean>>({})
 

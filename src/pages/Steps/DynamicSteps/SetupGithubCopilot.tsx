@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getUserInfo, getUserFullName } from './UserInfo'
+import { getUserInfo } from './UserInfo'
 import copilotIcon from '../../../assets/copilot-icon.png'
 import chatIcon from '../../../assets/chat-icon.png'
 import rightShadeToggle from '../../../assets/right-shade-toggle.png'
