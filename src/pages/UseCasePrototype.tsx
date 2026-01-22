@@ -52,7 +52,6 @@ export default function UseCasePrototype() {
   const [codingLanguage, setCodingLanguage] = useState('');
   const [ide, setIde] = useState('');
   const [toolsAndTechnologies, setToolsAndTechnologies] = useState<string[]>([]);
-  // const [toolsAndTechnologies, setToolsAndTechnologies] = useState<string[]>([]);
   const [toolSearchTerm, setToolSearchTerm] = useState('');
   const [showToolDropdown, setShowToolDropdown] = useState(false);
   const [estimatedTime, setEstimatedTime] = useState('');
@@ -86,6 +85,9 @@ export default function UseCasePrototype() {
   const [autofillSource, setAutofillSource] = useState<{ type: 'link' | 'file'; value: string } | null>(null);
   const [showAutofillModal, setShowAutofillModal] = useState(false);
   const [isAutofillOpen, setIsAutofillOpen] = useState(false);
+  
+  // Preview mode state
+  const [showPreview, setShowPreview] = useState(false);
 
   const handleAutofillReady = (data: AutofillData, source: { type: 'link' | 'file'; value: string }) => {
     setAutofillData(data);
@@ -106,27 +108,15 @@ export default function UseCasePrototype() {
       // Step 1: Set business unit first (required for conditional UI)
       if (autofillData.businessUnit) setBusinessUnit(autofillData.businessUnit);
       
-      // DEBUG: Log what we received from backend
-      console.log('🔍 Autofill data received:', {
-        businessUnit: autofillData.businessUnit,
-        codingLanguage: autofillData.codingLanguage,
-        ide: autofillData.ide
-      });
-      
       // Step 2: Auto-check "uses IDE/programming language" checkbox if detected
-      // Use setTimeout to ensure checkbox state updates before dependent fields
       if (autofillData.codingLanguage || autofillData.ide) {
-        console.log('✅ Checking isForDevelopers checkbox because language/IDE detected');
         setIsForDevelopers(true);
         
         // Delay setting language/IDE to allow checkbox to render first
         setTimeout(() => {
-          console.log('⏱️ Setting language/IDE values after delay');
           if (autofillData.codingLanguage) setCodingLanguage(autofillData.codingLanguage);
           if (autofillData.ide) setIde(autofillData.ide);
         }, 50);
-      } else {
-        console.log('❌ No language or IDE detected, checkbox will NOT be checked');
       }
       
       // Step 3: Set all general information
@@ -154,80 +144,9 @@ export default function UseCasePrototype() {
         setCustomStepsText(autofillData.additionalSteps);
       }
     }
-    // } else if (option === 'keep-both') {
-    //   // NEW: Keep both - prioritize user input, append AI suggestions as notes
-    //   // For text fields: keep user input, add AI as note at the end
-    //   if (autofillData.briefOverview) {
-    //     setBriefOverview(prev => prev ? `${prev}\n\n---Note from AI Analysis---\n${autofillData.briefOverview}` : (autofillData.briefOverview || ''));
-    //   }
-    //   if (autofillData.technicalDetails) {
-    //     setTechnicalDetails(prev => prev ? `${prev}\n\n---Note from AI Analysis---\n${autofillData.technicalDetails}` : (autofillData.technicalDetails || ''));
-    //   }
-    //   if (autofillData.dataRequirements) {
-    //     setDataRequirements(prev => prev ? `${prev}\n\n---Note from AI Analysis---\n${autofillData.dataRequirements}` : (autofillData.dataRequirements || ''));
-    //   }
-    //   if (autofillData.implementationSteps) {
-    //     setImplementationSteps(prev => prev ? `${prev}\n\n---Note from AI Analysis---\n${autofillData.implementationSteps}` : (autofillData.implementationSteps || ''));
-    //   }
-    
-      
-    //   // For dropdown fields: keep user selection, ignore AI suggestion
-    //   // (This implements the requirement: "if user selects keep both for any dropdown it will keep what the user entered")
-    //   // Only apply AI values if user hasn't selected anything
-    //   if (!codingLanguage && autofillData.codingLanguage) setCodingLanguage(autofillData.codingLanguage);
-    //   if (!ide && autofillData.ide) setIde(autofillData.ide);
-    //   if (!businessUnit && autofillData.businessUnit) setBusinessUnit(autofillData.businessUnit);
-      
-    //   // For arrays, merge unique values (user values take precedence)
-    //   if (autofillData.categories) setCategories(prev => [...new Set([...prev, ...autofillData.categories!])]);
-    //   if (autofillData.toolsAndTechnologies) setToolsAndTechnologies(prev => [...new Set([...prev, ...autofillData.toolsAndTechnologies!])]);
-    //   if (autofillData.searchTags) setSearchTags(prev => [...new Set([...prev, ...autofillData.searchTags!])]);
-    //   if (autofillData.relatedLinks) setRelatedLinks(prev => [...prev, ...autofillData.relatedLinks!]);
-      
-    //   // NEW: Handle tools and technologies
-    //   if (autofillData.toolsAndTechnologies) {
-    //     setToolsAndTechnologies(prev => [...new Set([...prev, ...autofillData.toolsAndTechnologies!])]);
-    //   }
-      
-    //   // NEW: Handle additional steps - append to existing
-    //   if (autofillData.additionalSteps) {
-    //     setCustomStepsText(prev => prev ? `${prev}\n${autofillData.additionalSteps}` : (autofillData.additionalSteps || ''));
-    //   }
-    // } else if (option === 'empty-only') {
-    //   // Only fill empty fields
-    //   if (!useCaseName && autofillData.useCaseName) setUseCaseName(autofillData.useCaseName);
-    //   if (!briefOverview && autofillData.briefOverview) setBriefOverview(autofillData.briefOverview);
-    //   if (!technicalDetails && autofillData.technicalDetails) setTechnicalDetails(autofillData.technicalDetails);
-    //   if (!dataRequirements && autofillData.dataRequirements) setDataRequirements(autofillData.dataRequirements);
-    //   if (!implementationSteps && autofillData.implementationSteps) setImplementationSteps(autofillData.implementationSteps);
-    //   if (!codingLanguage && autofillData.codingLanguage) setCodingLanguage(autofillData.codingLanguage);
-    //   if (!ide && autofillData.ide) setIde(autofillData.ide);
-    //   if (!businessUnit && autofillData.businessUnit) setBusinessUnit(autofillData.businessUnit);
-    //   if (!estimatedTime && autofillData.estimatedTime) setEstimatedTime(autofillData.estimatedTime);
-    //   if (categories.length === 0 && autofillData.categories) setCategories(autofillData.categories);
-    //   if (toolsAndTechnologies.length === 0 && autofillData.toolsAndTechnologies) setToolsAndTechnologies(autofillData.toolsAndTechnologies);
-    //   if (searchTags.length === 0 && autofillData.searchTags) setSearchTags(autofillData.searchTags);
-    //   if (relatedLinks.length === 0 && autofillData.relatedLinks) setRelatedLinks(autofillData.relatedLinks);
-      
-    //   // NEW: Handle tools and technologies
-    //   if (toolsAndTechnologies.length === 0 && autofillData.toolsAndTechnologies) {
-    //     setToolsAndTechnologies(autofillData.toolsAndTechnologies);
-    //   }
-      
-    //   // NEW: Handle additional steps
-    //   if (!customStepsText && autofillData.additionalSteps) {
-    //     setCustomStepsText(autofillData.additionalSteps);
-    //   }
-      
-    //   // NEW: Auto-check IDE checkbox if language/IDE detected
-    //   if (!usesDevTools && (autofillData.codingLanguage || autofillData.ide)) {
-    //     setUsesDevTools(true);
-    //   }
-    // }
 
-    // NEW: Auto-trigger Generate Steps if GitHub repo with Global Technology
+    // Auto-trigger Generate Steps if GitHub repo with Global Technology
     if (autofillData.shouldAutoGenerateSteps && autofillData.businessUnit === 'Global Technology') {
-      // Use setTimeout to ensure state updates are processed first
       setTimeout(() => {
         generateSteps();
       }, 100);
@@ -254,7 +173,6 @@ export default function UseCasePrototype() {
     
     // Secure Access Logic
     if (toolsAndTechnologies.includes('GitHub Copilot')) {
-      // For GitHub Copilot, only need eBay GitHub Enterprise access
       secureAccessItems.push('GitHub Enterprise');
     }
     
@@ -376,14 +294,12 @@ export default function UseCasePrototype() {
       let trimmedLine = line.trim();
       
       // Remove leading bullet points (-, *, •) or numbers (1., 2., etc.) with optional space
-      // This makes the parser forgiving - accepts lines with or without bullets/numbers
-      trimmedLine = trimmedLine.replace(/^[-*•]\s*/, '');  // Remove dash/bullet with optional space
-      trimmedLine = trimmedLine.replace(/^\d+\.\s*/, '');   // Remove numbers with optional space
+      trimmedLine = trimmedLine.replace(/^[-*•]\s*/, '');
+      trimmedLine = trimmedLine.replace(/^\d+\.\s*/, '');
       
       const content = trimmedLine.trim();
       
       if (content) {
-        // Auto-generate title from first 5-7 words
         const words = content.split(' ');
         const title = words.slice(0, Math.min(7, words.length)).join(' ');
         
@@ -402,7 +318,6 @@ export default function UseCasePrototype() {
   const addCustomSteps = () => {
     if (customStepsText.trim()) {
       const newSteps = parseStepsFromText(customStepsText);
-      console.log('Parsed steps:', newSteps); // Debug log
       if (newSteps.length > 0) {
         setGeneratedSteps([...generatedSteps, ...newSteps]);
         setCustomStepsText('');
@@ -501,13 +416,82 @@ export default function UseCasePrototype() {
 
   const selectedStep = generatedSteps.find(s => s.id === selectedStepId);
 
+  const handleSubmitUseCase = () => {
+    setShowPreview(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleFinalSubmit = async () => {
+    try {
+      // Prepare the use case data for submission
+      const useCaseData = {
+        name: useCaseName,
+        isAnonymous,
+        leadName: useCaseLeadName,
+        teamMembers,
+        thumbnail,
+        briefOverview,
+        businessUnit,
+        isForDevelopers,
+        codingLanguage,
+        ide,
+        isIdeAlsoAiTool,
+        toolsAndTechnologies,
+        relatedLinks,
+        generatedSteps: generatedSteps.map((step, index) => ({
+          stepId: step.id,
+          title: step.title,
+          description: step.description,
+          orderIndex: index,
+          category: step.category,
+          isCustom: step.category === 'custom',
+          comment: stepComments[step.id] || null
+        })),
+        technicalDetails,
+        dataRequirements,
+        implementationSteps,
+        categories,
+        estimatedTime,
+        mediaLinks,
+        searchTags
+      };
+
+      // Make API call to submit use case
+      const response = await fetch('http://localhost:3000/api/use-cases', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(useCaseData)
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        alert(`Use case submitted successfully!\n\nYour submission ID is: ${result.data.id}\n\nStatus: ${result.data.status}`);
+        setShowPreview(false);
+        
+        // Optionally, you could redirect to a success page or reset the form
+        // For now, we'll just close the preview
+      } else {
+        throw new Error(result.message || 'Failed to submit use case');
+      }
+    } catch (error) {
+      console.error('Error submitting use case:', error);
+      alert(`Error submitting use case: ${error instanceof Error ? error.message : 'Unknown error'}\n\nPlease try again or contact support.`);
+    }
+  };
+
+  const handleCancelPreview = () => {
+    setShowPreview(false);
+  };
+
   // Map step IDs to their components
   const getStepComponent = (stepId: string) => {
     switch (stepId) {
       case 'verify-sso-ping':
         return <VerifySecurity onComplete={() => {}} isCompleted={false} onNext={() => {}} />;
       case 'request-secure-access':
-        // Pass dynamic access items based on selected tools
         const accessItems = [];
         if (toolsAndTechnologies.includes('GitHub Copilot')) {
           accessItems.push(
@@ -520,16 +504,16 @@ export default function UseCasePrototype() {
         }
         return <RequestAccess accessItems={accessItems} userName={useCaseLeadName} />;
       case 'request-local-admin':
-        // @ts-ignore - Component may not accept these props in DynamicSteps version
+        // @ts-ignore
         return <LocalAdminAccess />;
       case 'install-nodejs':
-        // @ts-ignore - Component may not accept these props in DynamicSteps version
+        // @ts-ignore
         return <InstallNode />;
       case 'install-vscode':
-        // @ts-ignore - Component may not accept these props in DynamicSteps version
+        // @ts-ignore
         return <InstallVSCode />;
       case 'setup-github-copilot':
-        // @ts-ignore - Component may not accept these props in DynamicSteps version
+        // @ts-ignore
         return <SetupGithubCopilot />;
       default:
         return null;
@@ -538,6 +522,436 @@ export default function UseCasePrototype() {
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px', paddingTop: '80px' }}>
+      {showPreview ? (
+        /* PREVIEW MODE - PDF-like view */
+        <div style={{
+          backgroundColor: 'white',
+          padding: '50px',
+          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          maxWidth: '900px',
+          margin: '0 auto',
+          fontFamily: 'Georgia, serif'
+        }}>
+          {/* Header */}
+          <div style={{
+            borderBottom: '4px solid #0064d2',
+            paddingBottom: '25px',
+            marginBottom: '40px',
+            textAlign: 'center'
+          }}>
+            <h1 style={{ margin: '0 0 12px 0', color: '#0064d2', fontSize: '36px', fontWeight: 'bold' }}>
+              Use Case Submission
+            </h1>
+            <p style={{ color: '#666', fontSize: '18px', margin: 0, fontStyle: 'italic' }}>
+              Please review your submission carefully before final approval
+            </p>
+          </div>
+
+          {/* General Information */}
+          <section style={{ marginBottom: '35px', pageBreakInside: 'avoid' }}>
+            <h2 style={{ 
+              color: '#0064d2', 
+              borderBottom: '2px solid #e0e0e0',
+              paddingBottom: '12px',
+              marginBottom: '20px',
+              fontSize: '26px',
+              fontWeight: '600'
+            }}>
+              General Information
+            </h2>
+            
+            <div style={{ display: 'grid', gap: '18px' }}>
+              {thumbnail && (
+                <div>
+                  <strong style={{ display: 'block', color: '#222', marginBottom: '10px', fontSize: '15px' }}>Thumbnail:</strong>
+                  <img src={thumbnail} alt="Use case thumbnail" style={{ 
+                    maxWidth: '350px', 
+                    borderRadius: '6px',
+                    border: '2px solid #ddd',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                  }} />
+                </div>
+              )}
+              
+              <div>
+                <strong style={{ display: 'block', color: '#222', marginBottom: '8px', fontSize: '15px' }}>Use Case Name:</strong>
+                <p style={{ margin: 0, fontSize: '16px', lineHeight: '1.7', color: '#333' }}>
+                  {useCaseName || 'Not provided'}
+                </p>
+              </div>
+              
+              <div>
+                <strong style={{ display: 'block', color: '#222', marginBottom: '8px', fontSize: '15px' }}>Use Case Lead:</strong>
+                <p style={{ margin: 0, fontSize: '16px', lineHeight: '1.7', color: '#333' }}>
+                  {isAnonymous ? '(Anonymous Submission)' : useCaseLeadName || 'Not provided'}
+                </p>
+              </div>
+              
+              {teamMembers.length > 0 && (
+                <div>
+                  <strong style={{ display: 'block', color: '#222', marginBottom: '8px', fontSize: '15px' }}>Team Members:</strong>
+                  <p style={{ margin: 0, fontSize: '16px', lineHeight: '1.7', color: '#333' }}>
+                    {teamMembers.join(', ')}
+                  </p>
+                </div>
+              )}
+              
+              <div>
+                <strong style={{ display: 'block', color: '#222', marginBottom: '10px', fontSize: '15px' }}>Overview:</strong>
+                <div style={{ 
+                  margin: 0, 
+                  fontSize: '16px', 
+                  lineHeight: '1.9',
+                  whiteSpace: 'pre-wrap',
+                  backgroundColor: '#f8f9fa',
+                  padding: '18px',
+                  borderRadius: '6px',
+                  borderLeft: '4px solid #0064d2',
+                  color: '#333'
+                }}>
+                  {briefOverview || 'Not provided'}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Project Configuration */}
+          <section style={{ marginBottom: '35px', pageBreakInside: 'avoid' }}>
+            <h2 style={{ 
+              color: '#0064d2', 
+              borderBottom: '2px solid #e0e0e0',
+              paddingBottom: '12px',
+              marginBottom: '20px',
+              fontSize: '26px',
+              fontWeight: '600'
+            }}>
+              Project Configuration
+            </h2>
+            
+            <div style={{ display: 'grid', gap: '18px' }}>
+              <div>
+                <strong style={{ display: 'block', color: '#222', marginBottom: '8px', fontSize: '15px' }}>Business Unit:</strong>
+                <p style={{ margin: 0, fontSize: '16px', lineHeight: '1.7', color: '#333' }}>
+                  {businessUnit || 'Not provided'}
+                </p>
+              </div>
+              
+              {isForDevelopers && (
+                <>
+                  <div>
+                    <strong style={{ display: 'block', color: '#222', marginBottom: '8px', fontSize: '15px' }}>Coding Language:</strong>
+                    <p style={{ margin: 0, fontSize: '16px', lineHeight: '1.7', color: '#333' }}>
+                      {codingLanguage || 'Not provided'}
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <strong style={{ display: 'block', color: '#222', marginBottom: '8px', fontSize: '15px' }}>IDE:</strong>
+                    <p style={{ margin: 0, fontSize: '16px', lineHeight: '1.7', color: '#333' }}>
+                      {ide || 'Not provided'}
+                    </p>
+                  </div>
+                </>
+              )}
+              
+              {toolsAndTechnologies.length > 0 && (
+                <div>
+                  <strong style={{ display: 'block', color: '#222', marginBottom: '10px', fontSize: '15px' }}>Tools and Technologies:</strong>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                    {toolsAndTechnologies.map(tool => (
+                      <span key={tool} style={{
+                        padding: '8px 16px',
+                        backgroundColor: '#e3f2fd',
+                        border: '1px solid #0064d2',
+                        borderRadius: '20px',
+                        fontSize: '14px',
+                        color: '#0064d2',
+                        fontWeight: '500'
+                      }}>
+                        {tool}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {relatedLinks.length > 0 && (
+                <div>
+                  <strong style={{ display: 'block', color: '#222', marginBottom: '10px', fontSize: '15px' }}>Related Links:</strong>
+                  <ul style={{ margin: '0', paddingLeft: '25px', lineHeight: '1.8' }}>
+                    {relatedLinks.map((link, idx) => (
+                      <li key={idx} style={{ marginBottom: '10px', fontSize: '15px' }}>
+                        <strong>{link.name}:</strong>{' '}
+                        <a href={link.url} target="_blank" rel="noopener noreferrer" style={{ color: '#0064d2', textDecoration: 'underline' }}>
+                          {link.url}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Setup Steps */}
+          {businessUnit === 'Global Technology' && generatedSteps.length > 0 && (
+            <section style={{ marginBottom: '35px', pageBreakInside: 'avoid' }}>
+              <h2 style={{ 
+                color: '#0064d2', 
+                borderBottom: '2px solid #e0e0e0',
+                paddingBottom: '12px',
+                marginBottom: '20px',
+                fontSize: '26px',
+                fontWeight: '600'
+              }}>
+                Setup Steps ({generatedSteps.length})
+              </h2>
+              
+              <ol style={{ margin: 0, paddingLeft: '30px', lineHeight: '1.8' }}>
+                {generatedSteps.map((step) => (
+                  <li key={step.id} style={{ 
+                    marginBottom: '20px',
+                    fontSize: '16px',
+                    color: '#333'
+                  }}>
+                    <strong style={{ fontSize: '17px', color: '#222' }}>{step.title}</strong>
+                    <p style={{ 
+                      margin: '6px 0 0 0', 
+                      color: '#555',
+                      fontSize: '15px',
+                      lineHeight: '1.7'
+                    }}>
+                      {step.description}
+                    </p>
+                    {stepComments[step.id] && (
+                      <div style={{
+                        marginTop: '10px',
+                        padding: '10px 14px',
+                        backgroundColor: '#fffbeb',
+                        borderLeft: '4px solid #fbbf24',
+                        fontSize: '14px',
+                        color: '#78350f',
+                        borderRadius: '4px'
+                      }}>
+                        <strong>💬 Comment:</strong> {stepComments[step.id]}
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ol>
+            </section>
+          )}
+
+          {/* Additional Information */}
+          <section style={{ marginBottom: '35px' }}>
+            <h2 style={{ 
+              color: '#0064d2', 
+              borderBottom: '2px solid #e0e0e0',
+              paddingBottom: '12px',
+              marginBottom: '20px',
+              fontSize: '26px',
+              fontWeight: '600'
+            }}>
+              Additional Information
+            </h2>
+            
+            <div style={{ display: 'grid', gap: '18px' }}>
+              {technicalDetails && (
+                <div>
+                  <strong style={{ display: 'block', color: '#222', marginBottom: '10px', fontSize: '15px' }}>
+                    Technical Details:
+                  </strong>
+                  <div style={{ 
+                    margin: 0, 
+                    fontSize: '15px', 
+                    lineHeight: '1.9',
+                    whiteSpace: 'pre-wrap',
+                    backgroundColor: '#f8f9fa',
+                    padding: '18px',
+                    borderRadius: '6px',
+                    borderLeft: '4px solid #28a745',
+                    color: '#333'
+                  }}>
+                    {technicalDetails}
+                  </div>
+                </div>
+              )}
+              
+              {dataRequirements && (
+                <div>
+                  <strong style={{ display: 'block', color: '#222', marginBottom: '10px', fontSize: '15px' }}>
+                    Data Requirements:
+                  </strong>
+                  <div style={{ 
+                    margin: 0, 
+                    fontSize: '15px', 
+                    lineHeight: '1.9',
+                    whiteSpace: 'pre-wrap',
+                    backgroundColor: '#f8f9fa',
+                    padding: '18px',
+                    borderRadius: '6px',
+                    color: '#333'
+                  }}>
+                    {dataRequirements}
+                  </div>
+                </div>
+              )}
+              
+              {implementationSteps && (
+                <div>
+                  <strong style={{ display: 'block', color: '#222', marginBottom: '10px', fontSize: '15px' }}>
+                    Implementation Steps:
+                  </strong>
+                  <div style={{ 
+                    margin: 0, 
+                    fontSize: '15px', 
+                    lineHeight: '1.9',
+                    whiteSpace: 'pre-wrap',
+                    backgroundColor: '#f8f9fa',
+                    padding: '18px',
+                    borderRadius: '6px',
+                    color: '#333'
+                  }}>
+                    {implementationSteps}
+                  </div>
+                </div>
+              )}
+              
+              {categories.length > 0 && (
+                <div>
+                  <strong style={{ display: 'block', color: '#222', marginBottom: '10px', fontSize: '15px' }}>Categories:</strong>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                    {categories.map(cat => (
+                      <span key={cat} style={{
+                        padding: '8px 16px',
+                        backgroundColor: '#f0f0f0',
+                        border: '1px solid #ccc',
+                        borderRadius: '20px',
+                        fontSize: '14px',
+                        color: '#555'
+                      }}>
+                        {cat}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {estimatedTime && (
+                <div>
+                  <strong style={{ display: 'block', color: '#222', marginBottom: '8px', fontSize: '15px' }}>
+                    Estimated Time to Complete:
+                  </strong>
+                  <p style={{ margin: 0, fontSize: '16px', lineHeight: '1.7', color: '#333' }}>
+                    {estimatedTime}
+                  </p>
+                </div>
+              )}
+              
+              {mediaLinks.length > 0 && (
+                <div>
+                  <strong style={{ display: 'block', color: '#222', marginBottom: '10px', fontSize: '15px' }}>Media:</strong>
+                  <ul style={{ margin: '0', paddingLeft: '25px', lineHeight: '1.8' }}>
+                    {mediaLinks.map((link, idx) => (
+                      <li key={idx} style={{ marginBottom: '10px', fontSize: '15px' }}>
+                        <strong>{link.name}:</strong>{' '}
+                        <a href={link.url} target="_blank" rel="noopener noreferrer" style={{ color: '#0064d2', textDecoration: 'underline' }}>
+                          {link.url}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              
+              {searchTags.length > 0 && (
+                <div>
+                  <strong style={{ display: 'block', color: '#222', marginBottom: '10px', fontSize: '15px' }}>Search Tags:</strong>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                    {searchTags.map(tag => (
+                      <span key={tag} style={{
+                        padding: '8px 16px',
+                        backgroundColor: '#f0f0f0',
+                        border: '1px solid #ccc',
+                        borderRadius: '20px',
+                        fontSize: '14px',
+                        color: '#555'
+                      }}>
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Action Buttons */}
+          <div style={{
+            borderTop: '3px solid #e0e0e0',
+            paddingTop: '35px',
+            marginTop: '20px',
+            display: 'flex',
+            gap: '20px',
+            justifyContent: 'center'
+          }}>
+            <button
+              onClick={handleCancelPreview}
+              style={{
+                padding: '16px 45px',
+                backgroundColor: 'white',
+                color: '#666',
+                border: '2px solid #999',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontWeight: '600',
+                fontSize: '17px',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f5f5f5';
+                e.currentTarget.style.borderColor = '#666';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'white';
+                e.currentTarget.style.borderColor = '#999';
+              }}
+            >
+              ← Back to Editing
+            </button>
+            <button
+              onClick={handleFinalSubmit}
+              style={{
+                padding: '16px 45px',
+                backgroundColor: '#28a745',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontWeight: '600',
+                fontSize: '17px',
+                boxShadow: '0 4px 8px rgba(40, 167, 69, 0.3)',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#218838';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 6px 12px rgba(40, 167, 69, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#28a745';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 8px rgba(40, 167, 69, 0.3)';
+              }}
+            >
+              ✓ Submit for Approval
+            </button>
+          </div>
+        </div>
+      ) : (
+        /* FORM MODE */
+        <>
       {/* Sticky Save Draft Button */}
       <div style={{
         position: 'fixed',
@@ -558,15 +972,18 @@ export default function UseCasePrototype() {
         }}>
           Save as Draft
         </button>
-        <button style={{
-          padding: '10px 20px',
-          backgroundColor: '#0064d2',
-          color: 'white',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: 'pointer',
-          fontWeight: '600'
-        }}>
+        <button 
+          onClick={handleSubmitUseCase}
+          style={{
+            padding: '10px 20px',
+            backgroundColor: '#0064d2',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontWeight: '600'
+          }}
+        >
           Submit Use Case
         </button>
       </div>
@@ -1780,7 +2197,8 @@ export default function UseCasePrototype() {
           </p>
         </div>
       </div>
-
+        </>
+      )}
     </div>
   );
 }

@@ -16,9 +16,9 @@ export default function NavBar() {
           <NavLink to="/ai-sandbox" className="nav-link">AI Sandbox</NavLink>
           <NavLink to="/use-cases" className="nav-link">Use Cases</NavLink>
           <NavLink to="/workflow" className="nav-link">Workflows</NavLink>
+           <NavLink to="/all-steps" className="nav-link">All Steps</NavLink>
           <NavLink to="/use-case-prototype" className="nav-link">Use Case Prototype</NavLink>
-          <NavLink to="/all-steps" className="nav-link">All Steps</NavLink>
-          <NavLink to="/steps-library" className="nav-link">Steps Library</NavLink>
+          <NavLink to="/review-submissions" className="nav-link">Review Submissions</NavLink>
         </div>
 
         <div className="navbar-actions">

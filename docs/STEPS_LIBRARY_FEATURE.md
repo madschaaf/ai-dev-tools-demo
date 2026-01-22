@@ -119,6 +119,118 @@ Filters can be combined and are easily cleared with a single button.
 - Author notified when new comments added
 - Team notified when step approved/rejected
 
+### 7. AI Team Override & Global Edit Feature
+
+**Override All User Edits:**
+When reviewing a step with multiple version customizations across different use cases, AI Team members can override all individual edits with a canonical version:
+
+**Workflow:**
+1. **Review Step Versions**: AI team member views step modal with version selector showing all use case-specific edits
+2. **Click "Override All User Edits"**: Button appears when multiple versions exist
+3. **Edit Step**: AI team member enters edit mode to create the canonical version
+4. **Apply Changes to All Use Cases**: Confirm button applies the AI team's version to all use cases
+5. **Automatic Notifications**: System sends email notifications to all use case owners informing them:
+   - Their customized version has been replaced with the canonical version
+   - Reason for the change (if provided)
+   - Link to review the new canonical version
+   - Option to request an exception if their use case has special requirements
+
+**Use Cases for Override:**
+- **Standardization**: Ensuring consistent implementation across all use cases
+- **Security Updates**: Applying critical security fixes universally
+- **Best Practice Updates**: Enforcing new coding standards or methodologies
+- **Bug Fixes**: Correcting errors that affect all implementations
+- **Deprecation**: Updating steps that use deprecated technologies
+
+**User Experience:**
+```
+┌────────────────────────────────────────────────────────────┐
+│ Install VS Code [REVIEW]                         ✕         │
+├────────────────────────────┬───────────────────────────────┤
+│                            │ 📌 Associated Use Cases       │
+│ [Step content display]     │                               │
+│                            │ ✅ Frontend Dev (Jack's edit) │
+│                            │ ⚠️ Backend Setup (Molly's)    │
+│                            │ ○  AI Tools (base version)    │
+│                            │                               │
+│ [Diff view showing         │ 3 versions detected           │
+│  customizations]           │                               │
+│                            │ ⚠️ Multiple customizations    │
+│ ┌────────────────────────┐│    detected. AI Team can      │
+│ │ 🔓 Override All User   ││    create canonical version.  │
+│ │    Edits              ││                               │
+│ └────────────────────────┘│                               │
+└────────────────────────────┴───────────────────────────────┘
+```
+
+After clicking "Override All User Edits":
+```
+┌────────────────────────────────────────────────────────────┐
+│ Install VS Code - AI TEAM EDIT MODE              ✕         │
+├────────────────────────────────────────────────────────────┤
+│ [Editable textarea with canonical content]                 │
+│                                                             │
+│ Reason for Override (optional):                            │
+│ ┌─────────────────────────────────────────────────────────┐│
+│ │ Standardizing VS Code installation across all use cases││
+│ │ to include latest security settings...                 ││
+│ └─────────────────────────────────────────────────────────┘│
+│                                                             │
+│ ⚠️ This will replace all 3 custom versions:               │
+│    • Frontend Developer Onboarding (Jack Doe)              │
+│    • Backend Developer Setup (Molly Smith)                 │
+│    • AI Tools Integration (base version)                   │
+│                                                             │
+│ ┌─────────────────────┐  ┌──────────┐                     │
+│ │ ✓ Apply Changes to  │  │ Cancel   │                     │
+│ │   All Use Cases     │  │          │                     │
+│ └─────────────────────┘  └──────────┘                     │
+└────────────────────────────────────────────────────────────┘
+```
+
+**Email Notification Template:**
+```
+To: jack.doe@company.com, molly.smith@company.com
+Subject: Step Updated - Install VS Code
+
+Hello,
+
+An AI Team member has updated the "Install VS Code" step that affects 
+your use case:
+- Use Case: Frontend Developer Onboarding
+- Previous Version: Custom version by Jack Doe
+- Change Date: January 22, 2026
+- AI Team Member: Bob Johnson
+
+Reason for Update:
+Standardizing VS Code installation across all use cases to include 
+latest security settings...
+
+Your custom changes have been replaced with the new canonical version 
+to ensure consistency and security across all development workflows.
+
+Action Required:
+- Review the updated step: [Link to step]
+- If your use case requires specific customizations, please:
+  1. Submit a justification request
+  2. Document the specific requirements
+  3. AI Team will review for exception approval
+
+Questions? Contact the AI Team at ai-team@company.com
+```
+
+**Permission Model:**
+- Only AI Team members can access "Override All User Edits"
+- Regular users cannot override or edit canonical versions
+- Canonical version becomes the new base for all use cases
+- Future use case submissions default to canonical version
+
+**Audit Trail:**
+- Override action logged in step history
+- Email notification log maintained
+- Previous versions archived for reference
+- Rollback capability for AI Team if needed
+
 ## Data Model
 
 ### Step Interface

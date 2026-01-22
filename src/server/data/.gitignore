@@ -1,0 +1,5 @@
+# Ignore the JSON data file (use cases database)
+use-cases.json
+
+# But keep this directory in git
+!.gitignore

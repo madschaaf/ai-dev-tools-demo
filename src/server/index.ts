@@ -3,6 +3,7 @@ import express from 'express'
 import cors from 'cors'
 import { initializeAppContext, getAppContextInfo } from './config/appContext.ts'
 import autofillRoutes from './routes/autofill.ts'
+import useCaseRoutes from './routes/useCases.ts'
 
 // Initialize eBay App Context (if configured)
 initializeAppContext()
@@ -31,6 +32,9 @@ app.get('/api/resources', (_req, res) => {
 
 // Autofill routes
 app.use('/api/autofill', autofillRoutes)
+
+// Use case submission routes
+app.use('/api/use-cases', useCaseRoutes)
 
 const port = process.env.PORT ? Number(process.env.PORT) : 3000
 app.listen(port, () => {

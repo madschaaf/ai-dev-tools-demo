@@ -26,7 +26,7 @@ interface PreConfiguredStep {
   tags: string[];                      // Searchable/categorical labels (e.g., ["node.js", "JavaScript", "npm"])
   
   // Categorization
-  category: 'security' | 'access' | 'admin' | 'install' | 'setup' | 'config' | 'practice';
+  category: 'security' | 'access' | 'admin' | 'install' | 'setup' | 'config' | 'practice'; //needed or have tags?
   language?: string;                   // Programming language (e.g., "JavaScript", "Python", "Bash")
   ide?: string[];                      // IDE requirements (e.g., ["VS Code", "Terminal"])
   targetRoles?: string[];              // Who should see this (e.g., ["developer", "designer"])

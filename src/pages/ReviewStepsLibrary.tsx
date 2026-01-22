@@ -1,4 +1,86 @@
 import { useState, useMemo } from 'react'
+import ReviewUseCaseLibrary from './ReviewUseCaseLibrary'
+
+// Extended interface for step versions
+interface StepVersion {
+  versionId: string
+  useCaseId: string | null
+  useCaseName: string
+  author: string
+  authorId: string
+  content: string
+  previousContent?: string
+  lastModified: Date
+  status: 'review' | 'clarification' | 'approved' | 'rejected'
+  isBaseVersion: boolean
+  hasEdits: boolean
+}
+
+// Mock step versions - simulating different edits for different use cases
+const mockStepVersions: { [stepId: string]: StepVersion[] } = {
+  'STEP001': [
+    {
+      versionId: 'STEP001-UC001',
+      useCaseId: 'UC001',
+      useCaseName: 'Frontend Developer Onboarding',
+      author: 'Jack Doe',
+      authorId: 'user001',
+      content: `// Installation steps - Jack's Version for Frontend
+1. Visit https://code.visualstudio.com
+2. Download for your OS (Mac/Windows/Linux)
+3. Run installer
+4. Verify installation: code --version
+5. Configure user settings for frontend development
+6. Install recommended extensions for React`,
+      previousContent: `// Installation steps
+1. Visit https://code.visualstudio.com
+2. Download for your OS
+3. Run installer`,
+      lastModified: new Date('2026-01-20'),
+      status: 'review',
+      isBaseVersion: false,
+      hasEdits: true
+    },
+    {
+      versionId: 'STEP001-UC002',
+      useCaseId: 'UC002',
+      useCaseName: 'Backend Developer Setup',
+      author: 'Molly Smith',
+      authorId: 'user004',
+      content: `// Installation steps - Molly's Version for Backend
+1. Visit https://code.visualstudio.com
+2. Download for your OS (Mac/Windows/Linux)
+3. Run installer
+4. Verify installation: code --version
+5. Configure user settings for backend development
+6. Install Python extensions
+7. Setup debugging configurations for Python/Node`,
+      previousContent: `// Installation steps
+1. Visit https://code.visualstudio.com
+2. Download for your OS
+3. Run installer`,
+      lastModified: new Date('2026-01-18'),
+      status: 'review',
+      isBaseVersion: false,
+      hasEdits: true
+    },
+    {
+      versionId: 'STEP001-BASE',
+      useCaseId: null,
+      useCaseName: 'Base Version',
+      author: null as any,
+      authorId: null as any,
+      content: `// Installation steps
+1. Visit https://code.visualstudio.com
+2. Download for your OS
+3. Run installer`,
+      lastModified: new Date('2026-01-15'),
+      status: 'approved',
+      isBaseVersion: true,
+      hasEdits: false
+    }
+  ]
+}
 
 // Types
 interface StepComment {
@@ -269,7 +351,8 @@ python --version`,
   }
 ]
 
-export default function StepsLibrary() {
+export default function ReviewStepsLibrary() {
+  const [libraryMode, setLibraryMode] = useState<'steps' | 'usecases'>('steps')
   const [steps, setSteps] = useState<Step[]>(mockSteps)
   const [useCases] = useState<UseCase[]>(mockUseCases)
   const [searchTerm, setSearchTerm] = useState('')
@@ -471,13 +554,68 @@ export default function StepsLibrary() {
     }
   }
 
+  // If use cases mode is selected, render ReviewUseCaseLibrary instead
+  if (libraryMode === 'usecases') {
+    return <ReviewUseCaseLibrary onSwitchToSteps={() => setLibraryMode('steps' as const)} />
+  }
+
   return (
     <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
+      {/* Toggle Between Libraries */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        marginBottom: '2rem'
+      }}>
+        <div style={{
+          display: 'inline-flex',
+          background: '#f3f4f6',
+          borderRadius: 'var(--radius-lg)',
+          padding: '0.25rem',
+          gap: '0.25rem'
+        }}>
+          <button
+            onClick={() => setLibraryMode('steps' as const)}
+            style={{
+              padding: '0.75rem 2rem',
+              background: libraryMode === 'steps' ? '#fff' : 'transparent',
+              border: 'none',
+              borderRadius: 'var(--radius-md)',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: 600,
+              color: libraryMode === 'steps' ? 'var(--color-primary)' : '#6b7280',
+              boxShadow: libraryMode === 'steps' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+              transition: 'all 0.2s'
+            }}
+          >
+            📝 Review Steps
+          </button>
+          <button
+            onClick={() => setLibraryMode('usecases' as const)}
+            style={{
+              padding: '0.75rem 2rem',
+              background: libraryMode === 'usecases' ? '#fff' : 'transparent',
+              border: 'none',
+              borderRadius: 'var(--radius-md)',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: 600,
+              color: libraryMode === 'usecases' ? 'var(--color-primary)' : '#6b7280',
+              boxShadow: libraryMode === 'usecases' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+              transition: 'all 0.2s'
+            }}
+          >
+            📋 Review Use Cases
+          </button>
+        </div>
+      </div>
+
       {/* Header */}
       <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ marginBottom: '0.5rem' }}>Steps Library</h1>
+        <h1 style={{ marginBottom: '0.5rem' }}>Review Submissions - Steps</h1>
         <p style={{ color: 'var(--color-neutral-700)' }}>
-          Manage and review development steps with peer review workflow
+          AI team review interface for approving development steps
         </p>
       </div>
 
@@ -718,6 +856,23 @@ function StepModal({
 }: any) {
   // Local state for approval dropdown
   const [showApprovalDropdown, setShowApprovalDropdown] = useState(false)
+  
+  // Version selector state
+  const stepVersions = mockStepVersions[step.id] || []
+  const [selectedVersionId, setSelectedVersionId] = useState(stepVersions[0]?.versionId || null)
+  
+  // Override mode state
+  const [overrideMode, setOverrideMode] = useState(false)
+  const [overrideContent, setOverrideContent] = useState('')
+  const [overrideReason, setOverrideReason] = useState('')
+  
+  // Get current version data
+  const currentVersion = stepVersions.find(v => v.versionId === selectedVersionId) || stepVersions[0]
+  
+  // Use current version's content if available
+  const displayContent = currentVersion?.content || step.content
+  const displayPreviousContent = currentVersion?.previousContent || step.previousContent
+  const displayStatus = currentVersion?.status || step.status
 
   // Calculate diff for review status
   const diff = useMemo(() => {
@@ -846,7 +1001,7 @@ function StepModal({
         {/* Modal Body */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: '1fr 400px',
+          gridTemplateColumns: stepVersions.length > 0 ? '2fr 1fr' : '1fr 400px',
           flex: 1,
           overflow: 'hidden'
         }}>
@@ -1235,118 +1390,227 @@ function StepModal({
             )}
           </div>
 
-          {/* Right Pane - Use Cases */}
+          {/* Right Pane - Version Selector or Use Cases */}
           <div style={{
             padding: '1.5rem',
             overflow: 'auto',
             background: '#f9fafb'
           }}>
-            {!showUseCaseDetail ? (
+            {stepVersions.length > 0 ? (
+              /* Version Selector Sidebar */
               <>
-                <h3 style={{ marginTop: 0 }}>Associated Use Cases</h3>
-                {step.useCaseIds.length === 0 ? (
-                  <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>
-                    No use cases associated
+                <h3 style={{ marginTop: 0, marginBottom: '1rem' }}>📌 Associated Use Cases</h3>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {stepVersions.map((version) => (
+                    <div
+                      key={version.versionId}
+                      onClick={() => setSelectedVersionId(version.versionId)}
+                      style={{
+                        padding: '0.75rem',
+                        background: selectedVersionId === version.versionId ? '#e0f2fe' : '#fff',
+                        border: `2px solid ${selectedVersionId === version.versionId ? '#3b82f6' : '#e1e4e8'}`,
+                        borderRadius: 'var(--radius-md)',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'start', gap: '0.5rem' }}>
+                        <div style={{ fontSize: '1.25rem' }}>
+                          {selectedVersionId === version.versionId ? '✅' : version.hasEdits ? '⚠️' : '○'}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ 
+                            fontWeight: 600, 
+                            fontSize: '0.875rem',
+                            marginBottom: '0.25rem',
+                            color: selectedVersionId === version.versionId ? '#1e40af' : '#374151'
+                          }}>
+                            {version.useCaseName}
+                          </div>
+                          
+                          {version.hasEdits ? (
+                            <>
+                              <div style={{ fontSize: '0.75rem', color: '#dc2626', fontWeight: 600 }}>
+                                Modified by {version.author}
+                              </div>
+                              <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                                {version.lastModified.toLocaleDateString()}
+                              </div>
+                            </>
+                          ) : (
+                            <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                              No edits (base version)
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Override All User Edits Button */}
+                {stepVersions.filter(v => v.hasEdits).length > 1 && !overrideMode && (
+                  <div style={{
+                    marginTop: '1.5rem',
+                    padding: '1rem',
+                    background: '#fff3cd',
+                    border: '2px solid #f59e0b',
+                    borderRadius: 'var(--radius-md)'
+                  }}>
+                    <div style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#92400e' }}>
+                      ⚠️ Multiple Customizations Detected
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: '#78350f', marginBottom: '1rem' }}>
+                      {stepVersions.filter(v => v.hasEdits).length} use cases have custom versions. AI Team can create canonical version.
+                    </div>
+                    <button
+                      onClick={() => {
+                        setOverrideMode(true)
+                        setOverrideContent(step.previousContent || step.content)
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '0.75rem',
+                        background: '#f59e0b',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: 'var(--radius-md)',
+                        cursor: 'pointer',
+                        fontSize: '0.875rem',
+                        fontWeight: 600
+                      }}
+                    >
+                      🔓 Override All User Edits
+                    </button>
+                  </div>
+                )}
+
+                {/* Legend */}
+                <div style={{
+                  marginTop: '1.5rem',
+                  padding: '0.75rem',
+                  background: '#fff',
+                  border: '1px solid #e1e4e8',
+                  borderRadius: 'var(--radius-md)',
+                  fontSize: '0.75rem',
+                  color: '#6b7280'
+                }}>
+                  <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>Legend:</div>
+                  <div>✅ Currently viewing</div>
+                  <div>⚠️ Modified version</div>
+                  <div>○ Base version (no edits)</div>
+                </div>
+              </>
+            ) : (
+              /* Original Use Cases List */
+              !showUseCaseDetail ? (
+                <>
+                  <h3 style={{ marginTop: 0 }}>Associated Use Cases</h3>
+                  {step.useCaseIds.length === 0 ? (
+                    <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>
+                      No use cases associated
+                    </p>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                      {step.useCaseIds.map((ucId: string) => {
+                        const useCase = useCases.find((uc: any) => uc.id === ucId)
+                        if (!useCase) return null
+                        return (
+                          <div
+                            key={ucId}
+                            onClick={() => viewUseCaseDetail(ucId)}
+                            style={{
+                              padding: '1rem',
+                              background: '#fff',
+                              border: '1px solid #e1e4e8',
+                              borderRadius: 'var(--radius-md)',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.borderColor = 'var(--color-primary)'
+                              e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)'
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.borderColor = '#e1e4e8'
+                              e.currentTarget.style.boxShadow = 'none'
+                            }}
+                          >
+                            <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>
+                              {useCase.id}
+                            </div>
+                            <div style={{ fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.5rem' }}>
+                              {useCase.title}
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                              {useCase.steps.length} steps
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </>
+              ) : selectedUseCase && (
+                <>
+                  <button
+                    onClick={() => setShowUseCaseDetail(false)}
+                    style={{
+                      marginBottom: '1rem',
+                      padding: '0.5rem 1rem',
+                      background: '#fff',
+                      border: '1px solid #d1d5db',
+                      borderRadius: 'var(--radius-md)',
+                      cursor: 'pointer',
+                      fontSize: '0.875rem'
+                    }}
+                  >
+                    ← Back to Use Cases
+                  </button>
+
+                  <h3 style={{ marginTop: 0 }}>{selectedUseCase.title}</h3>
+                  <div style={{
+                    fontSize: '0.75rem',
+                    color: '#6b7280',
+                    marginBottom: '1rem'
+                  }}>
+                    {selectedUseCase.id}
+                  </div>
+
+                  <p style={{ fontSize: '0.875rem', marginBottom: '1.5rem' }}>
+                    {selectedUseCase.description}
                   </p>
-                ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    {step.useCaseIds.map((ucId: string) => {
-                      const useCase = useCases.find((uc: any) => uc.id === ucId)
-                      if (!useCase) return null
+
+                  <h4>Steps ({selectedUseCase.steps.length})</h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {selectedUseCase.steps.map((stepId: string, idx: number) => {
+                      const s = steps.find((st: any) => st.id === stepId)
+                      if (!s) return null
                       return (
                         <div
-                          key={ucId}
-                          onClick={() => viewUseCaseDetail(ucId)}
+                          key={stepId}
                           style={{
-                            padding: '1rem',
-                            background: '#fff',
-                            border: '1px solid #e1e4e8',
+                            padding: '0.75rem',
+                            background: s.id === step.id ? '#e0f2fe' : '#fff',
+                            border: '1px solid',
+                            borderColor: s.id === step.id ? '#0284c7' : '#e1e4e8',
                             borderRadius: 'var(--radius-md)',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s'
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.borderColor = 'var(--color-primary)'
-                            e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)'
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.borderColor = '#e1e4e8'
-                            e.currentTarget.style.boxShadow = 'none'
+                            fontSize: '0.875rem'
                           }}
                         >
-                          <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>
-                            {useCase.id}
+                          <div style={{ fontWeight: 600 }}>
+                            {idx + 1}. {s.title}
                           </div>
-                          <div style={{ fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.5rem' }}>
-                            {useCase.title}
-                          </div>
-                          <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
-                            {useCase.steps.length} steps
+                          <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.25rem' }}>
+                            {s.id} • {s.status}
                           </div>
                         </div>
                       )
                     })}
                   </div>
-                )}
-              </>
-            ) : selectedUseCase && (
-              <>
-                <button
-                  onClick={() => setShowUseCaseDetail(false)}
-                  style={{
-                    marginBottom: '1rem',
-                    padding: '0.5rem 1rem',
-                    background: '#fff',
-                    border: '1px solid #d1d5db',
-                    borderRadius: 'var(--radius-md)',
-                    cursor: 'pointer',
-                    fontSize: '0.875rem'
-                  }}
-                >
-                  ← Back to Use Cases
-                </button>
-
-                <h3 style={{ marginTop: 0 }}>{selectedUseCase.title}</h3>
-                <div style={{
-                  fontSize: '0.75rem',
-                  color: '#6b7280',
-                  marginBottom: '1rem'
-                }}>
-                  {selectedUseCase.id}
-                </div>
-
-                <p style={{ fontSize: '0.875rem', marginBottom: '1.5rem' }}>
-                  {selectedUseCase.description}
-                </p>
-
-                <h4>Steps ({selectedUseCase.steps.length})</h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  {selectedUseCase.steps.map((stepId: string, idx: number) => {
-                    const s = steps.find((st: any) => st.id === stepId)
-                    if (!s) return null
-                    return (
-                      <div
-                        key={stepId}
-                        style={{
-                          padding: '0.75rem',
-                          background: s.id === step.id ? '#e0f2fe' : '#fff',
-                          border: '1px solid',
-                          borderColor: s.id === step.id ? '#0284c7' : '#e1e4e8',
-                          borderRadius: 'var(--radius-md)',
-                          fontSize: '0.875rem'
-                        }}
-                      >
-                        <div style={{ fontWeight: 600 }}>
-                          {idx + 1}. {s.title}
-                        </div>
-                        <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.25rem' }}>
-                          {s.id} • {s.status}
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </>
+                </>
+              )
             )}
           </div>
         </div>
