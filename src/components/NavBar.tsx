@@ -18,6 +18,7 @@ export default function NavBar() {
           <NavLink to="/workflow" className="nav-link">Workflows</NavLink>
           <NavLink to="/use-case-prototype" className="nav-link">Use Case Prototype</NavLink>
           <NavLink to="/all-steps" className="nav-link">All Steps</NavLink>
+          <NavLink to="/steps-library" className="nav-link">Steps Library</NavLink>
         </div>
 
         <div className="navbar-actions">

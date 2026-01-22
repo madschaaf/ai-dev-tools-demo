@@ -8,6 +8,7 @@ import UseCases from './pages/UseCases'
 import UseCasePrototype from './pages/UseCasePrototype'
 import Workflow from './pages/Workflow'
 import AllSteps from './pages/Steps/AllSteps.tsx'
+import StepsLibrary from './pages/StepsLibrary'
 
 
 // const quickLinks = [
@@ -260,6 +261,7 @@ export default function App() {
           <Route path="/explore" element={<ExploreLinks />} />
           <Route path="/" element={<ExploreLinks />} />
           <Route path="/all-steps" element={<AllSteps />} />
+          <Route path="/steps-library" element={<StepsLibrary />} />
         </Routes>
       </div>
     </>
