@@ -1,32 +1,52 @@
 export default function SetupEnvironment() {
   return (
     <>
-      <h2>Step 5: Setup Environment</h2>
-      <p>Install project dependencies and configure your development environment.</p>
+      <h2>Setup Development Environment</h2>
+      <p>Configure environment variables and development settings for your projects.</p>
 
-      <h3>Install Node.js Dependencies</h3>
-      <p>Most projects use npm or yarn for package management:</p>
-
-      <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-3)' }}>
-        <code style={{ display: 'block', marginBottom: 'var(--space-2)' }}>
-          npm install
-        </code>
-        <p style={{ margin: 'var(--space-2) 0 0', color: 'var(--color-neutral-700)', fontSize: '0.9rem' }}>or</p>
-        <code style={{ display: 'block', marginTop: 'var(--space-2)' }}>
-          yarn install
-        </code>
+      <div className="callout" style={{ background: '#e3f2fd', borderColor: '#90caf9', color: '#0d47a1', marginTop: 'var(--space-3)' }}>
+        <strong>What are Environment Variables?</strong>
+        <p style={{ margin: '8px 0 0', fontSize: '0.9rem' }}>
+          Environment variables store configuration values like API keys, database URLs, and feature flags without hardcoding them.
+        </p>
       </div>
 
-      <h3>Environment Variables</h3>
-      <p>Create a <code>.env</code> file if needed:</p>
-      <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-3)' }}>
-        <code style={{ display: 'block' }}>cp .env.example .env</code>
+      <h3 style={{ marginTop: 'var(--space-4)' }}>Create .env File</h3>
+      <p>Most projects use a <code>.env</code> file for local development:</p>
+
+      <ol>
+        <li>Copy the example file: <code>cp .env.example .env</code></li>
+        <li>Edit <code>.env</code> with your local values</li>
+        <li>Never commit <code>.env</code> to git (it's in <code>.gitignore</code>)</li>
+      </ol>
+
+      <h3 style={{ marginTop: 'var(--space-4)' }}>Common Environment Variables</h3>
+      <pre style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', overflow: 'auto' }}>
+        <code>{`# Database
+DATABASE_URL=postgresql://localhost:5432/mydb
+
+# API Keys (get from team)
+GITHUB_TOKEN=your_token_here
+JIRA_API_TOKEN=your_token_here
+
+# Feature Flags
+ENABLE_AI_FEATURES=true
+NODE_ENV=development`}</code>
+      </pre>
+
+      <div className="callout" style={{ background: '#fff3cd', borderColor: '#ffeaa7', color: '#856404', marginTop: 'var(--space-3)' }}>
+        <strong>Security:</strong>
+        <p style={{ margin: '8px 0 0', fontSize: '0.9rem' }}>
+          Never share your <code>.env</code> file or commit it to version control. Use <code>.env.example</code> as a template.
+        </p>
       </div>
 
-      <h3>Run the Project</h3>
-      <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-3)' }}>
+      <h3 style={{ marginTop: 'var(--space-4)' }}>Verify Setup</h3>
+      <p>Check that your environment is configured:</p>
+      <pre style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', overflow: 'auto' }}>
         <code>npm run dev</code>
-      </div>
+      </pre>
+      <p style={{ marginTop: 'var(--space-2)' }}>If the application starts successfully, your environment is configured correctly.</p>
     </>
   )
 }

@@ -1,0 +1,219 @@
+// Use Cases Database Service Layer
+// CRUD operations for use cases
+
+import { query, getClient } from './connection.ts';
+import type { UseCase, UseCaseRow } from './models/index.ts';
+import { rowToUseCase, useCaseToInsertData } from './models/index.ts';
+
+export class UseCasesService {
+  // Create a new use case
+  async createUseCase(useCaseData: Partial<UseCase>): Promise<UseCase> {
+    const data = useCaseToInsertData(useCaseData);
+    
+    const result = await query(
+      `INSERT INTO use_cases (
+        title, description, category, tags, step_ids, user_id,
+        created_by, status, estimated_duration, difficulty_level, prerequisites
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      RETURNING *`,
+      [
+        data.title,
+        data.description,
+        data.category,
+        data.tags,
+        data.step_ids,
+        data.user_id,
+        data.created_by,
+        data.status,
+        data.estimated_duration,
+        data.difficulty_level,
+        data.prerequisites,
+      ]
+    );
+
+    return rowToUseCase(result.rows[0]);
+  }
+
+  // Get a use case by ID
+  async getUseCaseById(id: string): Promise<UseCase | null> {
+    const result = await query('SELECT * FROM use_cases WHERE id = $1', [id]);
+    
+    if (result.rows.length === 0) {
+      return null;
+    }
+
+    return rowToUseCase(result.rows[0]);
+  }
+
+  // Get all use cases with optional filters
+  async getUseCases(filters?: {
+    status?: string;
+    category?: string;
+    tags?: string[];
+    user_id?: string;
+  }): Promise<UseCase[]> {
+    let queryText = 'SELECT * FROM use_cases WHERE 1=1';
+    const params: any[] = [];
+    let paramCount = 1;
+
+    if (filters?.status) {
+      queryText += ` AND status = $${paramCount}`;
+      params.push(filters.status);
+      paramCount++;
+    }
+
+    if (filters?.category) {
+      queryText += ` AND category = $${paramCount}`;
+      params.push(filters.category);
+      paramCount++;
+    }
+
+    if (filters?.tags && filters.tags.length > 0) {
+      queryText += ` AND tags && $${paramCount}`;
+      params.push(filters.tags);
+      paramCount++;
+    }
+
+    if (filters?.user_id) {
+      queryText += ` AND user_id = $${paramCount}`;
+      params.push(filters.user_id);
+      paramCount++;
+    }
+
+    queryText += ' ORDER BY created_at DESC';
+
+    const result = await query(queryText, params);
+    return result.rows.map(rowToUseCase);
+  }
+
+  // Update a use case
+  async updateUseCase(id: string, useCaseData: Partial<UseCase>): Promise<UseCase> {
+    const client = await getClient();
+    
+    try {
+      await client.query('BEGIN');
+
+      // Build update query dynamically
+      const updates: string[] = [];
+      const params: any[] = [];
+      let paramCount = 1;
+
+      if (useCaseData.title !== undefined) {
+        updates.push(`title = $${paramCount}`);
+        params.push(useCaseData.title);
+        paramCount++;
+      }
+
+      if (useCaseData.description !== undefined) {
+        updates.push(`description = $${paramCount}`);
+        params.push(useCaseData.description);
+        paramCount++;
+      }
+
+      if (useCaseData.category !== undefined) {
+        updates.push(`category = $${paramCount}`);
+        params.push(useCaseData.category);
+        paramCount++;
+      }
+
+      if (useCaseData.tags !== undefined) {
+        updates.push(`tags = $${paramCount}`);
+        params.push(useCaseData.tags);
+        paramCount++;
+      }
+
+      if (useCaseData.step_ids !== undefined) {
+        updates.push(`step_ids = $${paramCount}`);
+        params.push(useCaseData.step_ids);
+        paramCount++;
+      }
+
+      if (useCaseData.user_id !== undefined) {
+        updates.push(`user_id = $${paramCount}`);
+        params.push(useCaseData.user_id);
+        paramCount++;
+      }
+
+      if (useCaseData.status !== undefined) {
+        updates.push(`status = $${paramCount}`);
+        params.push(useCaseData.status);
+        paramCount++;
+      }
+
+      if (useCaseData.estimated_duration !== undefined) {
+        updates.push(`estimated_duration = $${paramCount}`);
+        params.push(useCaseData.estimated_duration);
+        paramCount++;
+      }
+
+      if (useCaseData.difficulty_level !== undefined) {
+        updates.push(`difficulty_level = $${paramCount}`);
+        params.push(useCaseData.difficulty_level);
+        paramCount++;
+      }
+
+      if (useCaseData.prerequisites !== undefined) {
+        updates.push(`prerequisites = $${paramCount}`);
+        params.push(useCaseData.prerequisites);
+        paramCount++;
+      }
+
+      // Always update updated_at
+      updates.push(`updated_at = CURRENT_TIMESTAMP`);
+
+      params.push(id); // For WHERE clause
+      const whereParam = paramCount;
+
+      const updateQuery = `
+        UPDATE use_cases 
+        SET ${updates.join(', ')}
+        WHERE id = $${whereParam}
+        RETURNING *
+      `;
+
+      const result = await client.query(updateQuery, params);
+
+      if (result.rows.length === 0) {
+        throw new Error('Use case not found');
+      }
+
+      await client.query('COMMIT');
+
+      return rowToUseCase(result.rows[0]);
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  // Delete a use case
+  async deleteUseCase(id: string): Promise<boolean> {
+    const result = await query('DELETE FROM use_cases WHERE id = $1', [id]);
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  // Get use cases with associated step details
+  async getUseCaseWithSteps(id: string): Promise<{ useCase: UseCase; steps: any[] } | null> {
+    const useCase = await this.getUseCaseById(id);
+    
+    if (!useCase || !useCase.step_ids || useCase.step_ids.length === 0) {
+      return useCase ? { useCase, steps: [] } : null;
+    }
+
+    // Fetch associated steps
+    const stepsResult = await query(
+      'SELECT * FROM steps WHERE id = ANY($1) ORDER BY array_position($1, id)',
+      [useCase.step_ids]
+    );
+
+    return {
+      useCase,
+      steps: stepsResult.rows
+    };
+  }
+}
+
+// Export singleton instance
+export const useCasesService = new UseCasesService();

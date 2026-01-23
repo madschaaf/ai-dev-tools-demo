@@ -3,6 +3,9 @@ import '../styles/theme.css';
 import { DYNAMIC_STEPS, type DynamicStep } from './Steps/DynamicSteps/stepsData';
 import AIAutofillUpload, { type AutofillData } from '../components/AIAutofillUpload';
 import AIAutofillModal, { type AutofillOption } from '../components/AIAutofillModal';
+import { StepContentRenderer } from '../components/StepContentRenderer';
+import { StepContentEditor } from '../components/StepContentEditor';
+import type { DetailedContentItem } from '../components/StepContentRenderer';
 
 // Import step components from DynamicSteps
 import RequestAccess from './Steps/DynamicSteps/RequestAccess';
@@ -10,6 +13,8 @@ import LocalAdminAccess from './Steps/DynamicSteps/LocalAdminAccess';
 import VerifySecurity from './Steps/DynamicSteps/VerifySecurity';
 import InstallNode from './Steps/DynamicSteps/InstallNode';
 import InstallVSCode from './Steps/DynamicSteps/InstallVSCode';
+import InstallChrome from './Steps/DynamicSteps/InstallChrome';
+import InstallGleanExtension from './Steps/DynamicSteps/InstallGleanExtension';
 import SetupGithubCopilot from './Steps/DynamicSteps/SetupGithubCopilot';
 
 interface Step {
@@ -79,6 +84,11 @@ export default function UseCasePrototype() {
   const [editStepTitle, setEditStepTitle] = useState('');
   const [editStepDescription, setEditStepDescription] = useState('');
   const [stepComments, setStepComments] = useState<{[key: string]: string}>({});
+  
+  // Content editing state
+  const [isEditingContent, setIsEditingContent] = useState(false);
+  const [editingContent, setEditingContent] = useState<DetailedContentItem[]>([]);
+  const [customStepContent, setCustomStepContent] = useState<{[key: string]: DetailedContentItem[]}>({});
   
   // AI Autofill state
   const [autofillData, setAutofillData] = useState<AutofillData | null>(null);
@@ -350,6 +360,47 @@ export default function UseCasePrototype() {
     setStepComments({ ...stepComments, [stepId]: comment });
   };
 
+  // Content editing handlers
+  const startEditingContent = (stepId: string) => {
+    const fullStepData = DYNAMIC_STEPS.find(s => s.id === stepId);
+    const customContent = customStepContent[stepId];
+    
+    if (customContent) {
+      setEditingContent([...customContent]);
+    } else if (fullStepData?.detailed_content) {
+      setEditingContent([...fullStepData.detailed_content]);
+    } else {
+      // Create default content from description
+      const step = generatedSteps.find(s => s.id === stepId);
+      setEditingContent([{
+        id: 'intro',
+        type: 'text',
+        text: step?.description || ''
+      }]);
+    }
+    setIsEditingContent(true);
+  };
+
+  const handleContentChange = (newContent: DetailedContentItem[]) => {
+    setEditingContent(newContent);
+  };
+
+  const saveContentEdit = () => {
+    if (selectedStepId) {
+      setCustomStepContent({
+        ...customStepContent,
+        [selectedStepId]: editingContent
+      });
+    }
+    setIsEditingContent(false);
+    setEditingContent([]);
+  };
+
+  const cancelContentEdit = () => {
+    setIsEditingContent(false);
+    setEditingContent([]);
+  };
+
   const addPredefinedStep = (step: Step) => {
     if (!generatedSteps.find(s => s.id === step.id)) {
       setGeneratedSteps([...generatedSteps, step]);
@@ -492,20 +543,17 @@ export default function UseCasePrototype() {
       case 'verify-sso-ping':
         return <VerifySecurity onComplete={() => {}} isCompleted={false} onNext={() => {}} />;
       case 'request-secure-access':
-        const accessItems = [];
-        if (toolsAndTechnologies.includes('GitHub Copilot')) {
-          accessItems.push(
-            { key: 'github', name: 'eBay GitHub Access', description: 'Access to GitHub Enterprise (github.corp.ebay.com)' },
-            { key: 'copilot', name: 'github-emu-copilot', description: 'Access to GitHub Copilot AI assistant' }
-          );
-        }
-        if (toolsAndTechnologies.includes('Jira') || businessUnit === 'Engineering') {
-          accessItems.push({ key: 'jira', name: 'CORP Citrix Jira Access', description: 'Access to Jira for project management' });
-        }
-        return <RequestAccess accessItems={accessItems} userName={useCaseLeadName} />;
+        // @ts-ignore
+        return <RequestAccess />;
       case 'request-local-admin':
         // @ts-ignore
         return <LocalAdminAccess />;
+      case 'install-chrome':
+        // @ts-ignore
+        return <InstallChrome />;
+      case 'install-glean-extension':
+        // @ts-ignore
+        return <InstallGleanExtension />;
       case 'install-nodejs':
         // @ts-ignore
         return <InstallNode />;
@@ -1833,44 +1881,95 @@ export default function UseCasePrototype() {
                     ) : (
                       /* View Mode */
                       <>
-                        {getStepComponent(selectedStep.id) || (
-                          <>
-                            <h2>{selectedStep.title}</h2>
-                            <p style={{ whiteSpace: 'pre-wrap' }}>{selectedStep.description}</p>
-                          </>
-                        )}
+                        {(() => {
+                          const fullStepData = DYNAMIC_STEPS.find(s => s.id === selectedStep.id);
+                          const stepComponent = getStepComponent(selectedStep.id);
+                          
+                          if (stepComponent) {
+                            return stepComponent;
+                          } else if (fullStepData?.detailed_content) {
+                            return (
+                              <>
+                                <h2>{selectedStep.title}</h2>
+                                <StepContentRenderer content={fullStepData.detailed_content} />
+                              </>
+                            );
+                          } else {
+                            return (
+                              <>
+                                <h2>{selectedStep.title}</h2>
+                                <p style={{ whiteSpace: 'pre-wrap' }}>{selectedStep.description}</p>
+                              </>
+                            );
+                          }
+                        })()}
                         
                         <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #eee' }}>
-                          <button
-                            onClick={() => startEditStep(selectedStep)}
-                            style={{
-                              padding: '8px 16px',
-                              backgroundColor: '#0064d2',
-                              color: 'white',
-                              border: 'none',
-                              borderRadius: '4px',
-                              cursor: 'pointer',
-                              marginRight: '10px'
-                            }}
-                          >
-                            Edit Step
-                          </button>
-                          <button
-                            onClick={() => {
-                              const comment = prompt('Add a comment for this step:');
-                              if (comment) addStepComment(selectedStep.id, comment);
-                            }}
-                            style={{
-                              padding: '8px 16px',
-                              backgroundColor: 'white',
-                              color: '#0064d2',
-                              border: '2px solid #0064d2',
-                              borderRadius: '4px',
-                              cursor: 'pointer'
-                            }}
-                          >
-                            Add Comment
-                          </button>
+                          {isEditingContent ? (
+                            <StepContentEditor
+                              content={editingContent}
+                              onChange={handleContentChange}
+                              onCancel={cancelContentEdit}
+                              onSave={saveContentEdit}
+                            />
+                          ) : (
+                            <>
+                              {(() => {
+                                const fullStepData = DYNAMIC_STEPS.find(s => s.id === selectedStep.id);
+                                const hasStructuredContent = fullStepData?.detailed_content || customStepContent[selectedStep.id];
+                                
+                                return hasStructuredContent ? (
+                                  <button
+                                    onClick={() => startEditingContent(selectedStep.id)}
+                                    style={{
+                                      padding: '8px 16px',
+                                      backgroundColor: '#ff9800',
+                                      color: 'white',
+                                      border: 'none',
+                                      borderRadius: '4px',
+                                      cursor: 'pointer',
+                                      marginRight: '10px',
+                                      fontWeight: '600'
+                                    }}
+                                  >
+                                    ✏️ Edit Content
+                                  </button>
+                                ) : null;
+                              })()}
+                              
+                              <button
+                                onClick={() => startEditStep(selectedStep)}
+                                style={{
+                                  padding: '8px 16px',
+                                  backgroundColor: '#0064d2',
+                                  color: 'white',
+                                  border: 'none',
+                                  borderRadius: '4px',
+                                  cursor: 'pointer',
+                                  marginRight: '10px'
+                                }}
+                              >
+                                Edit Step
+                              </button>
+                              
+                              <button
+                                onClick={() => {
+                                  const comment = prompt('Add a comment for this step:');
+                                  if (comment) addStepComment(selectedStep.id, comment);
+                                }}
+                                style={{
+                                  padding: '8px 16px',
+                                  backgroundColor: 'white',
+                                  color: '#0064d2',
+                                  border: '2px solid #0064d2',
+                                  borderRadius: '4px',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                Add Comment
+                              </button>
+                            </>
+                          )}
                         </div>
 
                         {stepComments[selectedStep.id] && (

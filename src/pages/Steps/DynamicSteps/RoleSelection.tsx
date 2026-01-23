@@ -1,12 +1,8 @@
-interface RoleSelectionProps {
-  onComplete: () => void
-  isCompleted: boolean
-  onNext: () => void
-  onRoleSelect: (role: string) => void
-  selectedRole: string | null
-}
+import { useState } from 'react'
 
-export default function RoleSelection({ onComplete, isCompleted, onNext, onRoleSelect, selectedRole }: RoleSelectionProps) {
+export default function RoleSelection() {
+  const [selectedRole, setSelectedRole] = useState<string | null>(null)
+
   const roles = [
     {
       id: 'frontend',
@@ -80,19 +76,12 @@ export default function RoleSelection({ onComplete, isCompleted, onNext, onRoleS
     }
   ]
 
-  const handleRoleSelection = (roleId: string) => {
-    onRoleSelect(roleId)
-    if (!isCompleted) {
-      onComplete()
-    }
-  }
-
   return (
     <>
-      <h2>Select Your Engineer Role</h2>
+      <h2>Step 0: Select Your Engineer Role</h2>
       <p>Choose your primary engineering role to get a personalized setup experience. We'll tailor the setup steps to include tools and configurations specific to your role.</p>
 
-      {isCompleted && selectedRole && (
+      {selectedRole && (
         <div className="callout" style={{ background: '#d4edda', borderColor: '#28a745', color: '#155724', marginTop: 'var(--space-3)' }}>
           <strong>✓ Role Selected:</strong> {roles.find(r => r.id === selectedRole)?.name}
           <p style={{ margin: '8px 0 0', fontSize: '0.9rem' }}>You can change this selection anytime by clicking a different role below.</p>
@@ -104,7 +93,7 @@ export default function RoleSelection({ onComplete, isCompleted, onNext, onRoleS
           <button
             key={role.id}
             type="button"
-            onClick={() => handleRoleSelection(role.id)}
+            onClick={() => setSelectedRole(role.id)}
             className="button"
             style={{
               textAlign: 'left',
@@ -149,18 +138,29 @@ export default function RoleSelection({ onComplete, isCompleted, onNext, onRoleS
         <strong>Note:</strong> All engineers will complete core setup steps (Node.js, Git, VS Code, etc.). Your role selection adds specific tools and configurations relevant to your work.
       </div>
 
-      {isCompleted && (
-        <div style={{ marginTop: 'var(--space-4)', textAlign: 'center' }}>
-          <button
-            type="button"
-            onClick={onNext}
-            className="button primary"
-            style={{ padding: '12px 24px', fontSize: '1rem' }}
-          >
-            Continue to Next Step →
-          </button>
-        </div>
-      )}
+      <h3 style={{ marginTop: 'var(--space-4)' }}>Why Select a Role?</h3>
+      <ul>
+        <li><strong>Personalized Setup:</strong> Get tools and configurations specific to your engineering discipline</li>
+        <li><strong>Relevant Tools:</strong> Only install what you need for your daily work</li>
+        <li><strong>Faster Onboarding:</strong> Skip irrelevant setup steps and get coding faster</li>
+        <li><strong>Best Practices:</strong> Learn role-specific best practices and workflows</li>
+      </ul>
+
+      <h3 style={{ marginTop: 'var(--space-4)' }}>What Happens Next?</h3>
+      <p>Based on your role selection, the setup guide will:</p>
+      <ol>
+        <li>Include role-specific development tools</li>
+        <li>Configure your IDE with relevant extensions</li>
+        <li>Set up frameworks and libraries you'll use</li>
+        <li>Provide role-specific AI coding assistants and MCPs</li>
+      </ol>
+
+      <div className="callout" style={{ background: '#e8f4f8', borderColor: '#bee5eb', color: '#0c5460', marginTop: 'var(--space-3)' }}>
+        <strong>Can I Change My Role Later?</strong>
+        <p style={{ margin: '8px 0 0', fontSize: '0.9rem' }}>
+          Yes! You can always come back to this step and select a different role. Your setup steps will automatically update to match your new selection.
+        </p>
+      </div>
     </>
   )
 }

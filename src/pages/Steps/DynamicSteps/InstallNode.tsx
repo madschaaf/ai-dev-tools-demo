@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getUserOS } from './UserInfo'
+import { getUserOS } from '../steps/UserInfo'
 
 export default function InstallNode() {
   const [downloadStarted, setDownloadStarted] = useState(false)
@@ -47,7 +47,8 @@ export default function InstallNode() {
 
   return (
     <>
-      <h2>Step 5: Install Node.js</h2>
+      <h2>Install Node.js</h2>
+      <p>Install Node.js, the JavaScript runtime that powers modern web development. Node.js lets you run JavaScript on your computer (not just in browsers) and includes npm for managing packages and dependencies.</p>
 
       {!userOS && (
         <div className="callout" style={{ background: '#fff3cd', borderColor: '#ffeaa7', color: '#856404', marginTop: 'var(--space-4)' }}>
@@ -462,8 +463,12 @@ export default function InstallNode() {
         </>
       )}
 
-      <h3 style={{ marginTop: 'var(--space-4)' }}>Verify Installation</h3>
-      <p>Open {userOS === 'windows' ? 'PowerShell' : 'Terminal'} and verify Node.js and npm are installed:</p>
+      <h3 style={{ marginTop: 'var(--space-4)' }}>Verification</h3>
+      <p>After installation, open a new {userOS === 'windows' ? 'PowerShell' : 'Terminal'} window and verify Node.js and npm are installed:</p>
+
+      <div className="callout" style={{ background: '#fff3cd', borderColor: '#ffeaa7', color: '#856404', marginBottom: 'var(--space-2)' }}>
+        <strong>Important:</strong> Close and reopen your terminal after installation for the changes to take effect.
+      </div>
       <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--space-3)', marginBottom: 'var(--space-2)' }}>
           <code style={{ flex: 1 }}>node --version</code>
@@ -516,7 +521,35 @@ export default function InstallNode() {
       </div>
 
 
-      <div style={{ marginTop: 'var(--space-4)', display: 'flex', gap: 'var(--space-3)' }}>
+      <div className="callout" style={{ background: '#d4edda', borderColor: '#c3e6cb', color: '#155724', marginTop: 'var(--space-4)' }}>
+        <strong>✓ Node.js Installed Successfully!</strong>
+        <p style={{ margin: '8px 0 0' }}>
+          You now have Node.js, npm, and npx ready to use. You can now install packages, run build tools, and develop modern JavaScript applications.
+        </p>
+      </div>
+
+      <h3 style={{ marginTop: 'var(--space-4)' }}>Troubleshooting</h3>
+      <div className="callout" style={{ background: '#fff3cd', borderColor: '#ffeaa7', color: '#856404' }}>
+        <strong>Common Issues:</strong>
+        <ul style={{ margin: '8px 0 0', paddingLeft: '20px' }}>
+          <li><strong>Command not found:</strong> Close and reopen your terminal after installation</li>
+          <li><strong>Permission errors (Mac):</strong> Using nvm avoids these issues. If using the installer, you may need to use <code>sudo</code> for global npm installs</li>
+          <li><strong>Old version showing:</strong> You may have an older Node.js version installed. Uninstall it first or use nvm to manage multiple versions</li>
+          <li><strong>npm not found (Windows):</strong> Check that Node.js bin folder is in your PATH environment variable</li>
+          <li><strong>Installation hangs:</strong> Try downloading the installer again or check your antivirus isn't blocking it</li>
+        </ul>
+      </div>
+
+      <h3 style={{ marginTop: 'var(--space-4)' }}>Next Steps</h3>
+      <p>With Node.js installed, you can now:</p>
+      <ul>
+        <li>Install development tools and packages with npm</li>
+        <li>Run JavaScript build tools and bundlers</li>
+        <li>Start development servers for web applications</li>
+        <li>Use npx to run packages without installing them globally</li>
+      </ul>
+
+      <div style={{ marginTop: 'var(--space-4)', display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap' }}>
         <a
           className="button ghost"
           href="https://nodejs.org/en/learn/getting-started/introduction-to-nodejs"
@@ -524,6 +557,22 @@ export default function InstallNode() {
           rel="noopener noreferrer"
         >
           Node.js Documentation
+        </a>
+        <a
+          className="button ghost"
+          href="https://docs.npmjs.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          npm Documentation
+        </a>
+        <a
+          className="button ghost"
+          href="https://github.com/nvm-sh/nvm#readme"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          nvm Documentation
         </a>
       </div>
     </>

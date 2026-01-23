@@ -9,6 +9,7 @@ import UseCasePrototype from './pages/UseCasePrototype'
 import Workflow from './pages/Workflow'
 import AllSteps from './pages/Steps/AllSteps.tsx'
 import ReviewStepsLibrary from './pages/ReviewStepsLibrary'
+import Library from './pages/Library'
 import heroVideo from './assets/ai-ideas.mp4'
 import robotVideo from './assets/ai-robot.mp4'
 
@@ -267,6 +268,7 @@ export default function App() {
           <Route path="/" element={<ExploreLinks />} />
           <Route path="/all-steps" element={<AllSteps />} />
           <Route path="/review-submissions" element={<ReviewStepsLibrary />} />
+          <Route path="/library" element={<Library />} />
         </Routes>
       </div>
     </>

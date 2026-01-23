@@ -1,95 +1,69 @@
 export default function SetupGitHubEnterprise() {
   return (
     <>
-      <h2>Step 8: Setup GitHub Enterprise</h2>
-      <p>Configure GitHub Enterprise for eBay's internal repositories. This step requires your GitHub Enterprise access to be approved from Step 6.</p>
+      <h2>Setup GitHub Enterprise</h2>
+      <p>Configure access to eBay's GitHub Enterprise for internal repositories and collaboration.</p>
 
-      <div className="callout" style={{ background: '#fff3cd', borderColor: '#ffeaa7', color: '#856404', marginTop: 'var(--space-4)' }}>
-        <strong>Prerequisites:</strong> Make sure your "eBay GitHub Access" request from Step 6 has been approved before proceeding.
+      <div className="callout" style={{ background: '#e3f2fd', borderColor: '#90caf9', color: '#0d47a1', marginTop: 'var(--space-3)' }}>
+        <strong>GitHub Enterprise vs GitHub.com:</strong>
+        <p style={{ margin: '8px 0 0', fontSize: '0.9rem' }}>
+          eBay uses GitHub Enterprise (github.corp.ebay.com) for internal code. You'll use both platforms.
+        </p>
       </div>
 
-      <h3 style={{ marginTop: 'var(--space-4)' }}>Access GitHub Enterprise</h3>
-      <p>
-        Go to{' '}
-        <a href="https://github.corp.ebay.com/" target="_blank" rel="noopener noreferrer">
-          github.corp.ebay.com
-        </a>{' '}
-        and sign in with your eBay credentials.
-      </p>
-
-      <h3 style={{ marginTop: 'var(--space-4)' }}>Create Personal Access Token (Classic)</h3>
-      <p>This token will be used for Cline with MCP Servers.</p>
-
+      <h3 style={{ marginTop: 'var(--space-4)' }}>1. Access GitHub Enterprise</h3>
       <ol>
-        <li>In GitHub Enterprise, go to Settings → Developer settings → Personal access tokens → Tokens (classic)</li>
-        <li>Click "Generate new token (classic)"</li>
-        <li>Give it a descriptive name (e.g., "Cline MCP Token")</li>
-        <li>Select scopes:
-          <ul>
-            <li><code>repo</code> (Full control of private repositories)</li>
-            <li><code>workflow</code> (Update GitHub Action workflows)</li>
-            <li><code>read:org</code> (Read org and team membership)</li>
-          </ul>
-        </li>
-        <li>Set expiration (recommend 90 days for security)</li>
-        <li>Click "Generate token"</li>
-        <li><strong>IMPORTANT:</strong> Copy the token immediately and save it securely - you won't be able to see it again!</li>
+        <li>Visit <a href="https://github.corp.ebay.com" target="_blank" rel="noopener noreferrer">github.corp.ebay.com</a></li>
+        <li>Sign in with your eBay credentials</li>
+        <li>Complete any required authentication (PingID, YubiKey)</li>
       </ol>
+
+      <h3 style={{ marginTop: 'var(--space-4)' }}>2. Configure Git for Enterprise</h3>
+      <p>Set up your Git configuration for both GitHub Enterprise and GitHub.com:</p>
+
+      <pre style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', overflow: 'auto' }}>
+        <code>{`# Set up SSH for GitHub Enterprise
+ssh-keygen -t ed25519 -C "your.email@ebay.com"
+
+# Add SSH key to ssh-agent
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_ed25519`}</code>
+      </pre>
+
+      <h3 style={{ marginTop: 'var(--space-4)' }}>3. Add SSH Key to GitHub Enterprise</h3>
+      <ol>
+        <li>Copy your SSH public key:
+          <pre style={{ background: '#f6f8fa', padding: 'var(--space-2)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)' }}>
+            <code>cat ~/.ssh/id_ed25519.pub</code>
+          </pre>
+        </li>
+        <li>Go to GitHub Enterprise Settings → SSH and GPG keys</li>
+        <li>Click "New SSH key"</li>
+        <li>Paste your public key and save</li>
+      </ol>
+
+      <h3 style={{ marginTop: 'var(--space-4)' }}>4. Test Connection</h3>
+      <pre style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', overflow: 'auto' }}>
+        <code>ssh -T git@github.corp.ebay.com</code>
+      </pre>
+      <p style={{ marginTop: 'var(--space-2)' }}>You should see a success message confirming authentication.</p>
 
       <div className="callout" style={{ background: '#fff3cd', borderColor: '#ffeaa7', color: '#856404', marginTop: 'var(--space-3)' }}>
-        <strong>Save Your Token:</strong> Store this token in a secure password manager. You'll need it for configuring Cline in Step 10.
+        <strong>Need Access?</strong>
+        <p style={{ margin: '8px 0 0', fontSize: '0.9rem' }}>
+          If you can't access GitHub Enterprise, contact your manager or IT support to request access.
+        </p>
       </div>
 
-      <h3 style={{ marginTop: 'var(--space-4)' }}>Link Enterprise to Personal Account</h3>
-      <ol>
-        <li>In GitHub Enterprise, go to Settings → Organizations</li>
-        <li>Find "eBay" organization</li>
-        <li>Click "Connect" or "Link" to connect your personal GitHub account</li>
-        <li>Follow the prompts to authorize the connection</li>
-      </ol>
+      <h3 style={{ marginTop: 'var(--space-4)' }}>5. Clone Enterprise Repositories</h3>
+      <p>Once configured, you can clone eBay internal repositories:</p>
+      <pre style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', overflow: 'auto' }}>
+        <code>git clone git@github.corp.ebay.com:org-name/repo-name.git</code>
+      </pre>
 
-      <h3 style={{ marginTop: 'var(--space-4)' }}>Token Configuration Reference</h3>
-      <p>You'll use these configurations later when setting up MCP servers:</p>
-
-      <h4>For GitHub Enterprise (github.corp.ebay.com):</h4>
-      <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)', overflowX: 'auto' }}>
-        <pre style={{ margin: 0, fontSize: '0.85rem' }}>{`"env": {
-  "GITHUB_TOKEN": "<your enterprise PAT>",
-  "GITHUB_API_URL": "https://github.corp.ebay.com/api/v3"
-}`}</pre>
-      </div>
-
-      <h4 style={{ marginTop: 'var(--space-3)' }}>For Personal GitHub (github.com):</h4>
-      <div style={{ background: '#f6f8fa', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginTop: 'var(--space-2)', overflowX: 'auto' }}>
-        <pre style={{ margin: 0, fontSize: '0.85rem' }}>{`"env": {
-  "GITHUB_TOKEN": "<your github.com fine-grained PAT>",
-  "GITHUB_API_URL": "https://api.github.com"
-}`}</pre>
-      </div>
-
-      <h3 style={{ marginTop: 'var(--space-4)' }}>Next Steps</h3>
-      <p>With GitHub Enterprise configured, you're ready to:</p>
-      <ul>
-        <li>Install the Obsidian Workflow App (Step 9)</li>
-        <li>Install and configure Cline with your access token (Step 10)</li>
-      </ul>
-
-      <div style={{ marginTop: 'var(--space-4)', display: 'flex', gap: 'var(--space-3)' }}>
-        <a
-          className="button"
-          href="https://github.corp.ebay.com/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+      <div style={{ marginTop: 'var(--space-4)' }}>
+        <a className="button" href="https://github.corp.ebay.com" target="_blank" rel="noopener noreferrer">
           Open GitHub Enterprise
-        </a>
-        <a
-          className="button ghost"
-          href="https://github.corp.ebay.com/settings/tokens"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Create Access Token
         </a>
       </div>
     </>
