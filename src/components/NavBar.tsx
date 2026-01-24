@@ -14,12 +14,12 @@ export default function NavBar() {
           <NavLink to="/" className="nav-link" end>Explore Links</NavLink>
           <NavLink to="/vscode-extensions" className="nav-link">VS Code Extensions</NavLink>
           <NavLink to="/ai-sandbox" className="nav-link">AI Sandbox</NavLink>
-          <NavLink to="/library" className="nav-link">Library</NavLink>
           <NavLink to="/use-cases" className="nav-link">Use Cases</NavLink>
           <NavLink to="/workflow" className="nav-link">Workflows</NavLink>
           <NavLink to="/all-steps" className="nav-link">All Steps</NavLink>
           <NavLink to="/use-case-prototype" className="nav-link">Use Case Prototype</NavLink>
           <NavLink to="/review-submissions" className="nav-link">Review Submissions</NavLink>
+           <NavLink to="/library" className="nav-link">Library</NavLink>
         </div>
 
         <div className="navbar-actions">

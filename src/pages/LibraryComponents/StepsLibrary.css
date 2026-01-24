@@ -474,6 +474,56 @@
   background: #555;
 }
 
+/* Edit Mode Split View */
+.edit-split-view {
+  display: flex;
+  gap: 2rem;
+  height: 100%;
+}
+
+.edit-editor-section {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  padding-right: 1rem;
+}
+
+.edit-preview-section {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  padding-left: 1rem;
+  border-left: 2px solid #e0e0e0;
+}
+
+.edit-preview-section::-webkit-scrollbar,
+.edit-editor-section::-webkit-scrollbar {
+  width: 8px;
+}
+
+.edit-preview-section::-webkit-scrollbar-track,
+.edit-editor-section::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.edit-preview-section::-webkit-scrollbar-thumb,
+.edit-editor-section::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.edit-preview-section::-webkit-scrollbar-thumb:hover,
+.edit-editor-section::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Full Width Panel (when steps list is hidden) */
+.step-detail-panel.full-width {
+  flex: 0 0 100%;
+  max-width: 100%;
+}
+
 .modal-header {
   display: flex;
   justify-content: space-between;

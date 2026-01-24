@@ -31,6 +31,7 @@ export default function StepsLibrary({ userRole }: StepsLibraryProps) {
   // Split-view state
   const [selectedStepId, setSelectedStepId] = useState<string | null>(null);
   const [isEditingContent, setIsEditingContent] = useState(false);
+  const [showEditPreview, setShowEditPreview] = useState(false);
   const [editingContent, setEditingContent] = useState<DetailedContentItem[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newStepData, setNewStepData] = useState({
@@ -171,7 +172,12 @@ export default function StepsLibrary({ userRole }: StepsLibraryProps) {
 
   const handleCancelEdit = () => {
     setIsEditingContent(false);
+    setShowEditPreview(false);
     setEditingContent([]);
+  };
+
+  const toggleEditPreview = () => {
+    setShowEditPreview(!showEditPreview);
   };
 
   const canEdit = userRole === 'ai_team_member' || userRole === 'admin';
@@ -315,8 +321,9 @@ export default function StepsLibrary({ userRole }: StepsLibraryProps) {
         </div>
       ) : (
         <div className="split-view-container">
-          {/* Left side: Steps table (50%) */}
-          <div className="steps-list-panel">
+          {/* Left side: Steps table (50%) - Hidden when editing with preview */}
+          {!(isEditingContent && showEditPreview) && (
+            <div className="steps-list-panel">
             <div className="steps-list">
               <table className="steps-table">
                 <thead>
@@ -356,9 +363,10 @@ export default function StepsLibrary({ userRole }: StepsLibraryProps) {
               </table>
             </div>
           </div>
+          )}
 
-          {/* Right side: Step detail view (50%) */}
-          <div className="step-detail-panel">
+          {/* Right side: Step detail view (50%) OR full width when preview shown */}
+          <div className={`step-detail-panel ${isEditingContent && showEditPreview ? 'full-width' : ''}`}>
             {selectedStep ? (
               <div className="step-detail-content">
                 <div className="step-detail-header">
@@ -387,12 +395,96 @@ export default function StepsLibrary({ userRole }: StepsLibraryProps) {
 
                 <div className="step-content-area">
                   {isEditingContent ? (
-                    <StepContentEditor
-                      content={editingContent}
-                      onChange={handleContentChange}
-                      onCancel={handleCancelEdit}
-                      onSave={handleSaveContent}
-                    />
+                    <div className={showEditPreview ? 'edit-split-view' : ''}>
+                      {/* Editor Section */}
+                      <div className={showEditPreview ? 'edit-editor-section' : ''}>
+                        {/* Preview Toggle Button */}
+                        <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'flex-end' }}>
+                          <button
+                            onClick={toggleEditPreview}
+                            style={{
+                              padding: '0.5rem 1rem',
+                              background: showEditPreview ? '#dc3545' : '#17a2b8',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              fontSize: '0.9rem',
+                              fontWeight: '500',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem',
+                              transition: 'all 0.2s'
+                            }}
+                          >
+                            {showEditPreview ? (
+                              <>👁️ Hide Preview</>
+                            ) : (
+                              <>👁️ View Preview</>
+                            )}
+                          </button>
+                        </div>
+                        
+                        <StepContentEditor
+                          content={editingContent}
+                          onChange={handleContentChange}
+                          onCancel={handleCancelEdit}
+                          onSave={handleSaveContent}
+                        />
+                      </div>
+
+                      {/* Preview Section - Only shown when showEditPreview is true */}
+                      {showEditPreview && (
+                        <div className="edit-preview-section">
+                          <h3 style={{ 
+                            margin: '0 0 1rem 0', 
+                            fontSize: '1.1rem', 
+                            color: '#666', 
+                            borderBottom: '2px solid #e0e0e0', 
+                            paddingBottom: '0.5rem',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                          }}>
+                            📄 Live Preview
+                          </h3>
+                          <div style={{ 
+                            background: 'white', 
+                            padding: '1.5rem', 
+                            borderRadius: '8px', 
+                            border: '1px solid #ddd',
+                            minHeight: '400px'
+                          }}>
+                            {/* Preview Header */}
+                            <div style={{ marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '2px solid #e0e0e0' }}>
+                              <h2 style={{ margin: '0 0 0.5rem 0', fontSize: '1.5rem', color: '#333' }}>
+                                {selectedStep?.title || 'Step Title'}
+                              </h2>
+                              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                <span className={`category-tag category-${selectedStep?.category}`}>
+                                  {selectedStep?.category}
+                                </span>
+                                <span className={`source-badge source-${selectedStep?.source}`}>
+                                  {selectedStep?.source === 'dynamic' ? 'Built-in' : 'Custom'}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Preview Description */}
+                            {selectedStep?.description && (
+                              <p style={{ color: '#666', fontSize: '1rem', lineHeight: '1.6', marginBottom: '1.5rem' }}>
+                                {selectedStep.description}
+                              </p>
+                            )}
+
+                            {/* Preview Content */}
+                            {editingContent.length > 0 && (
+                              <StepContentRenderer content={editingContent} />
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   ) : (
                     selectedStep.detailed_content && selectedStep.detailed_content.length > 0 ? (
                       <StepContentRenderer content={selectedStep.detailed_content} />
