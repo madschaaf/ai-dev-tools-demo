@@ -13,8 +13,12 @@ export class UseCasesService {
     const result = await query(
       `INSERT INTO use_cases (
         title, description, category, tags, step_ids, user_id,
-        created_by, status, estimated_duration, difficulty_level, prerequisites
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        created_by, status, estimated_duration, difficulty_level, prerequisites,
+        thumbnail_url, lead_name, team_members, brief_overview, business_unit,
+        is_for_developers, coding_language, ide, tools, related_links,
+        technical_details, data_requirements, implementation_steps, categories,
+        estimated_time, media_links, search_tags, is_anonymous
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29)
       RETURNING *`,
       [
         data.title,
@@ -28,6 +32,24 @@ export class UseCasesService {
         data.estimated_duration,
         data.difficulty_level,
         data.prerequisites,
+        data.thumbnail_url,
+        data.lead_name,
+        data.team_members,
+        data.brief_overview,
+        data.business_unit,
+        data.is_for_developers,
+        data.coding_language,
+        data.ide,
+        data.tools,
+        data.related_links,
+        data.technical_details,
+        data.data_requirements,
+        data.implementation_steps,
+        data.categories,
+        data.estimated_time,
+        data.media_links,
+        data.search_tags,
+        data.is_anonymous,
       ]
     );
 
@@ -198,20 +220,43 @@ export class UseCasesService {
   async getUseCaseWithSteps(id: string): Promise<{ useCase: UseCase; steps: any[] } | null> {
     const useCase = await this.getUseCaseById(id);
     
-    if (!useCase || !useCase.step_ids || useCase.step_ids.length === 0) {
-      return useCase ? { useCase, steps: [] } : null;
+    if (!useCase) {
+      return null;
     }
 
-    // Fetch associated steps
-    const stepsResult = await query(
-      'SELECT * FROM steps WHERE id = ANY($1) ORDER BY array_position($1, id)',
-      [useCase.step_ids]
-    );
+    // If no step_ids or empty array, return use case with empty steps
+    if (!useCase.step_ids || useCase.step_ids.length === 0) {
+      return { useCase, steps: [] };
+    }
 
-    return {
-      useCase,
-      steps: stepsResult.rows
-    };
+    try {
+      // Import stepsService to use the new getStepsByIdentifiers method
+      const { stepsService } = await import('./stepsService.ts');
+      
+      // Fetch steps using identifiers (handles both UUIDs and string identifiers)
+      const steps = await stepsService.getStepsByIdentifiers(useCase.step_ids);
+      
+      if (steps.length === 0) {
+        console.warn(`Use case ${id} has step_ids but no matching steps were found:`, useCase.step_ids);
+      }
+
+      return {
+        useCase,
+        steps: steps.map((step, index) => ({
+          id: step.id,
+          title: step.title,
+          description: step.brief_description,
+          detailed_content: step.detailed_content,
+          order_index: index,
+          category: step.category,
+          is_custom: false,
+        }))
+      };
+    } catch (error) {
+      console.error('Error fetching steps for use case:', error);
+      // Return use case without steps if there's an error
+      return { useCase, steps: [] };
+    }
   }
 }
 

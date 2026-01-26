@@ -1,5 +1,6 @@
 import express from 'express';
 import { useCasesService } from '../db/useCasesService.ts';
+import { stepsService } from '../db/stepsService.ts';
 import type { UseCase } from '../db/models/index.ts';
 
 const router = express.Router();
@@ -9,23 +10,83 @@ router.post('/', async (req, res) => {
   try {
     const useCaseData = req.body;
 
-    // Map frontend data to database model
+    // First, create/get steps if provided
+    let stepIds: string[] = [];
+    if (useCaseData.generatedSteps && useCaseData.generatedSteps.length > 0) {
+      console.log(`Creating ${useCaseData.generatedSteps.length} steps for use case...`);
+      
+      for (const step of useCaseData.generatedSteps) {
+        try {
+          // Check if step already exists by searching for the step ID
+          let existingStep = await stepsService.getStepById(step.stepId || step.id);
+          
+          if (existingStep) {
+            console.log(`Step ${step.stepId} already exists, using existing step`);
+            stepIds.push(existingStep.id);
+          } else {
+            // Create new step in database
+            const newStep = await stepsService.createStep({
+              title: step.title,
+              brief_description: step.description,
+              detailed_content: step.detailed_content || [],
+              tags: [],
+              category: (step.category || 'setup') as any,
+              created_by: useCaseData.leadName || 'Anonymous',
+              modified_by: useCaseData.leadName || 'Anonymous',
+              status: 'approved', // Auto-approve steps from use case submission
+              estimated_time: 10,
+              difficulty_level: 'beginner'
+            });
+            
+            console.log(`Created new step: ${newStep.id} - ${newStep.title}`);
+            stepIds.push(newStep.id);
+          }
+        } catch (stepError) {
+          console.error(`Error creating step ${step.title}:`, stepError);
+          // Continue with other steps even if one fails
+        }
+      }
+    }
+
+    // Map frontend data to database model with ALL fields
     const mappedData: Partial<UseCase> = {
       title: useCaseData.name || useCaseData.title,
       description: useCaseData.briefOverview || useCaseData.description,
       category: useCaseData.businessUnit || useCaseData.category || 'General',
-      tags: [...(useCaseData.categories || []), ...(useCaseData.searchTags || [])],
+      tags: useCaseData.tags || [...(useCaseData.categories || []), ...(useCaseData.searchTags || [])],
       created_by: useCaseData.leadName || useCaseData.created_by || 'Anonymous',
-      status: 'review', // Set to 'review' so it appears in the review queue
+      status: 'review', // Submit for review
       
-      // Optional fields
-      step_ids: useCaseData.generatedSteps?.map((step: any) => step.stepId || step.id),
+      // New comprehensive fields
+      thumbnail_url: useCaseData.thumbnail,
+      lead_name: useCaseData.leadName,
+      team_members: useCaseData.teamMembers,
+      brief_overview: useCaseData.briefOverview,
+      business_unit: useCaseData.businessUnit,
+      is_for_developers: useCaseData.isForDevelopers || false,
+      coding_language: useCaseData.codingLanguage,
+      ide: useCaseData.ide,
+      tools: useCaseData.toolsAndTechnologies,
+      related_links: useCaseData.relatedLinks,
+      technical_details: useCaseData.technicalDetails,
+      data_requirements: useCaseData.dataRequirements,
+      implementation_steps: useCaseData.implementationSteps,
+      categories: useCaseData.categories,
+      estimated_time: useCaseData.estimatedTime,
+      media_links: useCaseData.mediaLinks,
+      search_tags: useCaseData.searchTags,
+      is_anonymous: useCaseData.isAnonymous || false,
+      
+      // Use the created step IDs
+      step_ids: stepIds.length > 0 ? stepIds : undefined,
       estimated_duration: useCaseData.estimatedTime ? parseInt(useCaseData.estimatedTime) : undefined,
       prerequisites: useCaseData.prerequisites,
     };
 
     // Create use case in database
     const newUseCase = await useCasesService.createUseCase(mappedData);
+    
+    console.log(`Use case created with ${stepIds.length} steps`);
 
     res.status(201).json({
       success: true,
@@ -34,7 +95,8 @@ router.post('/', async (req, res) => {
         id: newUseCase.id,
         status: newUseCase.status,
         title: newUseCase.title,
-        created_at: newUseCase.created_at
+        created_at: newUseCase.created_at,
+        steps_created: stepIds.length
       }
     });
   } catch (error) {

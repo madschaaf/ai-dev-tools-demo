@@ -1,5 +1,6 @@
 import { Routes, Route, Link } from 'react-router-dom'
 import NavBar from './components/NavBar'
+import AIUseCaseIcon from './components/AIUseCaseIcon'
 import VSCodeExtensions from './pages/VSCodeExtensions'
 import ExploreLinks from './pages/ExploreLinks'
 import StepsGuide from './pages/Steps/StepsGuide.tsx'
@@ -242,6 +243,15 @@ export default function App() {
           <source src={heroVideo} type="video/mp4" />
           Your browser does not support the video tag.
         </video>
+        <AIUseCaseIcon 
+          useCase={{
+            id: 'use-case-1769113567070-0jl8jskw2',
+            title: 'How to Create Hero Section Videos',
+            description: 'Learn how to create engaging hero section videos like this one using AI tools and GitHub Copilot.',
+            url: '/library?tab=use-cases'
+          }}
+          position={{ bottom: '20px', left: '20px' }}
+        />
         <video autoPlay muted loop className="robot-video">
           <source src={robotVideo} type="video/mp4" />
           Your browser does not support the video tag.

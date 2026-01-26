@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import './Library.css';
-import UseCasesLibrary from './LibraryComponents/UseCasesLibrary';
-import StepsLibrary from './LibraryComponents/StepsLibrary';
+import UseCasesLibrary from './LibraryComponents/UseCasesLibrary.tsx';
+import StepsLibrary from './LibraryComponents/StepsLibrary.tsx';
 
 export default function Library() {
   const [activeView, setActiveView] = useState<'use-cases' | 'steps'>('use-cases');
@@ -34,7 +34,7 @@ export default function Library() {
             className={`toggle-btn ${activeView === 'steps' ? 'active' : ''}`}
             onClick={() => setActiveView('steps')}
           >
-            Steps
+            Steps (Admin Only)
           </button>
         </div>
       )}

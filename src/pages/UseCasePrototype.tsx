@@ -1063,22 +1063,6 @@ export default function UseCasePrototype() {
         boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
       }}>
         <h2>1. General Information</h2>
-        
-        {/* Anonymous Checkbox */}
-        <div style={{ marginBottom: '20px', padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '4px' }}>
-          <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-            <input
-              type="checkbox"
-              checked={isAnonymous}
-              onChange={(e) => setIsAnonymous(e.target.checked)}
-              style={{ marginRight: '8px' }}
-            />
-            <span>I would like to remain anonymous for my use case submission.</span>
-          </label>
-          <p style={{ margin: '8px 0 0 24px', fontSize: '13px', color: '#666' }}>
-            Note: AI Academy team will be able to see that you are the use case submitter.
-          </p>
-        </div>
 
         {/* Use Case Name */}
         <div style={{ marginBottom: '20px' }}>
@@ -1100,6 +1084,22 @@ export default function UseCasePrototype() {
           />
         </div>
 
+   {/* Anonymous Checkbox */}
+        <div style={{ marginBottom: '20px', padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '4px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={isAnonymous}
+              onChange={(e) => setIsAnonymous(e.target.checked)}
+              style={{ marginRight: '8px' }}
+            />
+            <span>I would like to remain anonymous for my use case submission.</span>
+          </label>
+          <p style={{ margin: '8px 0 0 24px', fontSize: '13px', color: '#666' }}>
+            Note: AI Academy team will be able to see that you are the use case submitter.
+          </p>
+        </div>
+      
         {/* Use Case Lead Name */}
         <div style={{ marginBottom: '20px' }}>
           <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600' }}>
@@ -1107,6 +1107,7 @@ export default function UseCasePrototype() {
           </label>
           <input
             type="text"
+            disabled={isAnonymous}
             value={useCaseLeadName}
             onChange={(e) => setUseCaseLeadName(e.target.value)}
             placeholder="Search for name..."
@@ -1883,10 +1884,16 @@ export default function UseCasePrototype() {
                       <>
                         {(() => {
                           const fullStepData = DYNAMIC_STEPS.find(s => s.id === selectedStep.id);
-                          const stepComponent = getStepComponent(selectedStep.id);
+                          const customContent = customStepContent[selectedStep.id];
                           
-                          if (stepComponent) {
-                            return stepComponent;
+                          // Prioritize custom content, then detailed_content, then fallback to hardcoded component
+                          if (customContent) {
+                            return (
+                              <>
+                                <h2>{selectedStep.title}</h2>
+                                <StepContentRenderer content={customContent} />
+                              </>
+                            );
                           } else if (fullStepData?.detailed_content) {
                             return (
                               <>

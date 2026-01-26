@@ -14,16 +14,18 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- Use Cases Table
+-- Use Cases Table - Comprehensive Fields
 CREATE TABLE IF NOT EXISTS use_cases (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  
+  -- Basic Information
   title VARCHAR(255) NOT NULL,
   description TEXT NOT NULL,
   category VARCHAR(100) NOT NULL,
   tags TEXT[] DEFAULT '{}',
   
-  -- Optional relations
-  step_ids TEXT[] DEFAULT '{}', -- Array of step UUIDs
+  -- Relations
+  step_ids TEXT[] DEFAULT '{}', -- Array of step IDs (string identifiers or UUIDs)
   user_id UUID REFERENCES users(id) ON DELETE SET NULL,
   
   -- Metadata
@@ -32,10 +34,38 @@ CREATE TABLE IF NOT EXISTS use_cases (
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   status VARCHAR(50) NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'review', 'clarification', 'approved', 'rejected', 'published', 'archived')),
   
-  -- Additional fields
+  -- Time & Difficulty
   estimated_duration INTEGER, -- in minutes
+  estimated_time VARCHAR(100), -- Human-readable time estimate
   difficulty_level VARCHAR(50) CHECK (difficulty_level IN ('beginner', 'intermediate', 'advanced')),
-  prerequisites TEXT[] DEFAULT '{}'
+  prerequisites TEXT[] DEFAULT '{}',
+  
+  -- Comprehensive Fields for Preview/Display
+  thumbnail_url TEXT,
+  lead_name VARCHAR(255),
+  team_members TEXT[] DEFAULT '{}',
+  brief_overview TEXT,
+  business_unit VARCHAR(255),
+  
+  -- Technical Details
+  is_for_developers BOOLEAN DEFAULT FALSE,
+  coding_language VARCHAR(100),
+  ide VARCHAR(100),
+  tools TEXT[] DEFAULT '{}',
+  
+  -- Documentation & Links
+  related_links JSONB DEFAULT '[]', -- Array of {name, url, type}
+  media_links JSONB DEFAULT '[]', -- Array of {name, url, type}
+  technical_details TEXT,
+  data_requirements TEXT,
+  implementation_steps TEXT,
+  
+  -- Classification
+  categories TEXT[] DEFAULT '{}', -- Multiple categories
+  search_tags TEXT[] DEFAULT '{}', -- Additional searchable tags
+  
+  -- Privacy
+  is_anonymous BOOLEAN DEFAULT FALSE
 );
 
 -- Main Steps Table

@@ -54,6 +54,66 @@ export class StepsService {
     return rowToStep(result.rows[0]);
   }
 
+  // Get a step by title (case-insensitive, handles kebab-case to title conversion)
+  async getStepByTitle(title: string): Promise<PreConfiguredStep | null> {
+    // Convert kebab-case to title case for better matching
+    const titleVariations = [
+      title,
+      // Convert kebab-case to Title Case (e.g., 'verify-sso-ping' -> 'Verify SSO Ping')
+      title.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+      // Convert to lowercase for case-insensitive matching
+      title.toLowerCase()
+    ];
+
+    // Try exact match first
+    for (const variant of titleVariations) {
+      const result = await query('SELECT * FROM steps WHERE title ILIKE $1', [variant]);
+      if (result.rows.length > 0) {
+        return rowToStep(result.rows[0]);
+      }
+    }
+
+    // Try partial match
+    const result = await query(
+      'SELECT * FROM steps WHERE title ILIKE $1 ORDER BY created_at DESC LIMIT 1',
+      [`%${title}%`]
+    );
+    
+    if (result.rows.length === 0) {
+      return null;
+    }
+
+    return rowToStep(result.rows[0]);
+  }
+
+  // Get multiple steps by IDs or titles
+  async getStepsByIdentifiers(identifiers: string[]): Promise<PreConfiguredStep[]> {
+    if (identifiers.length === 0) {
+      return [];
+    }
+
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const steps: PreConfiguredStep[] = [];
+    
+    for (const identifier of identifiers) {
+      let step: PreConfiguredStep | null = null;
+      
+      if (uuidRegex.test(identifier)) {
+        // It's a UUID, fetch directly
+        step = await this.getStepById(identifier);
+      } else {
+        // It's a string identifier, try to find by title
+        step = await this.getStepByTitle(identifier);
+      }
+      
+      if (step) {
+        steps.push(step);
+      }
+    }
+    
+    return steps;
+  }
+
   // Get all steps with optional filters
   async getSteps(filters?: {
     status?: string;

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 
-// Types matching the backend model
+// Types matching the backend model (extended with all fields)
 interface UseCase {
   id: string
   title: string
@@ -16,6 +16,26 @@ interface UseCase {
   estimated_duration?: number
   difficulty_level?: 'beginner' | 'intermediate' | 'advanced'
   prerequisites?: string[]
+  
+  // Extended comprehensive fields
+  thumbnail_url?: string
+  lead_name?: string
+  team_members?: string[]
+  brief_overview?: string
+  business_unit?: string
+  is_for_developers?: boolean
+  coding_language?: string
+  ide?: string
+  tools?: string[]
+  related_links?: Array<{ name: string; url: string; type?: string }>
+  technical_details?: string
+  data_requirements?: string
+  implementation_steps?: string
+  categories?: string[]
+  estimated_time?: string
+  media_links?: Array<{ name: string; url: string; type?: string }>
+  search_tags?: string[]
+  is_anonymous?: boolean
 }
 
 export default function ReviewUseCaseLibrary({ onSwitchToSteps }: { onSwitchToSteps?: () => void }) {
@@ -566,28 +586,123 @@ function UseCaseModal({
           overflow: 'auto',
           flex: 1
         }}>
+          {/* Basic Information Section */}
           <div style={{ marginBottom: '1.5rem', fontSize: '0.875rem', color: '#6b7280' }}>
             <div><strong>ID:</strong> {useCase.id}</div>
-            <div><strong>Author:</strong> {useCase.created_by}</div>
             <div><strong>Created:</strong> {new Date(useCase.created_at).toLocaleDateString()}</div>
             <div><strong>Last Modified:</strong> {new Date(useCase.updated_at).toLocaleDateString()}</div>
             <div><strong>Category:</strong> {useCase.category}</div>
             {useCase.estimated_duration && (
               <div><strong>Estimated Duration:</strong> {useCase.estimated_duration} minutes</div>
             )}
+            {useCase.estimated_time && (
+              <div><strong>Estimated Time:</strong> {useCase.estimated_time}</div>
+            )}
             {useCase.difficulty_level && (
               <div><strong>Difficulty:</strong> {useCase.difficulty_level}</div>
             )}
           </div>
 
-          <div style={{ marginBottom: '1.5rem' }}>
-            <h3>Description</h3>
-            <p>{useCase.description}</p>
+          {/* Submission Information */}
+          <div style={{ marginBottom: '1.5rem', padding: '1rem', background: '#f9fafb', borderRadius: 'var(--radius-md)' }}>
+            <h3 style={{ marginTop: 0, marginBottom: '0.75rem' }}>Submission Information</h3>
+            <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+              {!useCase.is_anonymous && useCase.created_by && (
+                <div><strong>Submitted By:</strong> {useCase.created_by}</div>
+              )}
+              {useCase.is_anonymous && (
+                <div><strong>Submitted By:</strong> Anonymous</div>
+              )}
+              {useCase.lead_name && (
+                <div><strong>Lead Name:</strong> {useCase.lead_name}</div>
+              )}
+              {useCase.team_members && useCase.team_members.length > 0 && (
+                <div><strong>Team Members:</strong> {useCase.team_members.join(', ')}</div>
+              )}
+              {useCase.business_unit && (
+                <div><strong>Business Unit:</strong> {useCase.business_unit}</div>
+              )}
+            </div>
           </div>
 
+          {/* 1. General Information - Following form order */}
+          
+          {/* Thumbnail */}
+          {useCase.thumbnail_url && (
+            <div style={{ marginBottom: '1.5rem' }}>
+              <h3>Thumbnail</h3>
+              <img 
+                src={useCase.thumbnail_url} 
+                alt="Use case thumbnail"
+                style={{ 
+                  maxWidth: '300px', 
+                  maxHeight: '200px', 
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid #e1e4e8'
+                }}
+              />
+            </div>
+          )}
+
+          {/* Brief Overview / Description */}
+          <div style={{ marginBottom: '1.5rem' }}>
+            <h3>{useCase.brief_overview ? 'Brief Overview' : 'Description'}</h3>
+            <p style={{ whiteSpace: 'pre-wrap' }}>
+              {useCase.brief_overview || useCase.description}
+            </p>
+          </div>
+
+          {/* 2. Project Configuration - Following form order */}
+
+          {/* Development Information */}
+          {(useCase.is_for_developers || useCase.coding_language || useCase.ide || useCase.tools) && (
+            <div style={{ marginBottom: '1.5rem', padding: '1rem', background: '#f0f9ff', border: '1px solid #bfdbfe', borderRadius: 'var(--radius-md)' }}>
+              <h3 style={{ marginTop: 0, marginBottom: '0.75rem' }}>Development Information</h3>
+              <div style={{ fontSize: '0.875rem' }}>
+                {useCase.is_for_developers !== undefined && (
+                  <div><strong>For Developers:</strong> {useCase.is_for_developers ? 'Yes' : 'No'}</div>
+                )}
+                {useCase.coding_language && (
+                  <div><strong>Coding Language:</strong> {useCase.coding_language}</div>
+                )}
+                {useCase.ide && (
+                  <div><strong>IDE:</strong> {useCase.ide}</div>
+                )}
+                {useCase.tools && useCase.tools.length > 0 && (
+                  <div><strong>Tools:</strong> {useCase.tools.join(', ')}</div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Related Links */}
+          {useCase.related_links && useCase.related_links.length > 0 && (
+            <div style={{ marginBottom: '1.5rem' }}>
+              <h3>Related Links</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {useCase.related_links.map((link, idx) => (
+                  <div key={idx} style={{ fontSize: '0.875rem' }}>
+                    <a 
+                      href={link.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      style={{ color: 'var(--color-primary)', textDecoration: 'none' }}
+                    >
+                      {link.name || link.url}
+                    </a>
+                    {link.type && <span style={{ color: '#6b7280', marginLeft: '0.5rem' }}>({link.type})</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 3. Setup Steps */}
+          
+          {/* Included Steps */}
           {useCase.step_ids && useCase.step_ids.length > 0 && (
             <div style={{ marginBottom: '1.5rem' }}>
-              <h3>Included Steps ({useCase.step_ids.length})</h3>
+              <h3>Setup Steps ({useCase.step_ids.length})</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {useCase.step_ids.map((stepId, idx) => (
                   <div
@@ -607,10 +722,106 @@ function UseCaseModal({
             </div>
           )}
 
+          {/* 4. Additional Information - Following form order */}
+
+          {/* Technical Details */}
+          {useCase.technical_details && (
+            <div style={{ marginBottom: '1.5rem' }}>
+              <h3>Technical Details</h3>
+              <p style={{ whiteSpace: 'pre-wrap' }}>{useCase.technical_details}</p>
+            </div>
+          )}
+
+          {/* Data Requirements */}
+          {useCase.data_requirements && (
+            <div style={{ marginBottom: '1.5rem' }}>
+              <h3>Data Requirements</h3>
+              <p style={{ whiteSpace: 'pre-wrap' }}>{useCase.data_requirements}</p>
+            </div>
+          )}
+
+          {/* Implementation Steps */}
+          {useCase.implementation_steps && (
+            <div style={{ marginBottom: '1.5rem' }}>
+              <h3>Implementation Steps</h3>
+              <p style={{ whiteSpace: 'pre-wrap' }}>{useCase.implementation_steps}</p>
+            </div>
+          )}
+
+          {/* Categories (multiple) */}
+          {useCase.categories && useCase.categories.length > 0 && (
+            <div style={{ marginBottom: '1.5rem' }}>
+              <h3>Categories</h3>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                {useCase.categories.map(cat => (
+                  <span
+                    key={cat}
+                    style={{
+                      padding: '0.25rem 0.75rem',
+                      background: '#dbeafe',
+                      color: '#1e40af',
+                      borderRadius: '0.5rem',
+                      fontSize: '0.875rem',
+                      fontWeight: 500
+                    }}
+                  >
+                    {cat}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Media Links */}
+          {useCase.media_links && useCase.media_links.length > 0 && (
+            <div style={{ marginBottom: '1.5rem' }}>
+              <h3>Media</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {useCase.media_links.map((link, idx) => (
+                  <div key={idx} style={{ fontSize: '0.875rem' }}>
+                    <a 
+                      href={link.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      style={{ color: 'var(--color-primary)', textDecoration: 'none' }}
+                    >
+                      {link.name || link.url}
+                    </a>
+                    {link.type && <span style={{ color: '#6b7280', marginLeft: '0.5rem' }}>({link.type})</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Search Tags */}
+          {useCase.search_tags && useCase.search_tags.length > 0 && (
+            <div style={{ marginBottom: '1.5rem' }}>
+              <h3>Search Tags</h3>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                {useCase.search_tags.map(tag => (
+                  <span
+                    key={tag}
+                    style={{
+                      padding: '0.25rem 0.75rem',
+                      background: '#fef3c7',
+                      color: '#92400e',
+                      borderRadius: '0.5rem',
+                      fontSize: '0.875rem'
+                    }}
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Prerequisites - keeping at end as it's not in form */}
           {useCase.prerequisites && useCase.prerequisites.length > 0 && (
             <div style={{ marginBottom: '1.5rem' }}>
               <h3>Prerequisites</h3>
-              <ul>
+              <ul style={{ margin: '0.5rem 0', paddingLeft: '1.5rem' }}>
                 {useCase.prerequisites.map((prereq, idx) => (
                   <li key={idx}>{prereq}</li>
                 ))}
@@ -618,6 +829,7 @@ function UseCaseModal({
             </div>
           )}
 
+          {/* Tags - keeping at end as it's not in form */}
           {useCase.tags.length > 0 && (
             <div style={{ marginBottom: '1.5rem' }}>
               <h3>Tags</h3>
