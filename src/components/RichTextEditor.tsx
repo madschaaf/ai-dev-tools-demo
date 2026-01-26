@@ -270,23 +270,6 @@ export function RichTextEditor({ value, onChange, placeholder = '', rows = 3 }: 
           </button>
           <button
             type="button"
-            onClick={() => applyFormatting('ai-icon')}
-            title="AI Icon (Markdown: 🤖text🤖)"
-            style={{
-              padding: '6px 12px',
-              backgroundColor: isFormatActive('ai-icon') ? '#e3f2fd' : 'white',
-              color: '#333',
-              border: '1px solid #ccc',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '14px',
-              transition: 'all 0.2s'
-            }}
-          >
-            🤖
-          </button>
-          <button
-            type="button"
             onClick={() => applyFormatting('highlight')}
             title="Highlight (Markdown: ==text==)"
             style={{
@@ -300,7 +283,24 @@ export function RichTextEditor({ value, onChange, placeholder = '', rows = 3 }: 
               transition: 'all 0.2s'
             }}
           >
-            ✨
+            🖍️
+          </button>
+          <button
+            type="button"
+            onClick={() => applyFormatting('ai-icon')}
+            title="AI Badge - Marks text as AI-related or AI-generated content (Markdown: 🤖text🤖)"
+            style={{
+              padding: '6px 12px',
+              backgroundColor: isFormatActive('ai-icon') ? '#e3f2fd' : 'white',
+              color: '#333',
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              transition: 'all 0.2s'
+            }}
+          >
+            🤖
           </button>
         </div>
       )}
