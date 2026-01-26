@@ -1,10 +1,14 @@
 import React, { useState, useRef, type KeyboardEvent } from 'react';
+import { StepContentRenderer, type DetailedContentItem } from './StepContentRenderer';
+import { RichTextEditor } from './RichTextEditor';
+import { MarkdownRenderer } from './MarkdownRenderer';
 
 interface CustomStep {
   id: string;
   text: string;
   title?: string;
   detailedContent?: string;
+  richContent?: DetailedContentItem[]; // Optional advanced content for code blocks, callouts, etc.
 }
 
 interface CustomStepsEditorProps {
@@ -14,6 +18,7 @@ interface CustomStepsEditorProps {
 export function CustomStepsEditor({ onStepsChange }: CustomStepsEditorProps) {
   const [steps, setSteps] = useState<CustomStep[]>([{ id: '1', text: '', detailedContent: undefined }]);
   const [listType, setListType] = useState<'bullet' | 'numbered'>('bullet');
+  const [expandedCustomization, setExpandedCustomization] = useState<{ [key: string]: boolean }>({});
   const inputRefs = useRef<{ [key: string]: HTMLTextAreaElement | null }>({});
 
   const updateSteps = (newSteps: CustomStep[]) => {
@@ -139,6 +144,52 @@ export function CustomStepsEditor({ onStepsChange }: CustomStepsEditorProps) {
     updateSteps(newSteps);
   };
 
+  // Rich content management functions
+  const toggleCustomization = (stepId: string) => {
+    setExpandedCustomization(prev => ({
+      ...prev,
+      [stepId]: !prev[stepId]
+    }));
+  };
+
+  const addRichContentItem = (index: number, type: DetailedContentItem['type']) => {
+    const newSteps = [...steps];
+    const newItem: DetailedContentItem = {
+      id: `rich-${Date.now()}`,
+      type,
+      text: type === 'list' ? undefined : '',
+      items: type === 'list' ? [''] : undefined,
+      listStyle: type === 'list' ? 'bullet' : undefined,
+      variant: type === 'callout' ? 'info' : undefined,
+      url: type === 'link' ? '' : undefined,
+    };
+    
+    if (!newSteps[index].richContent) {
+      newSteps[index].richContent = [];
+    }
+    newSteps[index].richContent = [...newSteps[index].richContent!, newItem];
+    updateSteps(newSteps);
+  };
+
+  const updateRichContentItem = (stepIndex: number, itemIndex: number, updates: Partial<DetailedContentItem>) => {
+    const newSteps = [...steps];
+    if (newSteps[stepIndex].richContent) {
+      newSteps[stepIndex].richContent![itemIndex] = {
+        ...newSteps[stepIndex].richContent![itemIndex],
+        ...updates
+      };
+      updateSteps(newSteps);
+    }
+  };
+
+  const removeRichContentItem = (stepIndex: number, itemIndex: number) => {
+    const newSteps = [...steps];
+    if (newSteps[stepIndex].richContent) {
+      newSteps[stepIndex].richContent = newSteps[stepIndex].richContent!.filter((_, i) => i !== itemIndex);
+      updateSteps(newSteps);
+    }
+  };
+
   const hasContent = steps.some(s => s.text.trim());
 
   return (
@@ -261,27 +312,22 @@ export function CustomStepsEditor({ onStepsChange }: CustomStepsEditorProps) {
                       </div>
                     )}
                     
-                    {/* Main step text */}
-                    <textarea
-                      ref={(el) => {
-                        inputRefs.current[textRefKey] = el;
-                      }}
-                      value={step.text}
-                      onChange={(e) => updateStep(index, 'text', e.target.value)}
-                      onKeyDown={(e) => handleKeyDown(e, index, 'text')}
-                      placeholder={hasTitle ? "Enter step content..." : "Enter step description..."}
-                      rows={1}
-                      style={{
-                        width: '100%',
-                        padding: '10px',
-                        border: '1px solid #ccc',
-                        borderRadius: '4px',
-                        fontSize: '14px',
-                        fontFamily: 'inherit',
-                        resize: 'vertical',
-                        minHeight: '42px'
-                      }}
-                    />
+                    {/* Main step text with inline formatting */}
+                    <div ref={(el) => {
+                      if (el) {
+                        const textarea = el.querySelector('textarea');
+                        if (textarea) {
+                          inputRefs.current[textRefKey] = textarea;
+                        }
+                      }
+                    }}>
+                      <RichTextEditor
+                        value={step.text}
+                        onChange={(value) => updateStep(index, 'text', value)}
+                        placeholder={hasTitle ? "Enter step content..." : "Enter step description..."}
+                        rows={1}
+                      />
+                    </div>
 
                     {/* Additional details checkbox */}
                     <div style={{ marginTop: '8px', marginBottom: '8px' }}>
@@ -296,30 +342,284 @@ export function CustomStepsEditor({ onStepsChange }: CustomStepsEditorProps) {
                       </label>
                     </div>
 
-                    {/* Detailed content area */}
+                    {/* Detailed content area with inline formatting */}
                     {hasDetailedContent && (
-                      <div style={{ marginTop: '8px' }}>
-                        <textarea
-                          ref={(el) => {
-                            inputRefs.current[detailRefKey] = el;
-                          }}
-                          value={step.detailedContent}
-                          onChange={(e) => updateStep(index, 'detailedContent', e.target.value)}
+                      <div style={{ marginTop: '8px' }} ref={(el) => {
+                        if (el) {
+                          const textarea = el.querySelector('textarea');
+                          if (textarea) {
+                            inputRefs.current[detailRefKey] = textarea;
+                          }
+                        }
+                      }}>
+                        <RichTextEditor
+                          value={step.detailedContent || ''}
+                          onChange={(value) => updateStep(index, 'detailedContent', value)}
                           placeholder="Add detailed explanation, examples, or additional information..."
                           rows={3}
-                          style={{
-                            width: '100%',
-                            padding: '10px',
-                            border: '1px solid #ccc',
-                            borderRadius: '4px',
-                            fontSize: '13px',
-                            fontFamily: 'inherit',
-                            resize: 'vertical',
-                            backgroundColor: '#fff'
-                          }}
                         />
                       </div>
                     )}
+
+                    {/* Advanced Customization Toggle - For Code Blocks, Callouts, etc. */}
+                    <div style={{ marginTop: '12px' }}>
+                      <button
+                        type="button"
+                        onClick={() => toggleCustomization(step.id)}
+                        style={{
+                          padding: '6px 12px',
+                          backgroundColor: expandedCustomization[step.id] ? '#f0f0f0' : 'white',
+                          border: '1px solid #ccc',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                          fontWeight: '500',
+                          color: '#555',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}
+                      >
+                        <span>{expandedCustomization[step.id] ? '▼' : '▶'}</span>
+                        <span>Advanced Customization</span>
+                        {step.richContent && step.richContent.length > 0 && (
+                          <span style={{
+                            backgroundColor: '#0064d2',
+                            color: 'white',
+                            borderRadius: '10px',
+                            padding: '2px 6px',
+                            fontSize: '10px',
+                            fontWeight: '600'
+                          }}>
+                            {step.richContent.length}
+                          </span>
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Advanced Customization Panel */}
+                    {expandedCustomization[step.id] && (
+                      <div style={{
+                        marginTop: '12px',
+                        padding: '12px',
+                        backgroundColor: '#fff',
+                        border: '1px solid #ddd',
+                        borderRadius: '4px'
+                      }}>
+                        <div style={{
+                          marginBottom: '12px',
+                          fontSize: '12px',
+                          color: '#666',
+                          fontStyle: 'italic'
+                        }}>
+                          ✨ Add multi-line code blocks, callouts, or highlighted sections (Use inline toolbar above for simple formatting)
+                        </div>
+
+                        {/* Quick Action Buttons */}
+                        <div style={{
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          gap: '8px',
+                          marginBottom: '12px'
+                        }}>
+                          <button
+                            type="button"
+                            onClick={() => addRichContentItem(index, 'code')}
+                            style={{
+                              padding: '6px 12px',
+                              backgroundColor: '#f5f5f5',
+                              border: '1px solid #ccc',
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                              fontSize: '12px',
+                              fontWeight: '500'
+                            }}
+                          >
+                            {'</>'} Code Block
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => addRichContentItem(index, 'callout')}
+                            style={{
+                              padding: '6px 12px',
+                              backgroundColor: '#f5f5f5',
+                              border: '1px solid #ccc',
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                              fontSize: '12px',
+                              fontWeight: '500'
+                            }}
+                          >
+                            ℹ️ Callout
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => addRichContentItem(index, 'section')}
+                            style={{
+                              padding: '6px 12px',
+                              backgroundColor: '#f5f5f5',
+                              border: '1px solid #ccc',
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                              fontSize: '12px',
+                              fontWeight: '500'
+                            }}
+                          >
+                            📦 Highlight Section
+                          </button>
+                        </div>
+
+                        {/* Rich Content Items */}
+                        {step.richContent && step.richContent.length > 0 && (
+                          <div style={{ marginTop: '12px' }}>
+                            {step.richContent.map((item, richIndex) => (
+                              <div key={item.id} style={{
+                                marginBottom: '12px',
+                                padding: '10px',
+                                backgroundColor: '#fafafa',
+                                border: '1px solid #e0e0e0',
+                                borderRadius: '4px'
+                              }}>
+                                <div style={{
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  alignItems: 'center',
+                                  marginBottom: '8px'
+                                }}>
+                                  <span style={{
+                                    fontSize: '11px',
+                                    fontWeight: '600',
+                                    color: '#0064d2',
+                                    textTransform: 'uppercase'
+                                  }}>
+                                    {item.type}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => removeRichContentItem(index, richIndex)}
+                                    style={{
+                                      padding: '4px 8px',
+                                      backgroundColor: '#dc3545',
+                                      color: 'white',
+                                      border: 'none',
+                                      borderRadius: '3px',
+                                      cursor: 'pointer',
+                                      fontSize: '10px'
+                                    }}
+                                  >
+                                    ✕
+                                  </button>
+                                </div>
+
+                                {/* Code Block Editor */}
+                                {item.type === 'code' && (
+                                  <>
+                                    <input
+                                      type="text"
+                                      value={item.language || ''}
+                                      onChange={(e) => updateRichContentItem(index, richIndex, { language: e.target.value })}
+                                      placeholder="Language (e.g., bash, javascript)"
+                                      style={{
+                                        width: '100%',
+                                        padding: '6px',
+                                        border: '1px solid #ccc',
+                                        borderRadius: '3px',
+                                        fontSize: '12px',
+                                        marginBottom: '6px'
+                                      }}
+                                    />
+                                    <textarea
+                                      value={item.text || ''}
+                                      onChange={(e) => updateRichContentItem(index, richIndex, { text: e.target.value })}
+                                      placeholder="Code content..."
+                                      rows={3}
+                                      style={{
+                                        width: '100%',
+                                        padding: '6px',
+                                        border: '1px solid #ccc',
+                                        borderRadius: '3px',
+                                        fontSize: '12px',
+                                        fontFamily: 'monospace'
+                                      }}
+                                    />
+                                  </>
+                                )}
+
+                                {/* Callout Editor */}
+                                {item.type === 'callout' && (
+                                  <>
+                                    <select
+                                      value={item.variant || 'info'}
+                                      onChange={(e) => updateRichContentItem(index, richIndex, { variant: e.target.value as any })}
+                                      style={{
+                                        width: '100%',
+                                        padding: '6px',
+                                        border: '1px solid #ccc',
+                                        borderRadius: '3px',
+                                        fontSize: '12px',
+                                        marginBottom: '6px'
+                                      }}
+                                    >
+                                      <option value="info">Info (Blue)</option>
+                                      <option value="warning">Warning (Orange)</option>
+                                      <option value="success">Success (Green)</option>
+                                      <option value="error">Error (Red)</option>
+                                    </select>
+                                    <textarea
+                                      value={item.text || ''}
+                                      onChange={(e) => updateRichContentItem(index, richIndex, { text: e.target.value })}
+                                      placeholder="Callout text..."
+                                      rows={2}
+                                      style={{
+                                        width: '100%',
+                                        padding: '6px',
+                                        border: '1px solid #ccc',
+                                        borderRadius: '3px',
+                                        fontSize: '12px'
+                                      }}
+                                    />
+                                  </>
+                                )}
+
+                                {/* Section/Highlight Editor */}
+                                {item.type === 'section' && (
+                                  <>
+                                    <input
+                                      type="text"
+                                      value={item.label || ''}
+                                      onChange={(e) => updateRichContentItem(index, richIndex, { label: e.target.value })}
+                                      placeholder="Section label"
+                                      style={{
+                                        width: '100%',
+                                        padding: '6px',
+                                        border: '1px solid #ccc',
+                                        borderRadius: '3px',
+                                        fontSize: '12px',
+                                        marginBottom: '6px'
+                                      }}
+                                    />
+                                    <textarea
+                                      value={item.text || ''}
+                                      onChange={(e) => updateRichContentItem(index, richIndex, { text: e.target.value })}
+                                      placeholder="Section content..."
+                                      rows={2}
+                                      style={{
+                                        width: '100%',
+                                        padding: '6px',
+                                        border: '1px solid #ccc',
+                                        borderRadius: '3px',
+                                        fontSize: '12px'
+                                      }}
+                                    />
+                                  </>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                   </div>
 
                   {/* Remove button */}
@@ -409,16 +709,12 @@ export function CustomStepsEditor({ onStepsChange }: CustomStepsEditorProps) {
                         }}>
                           {step.title}
                         </h2>
-                        {/* Regular-sized content text */}
+                        {/* Regular-sized content text with markdown rendering */}
                         {step.text && step.text.trim() && (
-                          <p style={{ 
-                            fontSize: '16px', 
-                            lineHeight: '1.6',
-                            marginBottom: '12px',
-                            whiteSpace: 'pre-wrap'
-                          }}>
-                            {step.text}
-                          </p>
+                          <MarkdownRenderer
+                            content={step.text}
+                            className="step-content"
+                          />
                         )}
                       </>
                     ) : (
@@ -432,28 +728,28 @@ export function CustomStepsEditor({ onStepsChange }: CustomStepsEditorProps) {
                         }}>
                           {step.text}
                         </h2>
-                        <p style={{ 
-                          fontSize: '16px', 
-                          lineHeight: '1.6',
-                          marginBottom: '12px',
-                          whiteSpace: 'pre-wrap'
-                        }}>
-                          {step.text}
-                        </p>
+                        <MarkdownRenderer
+                          content={step.text}
+                          className="step-content"
+                        />
                       </>
                     )}
 
-                    {/* Detailed Content - shown as regular paragraph if present */}
+                    {/* Detailed Content - shown with markdown rendering if present */}
                     {step.detailedContent && step.detailedContent.trim() && (
-                      <p style={{ 
-                        fontSize: '16px', 
-                        lineHeight: '1.6',
-                        marginBottom: '12px',
-                        whiteSpace: 'pre-wrap',
-                        color: '#555'
-                      }}>
-                        {step.detailedContent}
-                      </p>
+                      <div style={{ marginBottom: '12px', marginTop: '12px' }}>
+                        <MarkdownRenderer
+                          content={step.detailedContent}
+                          className="step-detailed-content"
+                        />
+                      </div>
+                    )}
+
+                    {/* Rich Content Items Rendering (Code Blocks, Callouts, etc.) */}
+                    {step.richContent && step.richContent.length > 0 && (
+                      <div style={{ marginTop: '16px' }}>
+                        <StepContentRenderer content={step.richContent} />
+                      </div>
                     )}
 
                     {/* Simulated Action Button (for preview purposes) */}

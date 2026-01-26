@@ -1950,7 +1950,7 @@ export default function UseCasePrototype() {
 
               {/* Bottom Row: Custom Steps Editor (full width) */}
               <div style={{ marginTop: '30px', paddingTop: '30px', borderTop: '2px solid #e0e0e0' }}>
-                <h3 style={{ marginBottom: '16px' }}>Create Custom Steps with Word-Style Editor</h3>
+                <h3 style={{ marginBottom: '16px' }}>Create Custom Steps To Help Implement Use Case</h3>
                 <CustomStepsEditor
                   onStepsChange={(steps) => {
                     // Convert CustomSteps to Step format and add to generated steps

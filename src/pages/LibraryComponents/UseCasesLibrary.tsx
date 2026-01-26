@@ -39,7 +39,7 @@ interface UseCaseStep {
   order_index: number;
   category: string;
   is_custom: boolean;
-  //comment?: string;
+  comment?: string;
 }
 
 interface RelatedLink {
