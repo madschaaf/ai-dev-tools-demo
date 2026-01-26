@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import type { DetailedContentItem } from './StepContentRenderer';
+import React, { useState, useRef, type KeyboardEvent } from 'react';
+import type { DetailedContentItem, ListItemData } from './StepContentRenderer';
 
 interface StepContentEditorProps {
   content: DetailedContentItem[];
@@ -13,6 +13,7 @@ export function StepContentEditor({ content, onChange, onCancel, onSave, hideBut
   const [items, setItems] = useState<DetailedContentItem[]>(content);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [showAddMenu, setShowAddMenu] = useState(false);
+  const listInputRefs = useRef<{ [key: string]: HTMLTextAreaElement | null }>({});
 
   // Update parent when items change
   const updateItems = (newItems: DetailedContentItem[]) => {
@@ -27,6 +28,7 @@ export function StepContentEditor({ content, onChange, onCancel, onSave, hideBut
       type,
       text: type === 'list' ? undefined : '',
       items: type === 'list' ? [''] : undefined,
+      listStyle: type === 'list' ? 'bullet' : undefined,
       level: type === 'heading' ? 2 : undefined,
       variant: type === 'callout' ? 'info' : undefined,
       url: type === 'link' ? '' : undefined,
@@ -86,19 +88,115 @@ export function StepContentEditor({ content, onChange, onCancel, onSave, hideBut
     onChange(items);
   };
 
+  // Parse list item - can be string or object with text and detailedContent
+  const parseListItem = (item: string | ListItemData): ListItemData => {
+    if (typeof item === 'string') {
+      return { text: item };
+    }
+    return item;
+  };
+
   // Update list item
-  const updateListItem = (itemIndex: number, listItemIndex: number, value: string) => {
+  const updateListItem = (itemIndex: number, listItemIndex: number, value: string, field: 'text' | 'detailedContent' = 'text') => {
     const newItems = [...items];
     const listItems = [...(newItems[itemIndex].items || [])];
-    listItems[listItemIndex] = value;
+    const currentItem = parseListItem(listItems[listItemIndex]);
+    
+    if (field === 'text') {
+      const updated: string | ListItemData = value ? { ...currentItem, text: value } : currentItem;
+      listItems[listItemIndex] = updated;
+    } else {
+      const updated: string | ListItemData = { ...currentItem, detailedContent: value };
+      listItems[listItemIndex] = updated;
+    }
+    
     newItems[itemIndex] = { ...newItems[itemIndex], items: listItems };
     updateItems(newItems);
   };
 
-  // Add list item
-  const addListItem = (itemIndex: number) => {
+  // Handle Enter key in list items
+  const handleListItemKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>, itemIndex: number, listItemIndex: number) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      const currentValue = e.currentTarget.value;
+      const cursorPosition = e.currentTarget.selectionStart;
+      
+      // If cursor is at the end and the current item is not empty, add a new item
+      if (cursorPosition === currentValue.length && currentValue.trim()) {
+        addListItem(itemIndex, listItemIndex + 1);
+        // Focus the new item after a brief delay
+        setTimeout(() => {
+          const refKey = `${itemIndex}-${listItemIndex + 1}`;
+          listInputRefs.current[refKey]?.focus();
+        }, 10);
+      }
+      // If cursor is in the middle, split the content
+      else if (cursorPosition < currentValue.length) {
+        const beforeCursor = currentValue.substring(0, cursorPosition);
+        const afterCursor = currentValue.substring(cursorPosition);
+        
+        // Update current item
+        updateListItem(itemIndex, listItemIndex, beforeCursor);
+        
+        // Add new item with remaining text
+        const newItems = [...items];
+        const listItems = [...(newItems[itemIndex].items || [])];
+        listItems.splice(listItemIndex + 1, 0, afterCursor);
+        newItems[itemIndex] = { ...newItems[itemIndex], items: listItems };
+        updateItems(newItems);
+        
+        // Focus the new item
+        setTimeout(() => {
+          const refKey = `${itemIndex}-${listItemIndex + 1}`;
+          listInputRefs.current[refKey]?.focus();
+        }, 10);
+      }
+      // If current item is empty and it's not the first item, remove it
+      else if (!currentValue.trim() && listItemIndex > 0) {
+        removeListItem(itemIndex, listItemIndex);
+        // Focus the previous item
+        setTimeout(() => {
+          const refKey = `${itemIndex}-${listItemIndex - 1}`;
+          listInputRefs.current[refKey]?.focus();
+        }, 10);
+      }
+    }
+    // Handle Backspace at the beginning to merge with previous item
+    else if (e.key === 'Backspace' && e.currentTarget.selectionStart === 0 && listItemIndex > 0) {
+      e.preventDefault();
+      const currentValue = e.currentTarget.value;
+      const newItems = [...items];
+      const listItems = [...(newItems[itemIndex].items || [])];
+      const previousItem = parseListItem(listItems[listItemIndex - 1]);
+      
+      // Merge with previous item
+      listItems[listItemIndex - 1] = {
+        ...previousItem,
+        text: previousItem.text + currentValue
+      };
+      listItems.splice(listItemIndex, 1);
+      newItems[itemIndex] = { ...newItems[itemIndex], items: listItems };
+      updateItems(newItems);
+      
+      // Focus previous item and set cursor to merge point
+      setTimeout(() => {
+        const refKey = `${itemIndex}-${listItemIndex - 1}`;
+        const input = listInputRefs.current[refKey];
+        if (input) {
+          input.focus();
+          const cursorPos = previousItem.text.length;
+          input.setSelectionRange(cursorPos, cursorPos);
+        }
+      }, 10);
+    }
+  };
+
+  // Add list item at specific position
+  const addListItem = (itemIndex: number, position?: number) => {
     const newItems = [...items];
-    const listItems = [...(newItems[itemIndex].items || []), ''];
+    const listItems = [...(newItems[itemIndex].items || [])];
+    const insertPosition = position !== undefined ? position : listItems.length;
+    listItems.splice(insertPosition, 0, '');
     newItems[itemIndex] = { ...newItems[itemIndex], items: listItems };
     updateItems(newItems);
   };
@@ -107,6 +205,26 @@ export function StepContentEditor({ content, onChange, onCancel, onSave, hideBut
   const removeListItem = (itemIndex: number, listItemIndex: number) => {
     const newItems = [...items];
     const listItems = (newItems[itemIndex].items || []).filter((_, i) => i !== listItemIndex);
+    newItems[itemIndex] = { ...newItems[itemIndex], items: listItems };
+    updateItems(newItems);
+  };
+
+  // Toggle detailed content mode for a list item
+  const toggleDetailedContent = (itemIndex: number, listItemIndex: number) => {
+    const newItems = [...items];
+    const listItems = [...(newItems[itemIndex].items || [])];
+    const currentItem = parseListItem(listItems[listItemIndex]);
+    
+    if (currentItem.detailedContent !== undefined) {
+      // Remove detailed content mode
+      const updated: string | ListItemData = currentItem.text || '';
+      listItems[listItemIndex] = updated;
+    } else {
+      // Add detailed content mode
+      const updated: string | ListItemData = { ...currentItem, detailedContent: '' };
+      listItems[listItemIndex] = updated;
+    }
+    
     newItems[itemIndex] = { ...newItems[itemIndex], items: listItems };
     updateItems(newItems);
   };
@@ -359,50 +477,184 @@ export function StepContentEditor({ content, onChange, onCancel, onSave, hideBut
 
             {item.type === 'list' && (
               <div>
-                {(item.items || []).map((listItem, listIndex) => (
-                  <div key={listIndex} style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
-                    <input
-                      type="text"
-                      value={listItem}
-                      onChange={(e) => updateListItem(index, listIndex, e.target.value)}
-                      placeholder="List item..."
-                      style={{
-                        flex: 1,
-                        padding: '8px',
-                        border: '1px solid #ccc',
-                        borderRadius: '4px',
-                        fontSize: '14px'
-                      }}
-                    />
+                {/* List Style Selector */}
+                <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <label style={{ fontSize: '13px', fontWeight: '600' }}>List Style:</label>
+                  <div style={{ display: 'flex', gap: '8px' }}>
                     <button
-                      onClick={() => removeListItem(index, listIndex)}
+                      onClick={() => updateItem(index, { listStyle: 'bullet' })}
                       style={{
                         padding: '6px 12px',
-                        backgroundColor: '#dc3545',
-                        color: 'white',
-                        border: 'none',
+                        backgroundColor: item.listStyle === 'bullet' ? '#0064d2' : 'white',
+                        color: item.listStyle === 'bullet' ? 'white' : '#333',
+                        border: '1px solid #ccc',
                         borderRadius: '4px',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        fontSize: '13px',
+                        fontWeight: item.listStyle === 'bullet' ? '600' : 'normal'
                       }}
                     >
-                      ✕
+                      • Bullet
+                    </button>
+                    <button
+                      onClick={() => updateItem(index, { listStyle: 'numbered' })}
+                      style={{
+                        padding: '6px 12px',
+                        backgroundColor: item.listStyle === 'numbered' ? '#0064d2' : 'white',
+                        color: item.listStyle === 'numbered' ? 'white' : '#333',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontSize: '13px',
+                        fontWeight: item.listStyle === 'numbered' ? '600' : 'normal'
+                      }}
+                    >
+                      1. Numbered
                     </button>
                   </div>
-                ))}
-                <button
-                  onClick={() => addListItem(index)}
-                  style={{
-                    padding: '6px 12px',
-                    backgroundColor: '#0064d2',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '13px'
-                  }}
-                >
-                  + Add Item
-                </button>
+                </div>
+
+                {/* List Items with Word-style editing */}
+                <div style={{ 
+                  backgroundColor: '#fafafa', 
+                  padding: '12px', 
+                  borderRadius: '4px',
+                  border: '1px solid #e0e0e0'
+                }}>
+                  <div style={{ 
+                    marginBottom: '8px', 
+                    fontSize: '12px', 
+                    color: '#666',
+                    fontStyle: 'italic'
+                  }}>
+                    💡 Press Enter to create new list items, Shift+Enter for line breaks
+                  </div>
+                  
+                  {(item.items || []).map((listItem, listIndex) => {
+                    const parsedItem = parseListItem(listItem);
+                    const hasDetailedContent = parsedItem.detailedContent !== undefined;
+                    const refKey = `${index}-${listIndex}`;
+                    
+                    return (
+                      <div key={listIndex} style={{ marginBottom: '12px' }}>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+                          {/* List marker */}
+                          <span style={{ 
+                            minWidth: '24px', 
+                            paddingTop: '8px',
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            color: '#555'
+                          }}>
+                            {item.listStyle === 'numbered' ? `${listIndex + 1}.` : '•'}
+                          </span>
+                          
+                          {/* Main list item text */}
+                          <div style={{ flex: 1 }}>
+                            <textarea
+                              ref={(el) => {
+                                listInputRefs.current[refKey] = el;
+                              }}
+                              value={parsedItem.text}
+                              onChange={(e) => updateListItem(index, listIndex, e.target.value, 'text')}
+                              onKeyDown={(e) => handleListItemKeyDown(e, index, listIndex)}
+                              placeholder="List item text..."
+                              rows={1}
+                              style={{
+                                width: '100%',
+                                padding: '8px',
+                                border: '1px solid #ccc',
+                                borderRadius: '4px',
+                                fontSize: '14px',
+                                fontFamily: 'inherit',
+                                resize: 'vertical',
+                                minHeight: '38px'
+                              }}
+                            />
+                            
+                            {/* Detailed content area (paragraph mode) */}
+                            {hasDetailedContent && (
+                              <div style={{ 
+                                marginTop: '8px',
+                                paddingLeft: '12px',
+                                borderLeft: '3px solid #ddd'
+                              }}>
+                                <textarea
+                                  value={parsedItem.detailedContent}
+                                  onChange={(e) => updateListItem(index, listIndex, e.target.value, 'detailedContent')}
+                                  placeholder="Add detailed information, explanations, or multi-paragraph content here..."
+                                  rows={3}
+                                  style={{
+                                    width: '100%',
+                                    padding: '8px',
+                                    border: '1px solid #e0e0e0',
+                                    borderRadius: '4px',
+                                    fontSize: '13px',
+                                    fontFamily: 'inherit',
+                                    resize: 'vertical',
+                                    backgroundColor: '#fff'
+                                  }}
+                                />
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Item controls */}
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <button
+                              onClick={() => toggleDetailedContent(index, listIndex)}
+                              title={hasDetailedContent ? "Remove detailed content" : "Add detailed content"}
+                              style={{
+                                padding: '4px 8px',
+                                backgroundColor: hasDetailedContent ? '#28a745' : 'white',
+                                color: hasDetailedContent ? 'white' : '#666',
+                                border: '1px solid #ccc',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontSize: '11px',
+                                whiteSpace: 'nowrap'
+                              }}
+                            >
+                              {hasDetailedContent ? '📄 On' : '📄 Off'}
+                            </button>
+                            <button
+                              onClick={() => removeListItem(index, listIndex)}
+                              title="Remove item"
+                              style={{
+                                padding: '4px 8px',
+                                backgroundColor: '#dc3545',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontSize: '11px'
+                              }}
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  
+                  <button
+                    onClick={() => addListItem(index)}
+                    style={{
+                      padding: '8px 16px',
+                      backgroundColor: '#0064d2',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '13px',
+                      fontWeight: '600',
+                      marginTop: '8px'
+                    }}
+                  >
+                    + Add Item
+                  </button>
+                </div>
               </div>
             )}
 
@@ -574,7 +826,7 @@ export function StepContentEditor({ content, onChange, onCancel, onSave, hideBut
               {[
                 { type: 'heading' as const, label: '📝 Heading', desc: 'Section title' },
                 { type: 'text' as const, label: '📄 Text', desc: 'Paragraph' },
-                { type: 'list' as const, label: '• List', desc: 'Bullet points' },
+                { type: 'list' as const, label: '• List', desc: 'Bullet or numbered' },
                 { type: 'code' as const, label: '</> Code', desc: 'Code block' },
                 { type: 'callout' as const, label: 'ℹ️ Callout', desc: 'Info box' },
                 { type: 'link' as const, label: '🔗 Link', desc: 'External link' },

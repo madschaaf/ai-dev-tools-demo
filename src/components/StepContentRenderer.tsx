@@ -1,5 +1,11 @@
 import React from 'react';
 
+// List item can be a simple string or an object with detailed content
+export interface ListItemData {
+  text: string;
+  detailedContent?: string;
+}
+
 // Type definitions for structured step content
 export interface DetailedContentItem {
   id?: string;
@@ -9,7 +15,8 @@ export interface DetailedContentItem {
   copy_to_clipboard?: boolean;
   language?: string;
   variant?: 'info' | 'warning' | 'success' | 'error';
-  items?: string[]; // For list type
+  items?: (string | ListItemData)[]; // For list type - supports both formats
+  listStyle?: 'bullet' | 'numbered'; // For list styling
   url?: string; // For link type
   level?: 1 | 2 | 3 | 4; // For heading type
 }
@@ -137,14 +144,35 @@ export function StepContentRenderer({ content, className = '' }: StepContentRend
             );
 
           case 'list':
+            const ListTag = item.listStyle === 'numbered' ? 'ol' : 'ul';
             return (
-              <ul key={key} style={{ marginBottom: '16px', paddingLeft: '24px' }}>
-                {item.items?.map((listItem, i) => (
-                  <li key={i} style={{ marginBottom: '8px', color: '#333' }}>
-                    {listItem}
-                  </li>
-                ))}
-              </ul>
+              <ListTag key={key} style={{ marginBottom: '16px', paddingLeft: '24px' }}>
+                {item.items?.map((listItem, i) => {
+                  // Support both string and object formats
+                  const itemData = typeof listItem === 'string' 
+                    ? { text: listItem } 
+                    : listItem;
+                  
+                  return (
+                    <li key={i} style={{ marginBottom: '8px', color: '#333' }}>
+                      {itemData.text}
+                      {itemData.detailedContent && (
+                        <div style={{
+                          marginTop: '8px',
+                          paddingLeft: '16px',
+                          fontSize: '13px',
+                          color: '#555',
+                          borderLeft: '3px solid #ddd',
+                          paddingTop: '4px',
+                          paddingBottom: '4px'
+                        }}>
+                          {itemData.detailedContent}
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ListTag>
             );
 
           case 'callout':

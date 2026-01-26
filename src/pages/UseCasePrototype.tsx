@@ -6,6 +6,7 @@ import AIAutofillModal, { type AutofillOption } from '../components/AIAutofillMo
 import { StepContentRenderer } from '../components/StepContentRenderer';
 import { StepContentEditor } from '../components/StepContentEditor';
 import type { DetailedContentItem } from '../components/StepContentRenderer';
+import { CustomStepsEditor } from '../components/CustomStepsEditor';
 
 // Import step components from DynamicSteps
 import RequestAccess from './Steps/DynamicSteps/RequestAccess';
@@ -743,7 +744,7 @@ export default function UseCasePrototype() {
           </section>
 
           {/* Setup Steps */}
-          {businessUnit === 'Global Technology' && generatedSteps.length > 0 && (
+          {generatedSteps.length > 0 && (
             <section style={{ marginBottom: '35px', pageBreakInside: 'avoid' }}>
               <h2 style={{ 
                 color: '#0064d2', 
@@ -1613,48 +1614,101 @@ export default function UseCasePrototype() {
         </div>
       </div>
 
-      {/* Setup Steps Section - Only for Global Technology */}
-      {businessUnit === 'Global Technology' && (
-        <div style={{
-          backgroundColor: 'white',
-          padding: '24px',
-          borderRadius: '8px',
-          marginBottom: '20px',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-        }}>
-          <h2>3. Setup Steps</h2>
+      {/* Setup Steps Section */}
+      <div style={{
+        backgroundColor: 'white',
+        padding: '24px',
+        borderRadius: '8px',
+        marginBottom: '20px',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+      }}>
+        <h2>3. Setup Implementation Steps</h2>
           <p style={{ color: '#666', fontSize: '14px', marginBottom: '20px' }}>
             Generate and customize the setup steps required for your use case.
           </p>
           
-          <div style={{ marginBottom: '20px' }}>
-            <button
-              onClick={generateSteps}
-              style={{
-                padding: '12px 24px',
-                backgroundColor: '#28a745',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '16px',
-                fontWeight: '600'
-              }}
-            >
-              Generate Steps
-            </button>
-            <p style={{ marginTop: '8px', fontSize: '14px', color: '#666' }}>
-              Click to automatically generate setup steps based on your selections above
-            </p>
+          {/* Top Row: Generate Steps button and Add More Steps search */}
+          <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', alignItems: 'flex-start' }}>
+            {/* Left: Generate Steps Button */}
+            <div style={{ flex: 1 }}>
+              <button
+                onClick={generateSteps}
+                style={{
+                  padding: '12px 24px',
+                  backgroundColor: '#28a745',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '16px',
+                  fontWeight: '600'
+                }}
+              >
+                Generate Steps
+              </button>
+              <p style={{ marginTop: '8px', fontSize: '14px', color: '#666' }}>
+                Click to automatically generate setup steps, if steps are not available, you can create them manually.
+              </p>
+            </div>
+
+            {/* Right: Add More Steps Search */}
+            <div style={{ flex: 1 }}>
+              <h4 style={{ marginBottom: '10px' }}>Search and Add PredefinedSteps</h4>
+              <input
+                type="text"
+                placeholder="Search predefined steps..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  marginBottom: '10px'
+                }}
+              />
+              {searchTerm && filteredPredefinedSteps.length > 0 && (
+                <div style={{
+                  maxHeight: '200px',
+                  overflowY: 'auto',
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  backgroundColor: 'white',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                }}>
+                  {filteredPredefinedSteps.map(step => (
+                    <div
+                      key={step.id}
+                      onClick={() => addPredefinedStep(step)}
+                      style={{
+                        padding: '10px',
+                        cursor: 'pointer',
+                        borderBottom: '1px solid #eee',
+                        backgroundColor: 'white'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                    >
+                      <div style={{ fontWeight: '500' }}>{step.title}</div>
+                      <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                        {step.description.substring(0, 100)}...
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {generatedSteps.length > 0 && (
-            <div style={{ display: 'flex', gap: '20px', marginTop: '20px' }}>
-              {/* Steps List - Left Side */}
-              <div style={{ flex: 1 }}>
-                <h3 style={{ marginBottom: '12px' }}>Steps ({generatedSteps.length})</h3>
-                <div>
-                  {generatedSteps.map((step, index) => (
+            <>
+              {/* Middle Row: Steps List (left) and Details (right) */}
+              <div style={{ display: 'flex', gap: '20px', marginBottom: '30px' }}>
+                {/* Steps List - Left Side */}
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ marginBottom: '12px' }}>Steps ({generatedSteps.length})</h3>
+                  <div>
+                    {generatedSteps.map((step, index) => (
                     <div
                       key={step.id}
                       draggable
@@ -1695,121 +1749,12 @@ export default function UseCasePrototype() {
                         ×
                       </button>
                     </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
 
-                {/* Add More Steps */}
-                <div style={{ marginTop: '20px' }}>
-                  <h4>Add More Steps</h4>
-                  <input
-                    type="text"
-                    placeholder="Search predefined steps..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '10px',
-                      border: '1px solid #ccc',
-                      borderRadius: '4px',
-                      marginBottom: '10px'
-                    }}
-                  />
-                  {searchTerm && filteredPredefinedSteps.length > 0 && (
-                    <div style={{
-                      maxHeight: '200px',
-                      overflowY: 'auto',
-                      border: '1px solid #ccc',
-                      borderRadius: '4px',
-                      marginBottom: '10px'
-                    }}>
-                      {filteredPredefinedSteps.map(step => (
-                        <div
-                          key={step.id}
-                          onClick={() => addPredefinedStep(step)}
-                          style={{
-                            padding: '10px',
-                            cursor: 'pointer',
-                            borderBottom: '1px solid #eee',
-                            backgroundColor: 'white'
-                          }}
-                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
-                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
-                        >
-                          <div style={{ fontWeight: '500' }}>{step.title}</div>
-                          <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
-                            {step.description.substring(0, 100)}...
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <h4 style={{ marginTop: '20px' }}>Or Create Custom Steps from Text</h4>
-                  <p style={{ fontSize: '13px', color: '#666', marginBottom: '8px' }}>
-                    Type or paste steps using bullet points (-, *, •) or numbered lists (1., 2., etc.). Each bullet will become a separate step.
-                  </p>
-                  <textarea
-                    placeholder="- Install Node.js&#10;- Configure VS Code settings&#10;- Set up GitHub authentication&#10;- Clone the repository"
-                    value={customStepsText}
-                    onChange={(e) => setCustomStepsText(e.target.value)}
-                    onFocus={(e) => {
-                      // Auto-add "- " if textarea is empty when first focused
-                      if (customStepsText.trim() === '') {
-                        setCustomStepsText('- ');
-                        setTimeout(() => {
-                          e.currentTarget.selectionStart = e.currentTarget.selectionEnd = 2;
-                        }, 0);
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        const textarea = e.currentTarget;
-                        const cursorPosition = textarea.selectionStart;
-                        const textBeforeCursor = customStepsText.substring(0, cursorPosition);
-                        const textAfterCursor = customStepsText.substring(cursorPosition);
-                        
-                        // Insert newline with dash and space
-                        const newText = textBeforeCursor + '\n- ' + textAfterCursor;
-                        setCustomStepsText(newText);
-                        
-                        // Set cursor position after the dash and space
-                        setTimeout(() => {
-                          textarea.selectionStart = textarea.selectionEnd = cursorPosition + 3;
-                        }, 0);
-                      }
-                    }}
-                    rows={6}
-                    style={{
-                      width: '100%',
-                      padding: '10px',
-                      border: '1px solid #ccc',
-                      borderRadius: '4px',
-                      marginBottom: '10px',
-                      fontFamily: 'monospace',
-                      fontSize: '13px',
-                      lineHeight: '1.6'
-                    }}
-                  />
-                  <button
-                    onClick={addCustomSteps}
-                    disabled={!customStepsText.trim()}
-                    style={{
-                      padding: '10px 20px',
-                      backgroundColor: customStepsText.trim() ? '#0064d2' : '#ccc',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: customStepsText.trim() ? 'pointer' : 'not-allowed'
-                    }}
-                  >
-                    Add Steps
-                  </button>
-                </div>
-              </div>
-
-              {/* Step Details - Right Side */}
-              <div style={{ flex: 1, maxHeight: '800px', overflowY: 'auto' }}>
+                {/* Step Details - Right Side */}
+                <div style={{ flex: 1, maxHeight: '800px', overflowY: 'auto' }}>
                 {selectedStep ? (
                   <article className="page link-detail">
                     {editingStepId === selectedStep.id ? (
@@ -2000,11 +1945,36 @@ export default function UseCasePrototype() {
                     <p className="muted small">Pick a step on the left to see details and take action.</p>
                   </div>
                 )}
+                </div>
               </div>
-            </div>
+
+              {/* Bottom Row: Custom Steps Editor (full width) */}
+              <div style={{ marginTop: '30px', paddingTop: '30px', borderTop: '2px solid #e0e0e0' }}>
+                <h3 style={{ marginBottom: '16px' }}>Create Custom Steps with Word-Style Editor</h3>
+                <CustomStepsEditor
+                  onStepsChange={(steps) => {
+                    // Convert CustomSteps to Step format and add to generated steps
+                    const newSteps = steps
+                      .filter(s => s.text.trim())
+                      .map((step, index) => ({
+                        id: `custom-${Date.now()}-${index}`,
+                        title: step.text.length > 50 ? step.text.substring(0, 50) + '...' : step.text,
+                        description: step.detailedContent ? `${step.text}\n\n${step.detailedContent}` : step.text,
+                        category: 'custom' as const
+                      }));
+                    
+                    // Only add if there are valid steps
+                    if (newSteps.length > 0) {
+                      // Remove previously added custom steps and add new ones
+                      const nonCustomSteps = generatedSteps.filter(s => s.category !== 'custom');
+                      setGeneratedSteps([...nonCustomSteps, ...newSteps]);
+                    }
+                  }}
+                />
+              </div>
+            </>
           )}
         </div>
-      )}
 
       {/* Additional Information Section */}
       <div style={{
@@ -2061,15 +2031,15 @@ export default function UseCasePrototype() {
           />
         </div>
 
-        {/* Implementation Steps */}
+        {/* Additional Information */}
         <div style={{ marginBottom: '20px' }}>
           <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600' }}>
-            If there are implementation steps for this use case, enter them here.
+            Any additional information needed for this use case, enter them here.
           </label>
           <textarea
             value={implementationSteps}
             onChange={(e) => setImplementationSteps(e.target.value)}
-            placeholder="1. Document ingestion: PDFs, images, and scanned documents are uploaded to the system..."
+            placeholder="Enter any additional context, notes, or information about this use case..."
             rows={6}
             style={{
               width: '100%',
