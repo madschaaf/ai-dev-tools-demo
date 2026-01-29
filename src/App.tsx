@@ -7,6 +7,8 @@ import StepsGuide from './pages/Steps/StepsGuide.tsx'
 import AISandbox from './pages/AISandbox'
 import UseCases from './pages/UseCases'
 import UseCasePrototype from './pages/UseCasePrototype'
+import SimplifiedUseCaseSubmission from './pages/SimplifiedUseCaseSubmission'
+import QuickSubmitDemo from './pages/QuickSubmitDemo'
 import Workflow from './pages/Workflow'
 import AllSteps from './pages/Steps/AllSteps.tsx'
 import ReviewStepsLibrary from './pages/ReviewStepsLibrary'
@@ -274,6 +276,8 @@ export default function App() {
           <Route path="/use-cases" element={<UseCases />} />
           <Route path="/workflow" element={<Workflow />} />
           <Route path="/use-case-prototype" element={<UseCasePrototype />} />
+          <Route path="/simple-submission" element={<SimplifiedUseCaseSubmission />} />
+          <Route path="/quick-submit-demo" element={<QuickSubmitDemo />} />
           <Route path="/explore" element={<ExploreLinks />} />
           <Route path="/" element={<ExploreLinks />} />
           <Route path="/all-steps" element={<AllSteps />} />

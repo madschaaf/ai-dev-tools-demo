@@ -40,6 +40,9 @@ export default function StepsLibrary({ userRole }: StepsLibraryProps) {
     category: 'install' as DynamicStep['category']
   });
   const [showCopyFromMenu, setShowCopyFromMenu] = useState(false);
+  const [copyStepSearchQuery, setCopyStepSearchQuery] = useState('');
+  const [previewStepId, setPreviewStepId] = useState<string | null>(null);
+  const [editorKey, setEditorKey] = useState(0); // Force re-render key
 
   useEffect(() => {
     fetchApprovedSteps();
@@ -72,10 +75,10 @@ export default function StepsLibrary({ userRole }: StepsLibraryProps) {
       detailed_content: step.detailed_content,
       detailedContent: step.detailedContent
     })),
-    ...dbSteps.map(step => ({
-      id: step.step_id,
-      title: step.title,
-      description: step.description,
+    ...dbSteps.map((step, index) => ({
+      id: step.step_id || `db-step-${index}`,
+      title: step.title || 'Untitled Step',
+      description: step.description || '',
       category: step.category,
       source: 'database' as const,
       last_modified: step.last_modified,
@@ -86,8 +89,8 @@ export default function StepsLibrary({ userRole }: StepsLibraryProps) {
 
   const filteredSteps = allSteps.filter(step => {
     const matchesSearch = searchQuery === '' ||
-      step.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      step.description.toLowerCase().includes(searchQuery.toLowerCase());
+      (step.title?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+      (step.description?.toLowerCase() || '').includes(searchQuery.toLowerCase());
     
     const matchesCategory = categoryFilter === 'all' || step.category === categoryFilter;
     
@@ -203,21 +206,35 @@ export default function StepsLibrary({ userRole }: StepsLibraryProps) {
     const stepToCopy = allSteps.find(s => s.id === stepId);
     if (!stepToCopy) return;
 
-    // Copy the content structure (but not the actual text)
+    // Copy the step's title and description to the form
+    setNewStepData({
+      title: stepToCopy.title,
+      description: stepToCopy.description,
+      category: stepToCopy.category as DynamicStep['category']
+    });
+
+    // Copy the actual content (not just structure) so user can edit it
     if (stepToCopy.detailed_content && stepToCopy.detailed_content.length > 0) {
-      const copiedContent = stepToCopy.detailed_content.map(item => ({
+      const copiedContent = stepToCopy.detailed_content.map((item, index) => ({
         ...item,
-        id: `item-${Date.now()}-${Math.random()}`,
-        // Keep structure but clear text content for user to fill in
-        text: item.type === 'heading' ? 'Your heading here...' : 
-              item.type === 'text' ? 'Your content here...' :
-              item.type === 'code' ? '// Your code here' :
-              item.text || '',
-        items: item.type === 'list' ? ['List item 1', 'List item 2'] : item.items
+        id: `copied-${Date.now()}-${index}` // Generate new IDs
       }));
       setEditingContent(copiedContent);
+    } else if ((stepToCopy as any).detailedContent) {
+      // Handle legacy content
+      setEditingContent([{
+        id: `copied-${Date.now()}-legacy`,
+        type: 'text',
+        text: (stepToCopy as any).detailedContent
+      }]);
     }
+    
+    // Force editor to re-render with new content
+    setEditorKey(prev => prev + 1);
+    
     setShowCopyFromMenu(false);
+    setCopyStepSearchQuery(''); // Reset search
+    setPreviewStepId(null); // Reset preview
   };
 
   const handleCloseCreateModal = () => {
@@ -545,9 +562,9 @@ export default function StepsLibrary({ userRole }: StepsLibraryProps) {
             <div className="modal-body modal-split-view">
               {/* Left side: Form and Editor */}
               <div className="modal-form-section">
-                <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <div style={{ marginBottom: '1rem' }}>
                   <button
-                    onClick={() => setShowCopyFromMenu(!showCopyFromMenu)}
+                    onClick={() => setShowCopyFromMenu(true)}
                     style={{
                       padding: '0.5rem 1rem',
                       background: '#6c757d',
@@ -555,69 +572,11 @@ export default function StepsLibrary({ userRole }: StepsLibraryProps) {
                       border: 'none',
                       borderRadius: '4px',
                       cursor: 'pointer',
-                      fontSize: '0.9rem',
-                      position: 'relative'
+                      fontSize: '0.9rem'
                     }}
                   >
                     📋 Copy Layout from Step
                   </button>
-                  {showCopyFromMenu && (
-                    <>
-                      <div
-                        onClick={() => setShowCopyFromMenu(false)}
-                        style={{
-                          position: 'fixed',
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          bottom: 0,
-                          zIndex: 1099
-                        }}
-                      />
-                      <div
-                        style={{
-                          position: 'absolute',
-                          top: '100%',
-                          left: 0,
-                          marginTop: '0.5rem',
-                          background: 'white',
-                          border: '1px solid #ddd',
-                          borderRadius: '6px',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                          zIndex: 1100,
-                          maxHeight: '300px',
-                          overflowY: 'auto',
-                          minWidth: '300px'
-                        }}
-                      >
-                        {allSteps.map(step => (
-                          <button
-                            key={step.id}
-                            onClick={() => handleCopyFromStep(step.id)}
-                            style={{
-                              width: '100%',
-                              padding: '0.75rem 1rem',
-                              background: 'white',
-                              border: 'none',
-                              borderBottom: '1px solid #f0f0f0',
-                              cursor: 'pointer',
-                              textAlign: 'left',
-                              transition: 'background 0.2s'
-                            }}
-                            onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'}
-                            onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
-                          >
-                            <div style={{ fontWeight: '600', fontSize: '0.9rem', marginBottom: '0.25rem' }}>
-                              {step.title}
-                            </div>
-                            <div style={{ fontSize: '0.75rem', color: '#666' }}>
-                              {step.category} • {step.source === 'dynamic' ? 'Built-in' : 'Custom'}
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    </>
-                  )}
                 </div>
               <div className="form-group">
                 <label>Title *</label>
@@ -662,6 +621,7 @@ export default function StepsLibrary({ userRole }: StepsLibraryProps) {
                   <label>Detailed Content</label>
                   <div style={{ border: '1px solid #ddd', borderRadius: '6px', padding: '1rem', background: '#f9f9f9' }}>
                     <StepContentEditor
+                      key={`editor-${editorKey}`}
                       content={editingContent}
                       onChange={setEditingContent}
                       onCancel={() => {}}
@@ -727,6 +687,172 @@ export default function StepsLibrary({ userRole }: StepsLibraryProps) {
                   {!newStepData.description && editingContent.length === 0 && (
                     <div style={{ color: '#999', fontStyle: 'italic', textAlign: 'center', padding: '2rem' }}>
                       Fill in the form to see your step preview here
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Copy From Step Modal */}
+      {showCopyFromMenu && (
+        <div className="modal-overlay" onClick={() => setShowCopyFromMenu(false)}>
+          <div className="modal-content modal-content-wide" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>📋 Copy Content from Step</h2>
+              <button onClick={() => setShowCopyFromMenu(false)} className="close-btn">
+                ×
+              </button>
+            </div>
+            <div className="modal-body modal-split-view">
+              {/* Left side: Search and Step List */}
+              <div className="modal-form-section">
+                <div className="form-group">
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="🔍 Search steps by title..."
+                    value={copyStepSearchQuery}
+                    onChange={(e) => setCopyStepSearchQuery(e.target.value)}
+                    autoFocus
+                  />
+                </div>
+                
+                <div style={{ 
+                  maxHeight: '500px', 
+                  overflowY: 'auto', 
+                  border: '1px solid #ddd', 
+                  borderRadius: '6px',
+                  background: '#f9f9f9'
+                }}>
+                  {allSteps
+                    .filter(step => 
+                      copyStepSearchQuery === '' ||
+                      (step.title?.toLowerCase() || '').includes(copyStepSearchQuery.toLowerCase()) ||
+                      (step.description?.toLowerCase() || '').includes(copyStepSearchQuery.toLowerCase())
+                    )
+                    .map(step => (
+                      <button
+                        key={step.id}
+                        onClick={() => handleCopyFromStep(step.id)}
+                        onMouseEnter={() => setPreviewStepId(step.id)}
+                        style={{
+                          width: '100%',
+                          padding: '1rem',
+                          background: previewStepId === step.id ? '#f0f7ff' : 'white',
+                          border: 'none',
+                          borderBottom: '1px solid #e0e0e0',
+                          borderLeft: previewStepId === step.id ? '4px solid #007bff' : 'none',
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        <div style={{ fontWeight: '600', fontSize: '0.95rem', marginBottom: '0.5rem', color: '#333' }}>
+                          {step.title}
+                        </div>
+                        <div style={{ fontSize: '0.85rem', color: '#666', marginBottom: '0.5rem' }}>
+                          {step.description}
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                          <span className={`category-tag category-${step.category}`} style={{ fontSize: '0.75rem' }}>
+                            {step.category}
+                          </span>
+                          <span className={`source-badge source-${step.source}`} style={{ fontSize: '0.75rem' }}>
+                            {step.source === 'dynamic' ? 'Built-in' : 'Custom'}
+                          </span>
+                        </div>
+                      </button>
+                    ))}
+                </div>
+              </div>
+
+              {/* Right side: Preview */}
+              <div className="modal-preview-section">
+                <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem', color: '#666', borderBottom: '2px solid #e0e0e0', paddingBottom: '0.5rem' }}>
+                  👁️ Step Preview
+                </h3>
+                <div style={{ 
+                  background: 'white', 
+                  padding: '1.5rem', 
+                  borderRadius: '8px', 
+                  border: '1px solid #ddd',
+                  minHeight: '500px',
+                  maxHeight: '500px',
+                  overflowY: 'auto'
+                }}>
+                  {previewStepId ? (() => {
+                    const previewStep = allSteps.find(s => s.id === previewStepId);
+                    if (!previewStep) return null;
+                    
+                    return (
+                      <>
+                        {/* Preview Header */}
+                        <div style={{ marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '2px solid #e0e0e0' }}>
+                          <h2 style={{ margin: '0 0 0.5rem 0', fontSize: '1.5rem', color: '#333' }}>
+                            {previewStep.title}
+                          </h2>
+                          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '0.75rem' }}>
+                            <span className={`category-tag category-${previewStep.category}`}>
+                              {previewStep.category}
+                            </span>
+                            <span className={`source-badge source-${previewStep.source}`}>
+                              {previewStep.source === 'dynamic' ? 'Built-in' : 'Custom'}
+                            </span>
+                          </div>
+                          <p style={{ color: '#666', fontSize: '1rem', lineHeight: '1.6', margin: 0 }}>
+                            {previewStep.description}
+                          </p>
+                        </div>
+
+                        {/* Preview Content */}
+                        {previewStep.detailed_content && previewStep.detailed_content.length > 0 ? (
+                          <StepContentRenderer content={previewStep.detailed_content} />
+                        ) : (previewStep as any).detailedContent ? (
+                          <div style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6', color: '#444' }}>
+                            {(previewStep as any).detailedContent}
+                          </div>
+                        ) : (
+                          <div style={{ color: '#999', fontStyle: 'italic', padding: '2rem', textAlign: 'center' }}>
+                            No detailed content available for this step
+                          </div>
+                        )}
+                        
+                        {/* Copy Instructions */}
+                        <div style={{ 
+                          background: '#e3f2fd', 
+                          padding: '1rem', 
+                          borderRadius: '6px', 
+                          border: '1px solid #90caf9',
+                          marginTop: '1.5rem'
+                        }}>
+                          <div style={{ fontWeight: '600', color: '#1976d2', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
+                            💡 Click to Copy
+                          </div>
+                          <p style={{ color: '#1565c0', fontSize: '0.85rem', margin: 0, lineHeight: '1.5' }}>
+                            Click this step on the left to copy all content to your new step. You can then modify it as needed.
+                          </p>
+                        </div>
+                      </>
+                    );
+                  })() : (
+                    <div style={{ 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      height: '450px',
+                      color: '#999'
+                    }}>
+                      <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>👈</div>
+                      <p style={{ fontSize: '1.1rem', fontWeight: '500', marginBottom: '0.5rem' }}>
+                        Hover over a step to preview
+                      </p>
+                      <p style={{ fontSize: '0.9rem', color: '#bbb', textAlign: 'center', maxWidth: '300px' }}>
+                        Move your mouse over any step in the list to see its full content here
+                      </p>
                     </div>
                   )}
                 </div>

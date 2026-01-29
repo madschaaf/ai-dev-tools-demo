@@ -505,6 +505,30 @@ function UseCaseModal({
   onClose: () => void
   onUpdate: (useCase: UseCase) => void
 }) {
+  const [useCaseWithSteps, setUseCaseWithSteps] = useState<any>(null)
+  const [loadingSteps, setLoadingSteps] = useState(true)
+
+  // Fetch full use case with step details when modal opens
+  useEffect(() => {
+    const fetchUseCaseWithSteps = async () => {
+      try {
+        setLoadingSteps(true)
+        const response = await fetch(`http://localhost:3000/api/use-cases/${useCase.id}?includeSteps=true`)
+        const result = await response.json()
+        
+        if (result.success && result.data) {
+          setUseCaseWithSteps(result.data)
+        }
+      } catch (error) {
+        console.error('Error fetching use case with steps:', error)
+      } finally {
+        setLoadingSteps(false)
+      }
+    }
+    
+    fetchUseCaseWithSteps()
+  }, [useCase.id])
+
   const handleStatusChange = async (newStatus: UseCase['status']) => {
     try {
       const response = await fetch(`http://localhost:3000/api/use-cases/${useCase.id}`, {
@@ -703,22 +727,66 @@ function UseCaseModal({
           {useCase.step_ids && useCase.step_ids.length > 0 && (
             <div style={{ marginBottom: '1.5rem' }}>
               <h3>Setup Steps ({useCase.step_ids.length})</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {useCase.step_ids.map((stepId, idx) => (
-                  <div
-                    key={stepId}
-                    style={{
-                      padding: '0.75rem',
-                      background: '#f9fafb',
-                      border: '1px solid #e1e4e8',
-                      borderRadius: 'var(--radius-md)',
-                      fontSize: '0.875rem'
-                    }}
-                  >
-                    {idx + 1}. Step ID: {stepId}
-                  </div>
-                ))}
-              </div>
+              {loadingSteps ? (
+                <div style={{ padding: '1rem', textAlign: 'center', color: '#6b7280' }}>
+                  Loading step details...
+                </div>
+              ) : useCaseWithSteps?.steps && useCaseWithSteps.steps.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {useCaseWithSteps.steps.map((step: any, idx: number) => (
+                    <div
+                      key={step.id}
+                      style={{
+                        padding: '1rem',
+                        background: '#f9fafb',
+                        border: '1px solid #e1e4e8',
+                        borderRadius: 'var(--radius-md)',
+                        fontSize: '0.875rem'
+                      }}
+                    >
+                      <div style={{ 
+                        fontWeight: 600, 
+                        marginBottom: '0.5rem',
+                        color: '#374151'
+                      }}>
+                        {idx + 1}. {step.title}
+                      </div>
+                      {step.description && (
+                        <div style={{ 
+                          color: '#6b7280',
+                          marginBottom: '0.5rem',
+                          fontSize: '0.8rem'
+                        }}>
+                          {step.description}
+                        </div>
+                      )}
+                      <div style={{ 
+                        fontSize: '0.75rem',
+                        color: '#9ca3af'
+                      }}>
+                        Step ID: {step.id}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {useCase.step_ids.map((stepId, idx) => (
+                    <div
+                      key={stepId}
+                      style={{
+                        padding: '0.75rem',
+                        background: '#f9fafb',
+                        border: '1px solid #e1e4e8',
+                        borderRadius: 'var(--radius-md)',
+                        fontSize: '0.875rem'
+                      }}
+                    >
+                      {idx + 1}. Step ID: {stepId}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

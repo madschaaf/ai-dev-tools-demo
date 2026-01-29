@@ -5,7 +5,9 @@ import { initializeAppContext, getAppContextInfo } from './config/appContext.ts'
 import { initializeDatabase, closeDatabase } from './db/connection.ts'
 import autofillRoutes from './routes/autofill.ts'
 import useCaseRoutes from './routes/useCases.ts'
+import useCaseAddonsRoutes from './routes/useCaseAddons.ts'
 import stepsRoutes from './routes/steps.ts'
+import aiStepGenerationRoutes from './routes/aiStepGeneration.ts'
 
 // Initialize eBay App Context (if configured)
 initializeAppContext()
@@ -42,7 +44,9 @@ app.get('/api/resources', (_req, res) => {
 // API routes
 app.use('/api/autofill', autofillRoutes)
 app.use('/api/use-cases', useCaseRoutes)
+app.use('/api/use-cases', useCaseAddonsRoutes)
 app.use('/api/steps', stepsRoutes)
+app.use('/api/ai', aiStepGenerationRoutes)
 
 const port = process.env.PORT ? Number(process.env.PORT) : 3000
 const server = app.listen(port, () => {

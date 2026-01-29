@@ -13,7 +13,7 @@ interface SelectionRange {
   text: string;
 }
 
-type FormatType = 'bold' | 'italic' | 'code' | 'link' | 'highlight' | 'ai-icon';
+type FormatType = 'bold' | 'italic' | 'code' | 'link' | 'highlight' | 'ai-icon' | 'bullet-list' | 'numbered-list';
 
 export function RichTextEditor({ value, onChange, placeholder = '', rows = 3 }: RichTextEditorProps) {
   const [showToolbar, setShowToolbar] = useState(true);
@@ -91,6 +91,66 @@ export function RichTextEditor({ value, onChange, placeholder = '', rows = 3 }: 
         setShowLinkModal(true);
         return;
       }
+    }
+
+    // Special handling for lists
+    if (formatType === 'bullet-list' || formatType === 'numbered-list') {
+      // Find the start of the current line
+      const beforeCursor = value.substring(0, start);
+      const lineStart = beforeCursor.lastIndexOf('\n') + 1;
+      const currentLine = value.substring(lineStart, value.indexOf('\n', start) >= 0 ? value.indexOf('\n', start) : value.length);
+      
+      // Insert list marker at the beginning of current line or selected lines
+      if (start !== end) {
+        // Multi-line selection - add list marker to each line
+        const lines = selectedText.split('\n');
+        const prefix = formatType === 'bullet-list' ? '- ' : '';
+        const formattedLines = lines.map((line, index) => {
+          const marker = formatType === 'bullet-list' ? '- ' : `${index + 1}. `;
+          // Don't add marker if line already has one
+          if (line.trim().match(/^(-|\d+\.)\s/)) {
+            return line;
+          }
+          return marker + line;
+        });
+        const formattedText = formattedLines.join('\n');
+        const newValue = value.substring(0, start) + formattedText + value.substring(end);
+        onChange(newValue);
+      } else {
+        // Single line - add marker to current line
+        let marker = '';
+        
+        if (formatType === 'bullet-list') {
+          marker = '- ';
+        } else {
+          // For numbered lists, find the last number in previous lines
+          const linesBeforeCursor = value.substring(0, lineStart).split('\n');
+          let lastNumber = 0;
+          
+          // Look backwards for the most recent numbered list item
+          for (let i = linesBeforeCursor.length - 1; i >= 0; i--) {
+            const match = linesBeforeCursor[i].match(/^(\d+)\.\s/);
+            if (match) {
+              lastNumber = parseInt(match[1]);
+              break;
+            }
+          }
+          
+          marker = `${lastNumber + 1}. `;
+        }
+        
+        // Check if line already has a marker
+        if (!currentLine.trim().match(/^(-|\d+\.)\s/)) {
+          const newValue = value.substring(0, lineStart) + marker + value.substring(lineStart);
+          onChange(newValue);
+          setTimeout(() => {
+            const newPosition = lineStart + marker.length;
+            textarea.focus();
+            textarea.setSelectionRange(newPosition, newPosition);
+          }, 10);
+        }
+      }
+      return;
     }
 
     // If text is selected, wrap it with formatting
@@ -301,6 +361,41 @@ export function RichTextEditor({ value, onChange, placeholder = '', rows = 3 }: 
             }}
           >
             🤖
+          </button>
+          <div style={{ width: '1px', height: '28px', backgroundColor: '#ccc', margin: '0 4px' }} />
+          <button
+            type="button"
+            onClick={() => applyFormatting('bullet-list')}
+            title="Bullet List (Markdown: - item)"
+            style={{
+              padding: '6px 12px',
+              backgroundColor: 'white',
+              color: '#333',
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              transition: 'all 0.2s'
+            }}
+          >
+            •
+          </button>
+          <button
+            type="button"
+            onClick={() => applyFormatting('numbered-list')}
+            title="Numbered List (Markdown: 1. item)"
+            style={{
+              padding: '6px 12px',
+              backgroundColor: 'white',
+              color: '#333',
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              transition: 'all 0.2s'
+            }}
+          >
+            1.
           </button>
         </div>
       )}

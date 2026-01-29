@@ -18,6 +18,8 @@ export default function NavBar() {
           <NavLink to="/workflow" className="nav-link">Workflows</NavLink>
           <NavLink to="/all-steps" className="nav-link">All Steps</NavLink>
           <NavLink to="/use-case-prototype" className="nav-link">Use Case Prototype</NavLink>
+          <NavLink to="/simple-submission" className="nav-link">Simple Submission</NavLink>
+          <NavLink to="/quick-submit-demo" className="nav-link">Quick Submit Demo</NavLink>
           <NavLink to="/review-submissions" className="nav-link">Review Submissions</NavLink>
            <NavLink to="/library" className="nav-link">Library</NavLink>
         </div>

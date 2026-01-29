@@ -180,6 +180,12 @@ export class UseCasesService {
         paramCount++;
       }
 
+      if (useCaseData.estimated_time !== undefined) {
+        updates.push(`estimated_time = $${paramCount}`);
+        params.push(useCaseData.estimated_time);
+        paramCount++;
+      }
+
       // Always update updated_at
       updates.push(`updated_at = CURRENT_TIMESTAMP`);
 

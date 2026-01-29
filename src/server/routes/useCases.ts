@@ -13,36 +13,64 @@ router.post('/', async (req, res) => {
     // First, create/get steps if provided
     let stepIds: string[] = [];
     if (useCaseData.generatedSteps && useCaseData.generatedSteps.length > 0) {
-      console.log(`Creating ${useCaseData.generatedSteps.length} steps for use case...`);
+      console.log(`Processing ${useCaseData.generatedSteps.length} steps for use case...`);
       
       for (const step of useCaseData.generatedSteps) {
         try {
-          // Check if step already exists by searching for the step ID
-          let existingStep = await stepsService.getStepById(step.stepId || step.id);
+          const stepId = step.stepId || step.id;
+          const isCustomStep = stepId && stepId.startsWith('custom-');
+          let existingStep = null;
+          
+          // Try to look up preconfigured steps using the identifier (supports both UUIDs and string identifiers)
+          if (stepId && !isCustomStep) {
+            try {
+              // Use getStepsByIdentifiers which handles both UUIDs and string identifiers (like "setup-github-personal-account")
+              const steps = await stepsService.getStepsByIdentifiers([stepId]);
+              if (steps.length > 0) {
+                existingStep = steps[0];
+              }
+            } catch (lookupError) {
+              console.log(`Step ${stepId} not found in database`);
+            }
+          }
           
           if (existingStep) {
-            console.log(`Step ${step.stepId} already exists, using existing step`);
+            // Found existing preconfigured step - use it!
+            console.log(`✓ Using existing preconfigured step: ${existingStep.id} - ${existingStep.title}`);
             stepIds.push(existingStep.id);
-          } else {
-            // Create new step in database
+          } else if (isCustomStep) {
+            // This is a custom step - create it in the database
+            // For custom steps, ensure category is valid (database only allows specific values)
+            // Valid categories: 'security', 'access', 'admin', 'install', 'setup', 'config', 'practice'
+            let validCategory = step.category || 'setup';
+            const allowedCategories = ['security', 'access', 'admin', 'install', 'setup', 'config', 'practice'];
+            if (!allowedCategories.includes(validCategory)) {
+              validCategory = 'setup'; // Default to 'setup' for custom steps
+            }
+            
             const newStep = await stepsService.createStep({
               title: step.title,
               brief_description: step.description,
               detailed_content: step.detailed_content || [],
               tags: [],
-              category: (step.category || 'setup') as any,
+              category: validCategory as any,
               created_by: useCaseData.leadName || 'Anonymous',
               modified_by: useCaseData.leadName || 'Anonymous',
-              status: 'approved', // Auto-approve steps from use case submission
+              status: 'approved', // Auto-approve custom steps from use case submission
               estimated_time: 10,
               difficulty_level: 'beginner'
             });
             
-            console.log(`Created new step: ${newStep.id} - ${newStep.title}`);
+            console.log(`✓ Created new custom step: ${newStep.id} - ${newStep.title} (auto-approved)`);
             stepIds.push(newStep.id);
+          } else {
+            // Preconfigured step not found in database - this shouldn't happen
+            console.warn(`⚠️ Preconfigured step "${stepId}" not found in database. Skipping this step.`);
+            console.warn(`   Please ensure the step exists in the Steps Library before using it in a use case.`);
+            // DO NOT create a duplicate - skip this step
           }
         } catch (stepError) {
-          console.error(`Error creating step ${step.title}:`, stepError);
+          console.error(`Error processing step ${step.title}:`, stepError);
           // Continue with other steps even if one fails
         }
       }
@@ -51,7 +79,7 @@ router.post('/', async (req, res) => {
     // Map frontend data to database model with ALL fields
     const mappedData: Partial<UseCase> = {
       title: useCaseData.name || useCaseData.title,
-      description: useCaseData.briefOverview || useCaseData.description,
+      description: useCaseData.briefOverview || useCaseData.description || 'No description provided',
       category: useCaseData.businessUnit || useCaseData.category || 'General',
       tags: useCaseData.tags || [...(useCaseData.categories || []), ...(useCaseData.searchTags || [])],
       created_by: useCaseData.leadName || useCaseData.created_by || 'Anonymous',
@@ -79,7 +107,11 @@ router.post('/', async (req, res) => {
       
       // Use the created step IDs
       step_ids: stepIds.length > 0 ? stepIds : undefined,
-      estimated_duration: useCaseData.estimatedTime ? parseInt(useCaseData.estimatedTime) : undefined,
+      estimated_duration: (() => {
+        if (!useCaseData.estimatedTime) return undefined;
+        const parsed = parseInt(useCaseData.estimatedTime);
+        return isNaN(parsed) ? undefined : parsed;
+      })(),
       prerequisites: useCaseData.prerequisites,
     };
 

@@ -57,6 +57,88 @@ function CodeBlock({ code }: { code: string }) {
 }
 
 export function MarkdownRenderer({ content, className = '' }: MarkdownRendererProps) {
+  const parseContent = (text: string): React.ReactNode[] => {
+    // Split content into lines to handle block-level elements (lists)
+    const lines = text.split('\n');
+    const elements: React.ReactNode[] = [];
+    let key = 0;
+    let inBulletList = false;
+    let inNumberedList = false;
+    let listItems: React.ReactNode[] = [];
+    let numberedListStart = 1; // Track the starting number for numbered lists
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      
+      // Check for bullet list item
+      const bulletMatch = line.match(/^-\s+(.+)$/);
+      if (bulletMatch) {
+        if (!inBulletList && inNumberedList) {
+          // Close numbered list and open bullet list
+          elements.push(<ol key={key++} start={numberedListStart} style={{ marginLeft: '20px' }}>{listItems}</ol>);
+          listItems = [];
+          inNumberedList = false;
+        }
+        inBulletList = true;
+        listItems.push(<li key={key++}>{parseInlineMarkdown(bulletMatch[1])}</li>);
+        continue;
+      }
+      
+      // Check for numbered list item - capture the actual number
+      const numberedMatch = line.match(/^(\d+)\.\s+(.+)$/);
+      if (numberedMatch) {
+        const lineNumber = parseInt(numberedMatch[1], 10);
+        
+        if (!inNumberedList) {
+          // Starting a new numbered list
+          if (inBulletList) {
+            // Close bullet list first
+            elements.push(<ul key={key++} style={{ marginLeft: '20px' }}>{listItems}</ul>);
+            listItems = [];
+            inBulletList = false;
+          }
+          // Set the starting number for this list
+          numberedListStart = lineNumber;
+          inNumberedList = true;
+        }
+        
+        listItems.push(<li key={key++}>{parseInlineMarkdown(numberedMatch[2])}</li>);
+        continue;
+      }
+      
+      // Not a list item - close any open lists
+      if (inBulletList) {
+        elements.push(<ul key={key++} style={{ marginLeft: '20px' }}>{listItems}</ul>);
+        listItems = [];
+        inBulletList = false;
+      }
+      if (inNumberedList) {
+        elements.push(<ol key={key++} start={numberedListStart} style={{ marginLeft: '20px' }}>{listItems}</ol>);
+        // Calculate what the next number would be if we continue the list
+        numberedListStart = numberedListStart + listItems.length;
+        listItems = [];
+        inNumberedList = false;
+      }
+      
+      // Regular line - parse inline markdown
+      if (line.trim()) {
+        elements.push(<div key={key++}>{parseInlineMarkdown(line)}</div>);
+      } else {
+        elements.push(<br key={key++} />);
+      }
+    }
+    
+    // Close any remaining open lists
+    if (inBulletList) {
+      elements.push(<ul key={key++} style={{ marginLeft: '20px' }}>{listItems}</ul>);
+    }
+    if (inNumberedList) {
+      elements.push(<ol key={key++} start={numberedListStart} style={{ marginLeft: '20px' }}>{listItems}</ol>);
+    }
+
+    return elements;
+  };
+
   const parseInlineMarkdown = (text: string): React.ReactNode[] => {
     const elements: React.ReactNode[] = [];
     let remainingText = text;
@@ -206,7 +288,7 @@ export function MarkdownRenderer({ content, className = '' }: MarkdownRendererPr
 
   return (
     <div className={className} style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
-      {parseInlineMarkdown(content)}
+      {parseContent(content)}
     </div>
   );
 }

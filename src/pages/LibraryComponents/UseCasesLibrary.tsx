@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 import { AiOutlineHeart, AiFillHeart } from 'react-icons/ai';
+import { MarkdownRenderer } from '../../components/MarkdownRenderer';
+import { UseCaseAddonModal } from '../../components/UseCaseAddonModal';
 import './UseCasesLibrary.css';
+import { StepContentRenderer } from '../../components/StepContentRenderer';
+import type { DetailedContentItem } from '../../components/StepContentRenderer';
 
 interface UseCase {
   id: string;  // UUID from database
@@ -15,20 +19,6 @@ interface UseCase {
   like_count: number;
   last_updated: string;
   status: string;
-}
-
-interface DetailedContentItem {
-  id: string;
-  type: 'text' | 'code' | 'image' | 'link' | 'checklist' | 'warning' | 'tip';
-  label?: string;
-  text?: string;
-  code?: string;
-  language?: string;
-  imageUrl?: string;
-  linkUrl?: string;
-  linkText?: string;
-  items?: string[];
-  copyToClipboard?: boolean;
 }
 
 interface UseCaseStep {
@@ -85,6 +75,9 @@ export default function UseCasesLibrary() {
   const [selectedStepIndex, setSelectedStepIndex] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [showAddonModal, setShowAddonModal] = useState(false);
+  const [addons, setAddons] = useState<any[]>([]);
+  const [loadingAddons, setLoadingAddons] = useState(false);
 
   useEffect(() => {
     fetchApprovedUseCases();
@@ -138,6 +131,31 @@ export default function UseCasesLibrary() {
     setSelectedUseCase(null);
   };
 
+  const handleDeleteUseCase = async (useCaseId: string) => {
+    if (!confirm('Are you sure you want to delete this use case? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/use-cases/${useCaseId}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        alert('Use case deleted successfully!');
+        setSelectedUseCase(null);
+        // Refresh the use cases list
+        fetchApprovedUseCases();
+      } else {
+        const error = await response.json();
+        alert(`Failed to delete use case: ${error.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error deleting use case:', error);
+      alert('Failed to delete use case. Please try again.');
+    }
+  };
+
   const toggleFavorite = (useCaseId: string, event?: React.MouseEvent) => {
     if (event) {
       event.stopPropagation(); // Prevent card click when clicking heart
@@ -154,91 +172,28 @@ export default function UseCasesLibrary() {
     });
   };
 
-  const renderDetailedContent = (items: DetailedContentItem[]) => {
-    if (!items || items.length === 0) return null;
+  const handleSaveAddon = async (addonData: any) => {
+    if (!selectedUseCase) return;
 
-    return items.map((item, idx) => {
-      switch (item.type) {
-        case 'text':
-          return (
-            <div key={idx} style={{ marginBottom: '12px', fontSize: '15px', lineHeight: '1.7' }}>
-              {item.label && <strong>{item.label}: </strong>}
-              {item.text}
-            </div>
-          );
-        case 'code':
-          return (
-            <div key={idx} style={{ marginBottom: '12px' }}>
-              {item.label && <div style={{ marginBottom: '6px', fontWeight: 'bold', fontSize: '14px' }}>{item.label}</div>}
-              <pre style={{
-                backgroundColor: '#f6f8fa',
-                padding: '12px',
-                borderRadius: '6px',
-                overflow: 'auto',
-                border: '1px solid #e1e4e8',
-                fontSize: '13px'
-              }}>
-                <code>{item.code}</code>
-              </pre>
-            </div>
-          );
-        case 'checklist':
-          return (
-            <div key={idx} style={{ marginBottom: '12px' }}>
-              {item.label && <div style={{ marginBottom: '6px', fontWeight: 'bold', fontSize: '14px' }}>{item.label}</div>}
-              <ul style={{ margin: '0', paddingLeft: '20px' }}>
-                {item.items?.map((checkItem, i) => (
-                  <li key={i} style={{ marginBottom: '4px', fontSize: '15px' }}>{checkItem}</li>
-                ))}
-              </ul>
-            </div>
-          );
-        case 'link':
-          return (
-            <div key={idx} style={{ marginBottom: '12px' }}>
-              {item.label && <strong>{item.label}: </strong>}
-              <a href={item.linkUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#0064d2', textDecoration: 'underline' }}>
-                {item.linkText || item.linkUrl}
-              </a>
-            </div>
-          );
-        case 'image':
-          return (
-            <div key={idx} style={{ marginBottom: '12px' }}>
-              {item.label && <div style={{ marginBottom: '6px', fontWeight: 'bold', fontSize: '14px' }}>{item.label}</div>}
-              <img src={item.imageUrl} alt={item.label || 'Step image'} style={{ maxWidth: '100%', borderRadius: '4px', border: '1px solid #e1e4e8' }} />
-            </div>
-          );
-        case 'warning':
-          return (
-            <div key={idx} style={{
-              marginBottom: '12px',
-              padding: '12px',
-              backgroundColor: '#fff4e6',
-              borderLeft: '4px solid #ff9800',
-              borderRadius: '4px'
-            }}>
-              <strong style={{ color: '#e65100' }}>⚠️ Warning: </strong>
-              <span style={{ fontSize: '15px' }}>{item.text}</span>
-            </div>
-          );
-        case 'tip':
-          return (
-            <div key={idx} style={{
-              marginBottom: '12px',
-              padding: '12px',
-              backgroundColor: '#e8f5e9',
-              borderLeft: '4px solid #4caf50',
-              borderRadius: '4px'
-            }}>
-              <strong style={{ color: '#2e7d32' }}>💡 Tip: </strong>
-              <span style={{ fontSize: '15px' }}>{item.text}</span>
-            </div>
-          );
-        default:
-          return null;
+    try {
+      const response = await fetch(`/api/use-cases/${selectedUseCase.id}/addons`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(addonData),
+      });
+
+      if (response.ok) {
+        alert('Learning path created successfully!');
+        setShowAddonModal(false);
+        // Refresh use case details to show new addon
+        fetchUseCaseDetails(selectedUseCase.id);
+      } else {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to save addon');
       }
-    });
+    } catch (error: any) {
+      throw error; // Re-throw to be handled by modal
+    }
   };
 
   const filteredUseCases = useCases
@@ -278,12 +233,8 @@ export default function UseCasesLibrary() {
   if (selectedUseCase && viewMode === 'guide' && selectedUseCase.steps && selectedUseCase.steps.length > 0) {
     const activeStep = selectedUseCase.steps[selectedStepIndex];
     
-    // Group steps by category
-    const stepsByCategory = selectedUseCase.steps.reduce<Record<string, UseCaseStep[]>>((acc, step) => {
-      if (!acc[step.category]) acc[step.category] = [];
-      acc[step.category].push(step);
-      return acc;
-    }, {});
+    // Sort steps by order_index to maintain submission order
+    const orderedSteps = [...selectedUseCase.steps].sort((a, b) => a.order_index - b.order_index);
 
     return (
       <div className="container">
@@ -311,43 +262,40 @@ export default function UseCasesLibrary() {
               <p className="muted">Follow these steps to complete the use case. Click a step to see details.</p>
 
               <div className="quick-links-list">
-                {Object.entries(stepsByCategory).map(([category, categorySteps]) => (
-                  <section key={category} className="quick-links-group">
-                    <h3 className="quick-links-group-title">{category}</h3>
-                    <ul className="quick-links-items">
-                      {categorySteps.sort((a, b) => a.order_index - b.order_index).map((step, idx) => {
-                        const stepIndex = selectedUseCase.steps!.indexOf(step);
-                        const isCompleted = completedSteps.has(stepIndex);
-                        const isActive = stepIndex === selectedStepIndex;
-                        
-                        return (
-                          <li key={step.id}>
-                            <button
-                              type="button"
-                              onClick={() => setSelectedStepIndex(stepIndex)}
-                              className={`quick-link-row ${isActive ? 'active' : ''}`}
-                              style={isCompleted ? {
-                                background: '#d4edda',
-                                borderLeft: '4px solid #28a745'
-                              } : {}}
+                <section className="quick-links-group">
+                  <h3 className="quick-links-group-title">Setup Steps ({orderedSteps.length})</h3>
+                  <ul className="quick-links-items">
+                    {orderedSteps.map((step, idx) => {
+                      const isCompleted = completedSteps.has(idx);
+                      const isActive = idx === selectedStepIndex;
+                      
+                      return (
+                        <li key={step.id}>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedStepIndex(idx)}
+                            className={`quick-link-row ${isActive ? 'active' : ''}`}
+                            style={isCompleted ? {
+                              background: '#d4edda',
+                              borderLeft: '4px solid #28a745'
+                            } : {}}
+                          >
+                            <span 
+                              className="step-number" 
+                              style={isCompleted ? { background: '#28a745', color: 'white' } : {}}
                             >
-                              <span 
-                                className="step-number" 
-                                style={isCompleted ? { background: '#28a745', color: 'white' } : {}}
-                              >
-                                {isCompleted ? '✓' : stepIndex + 1}
-                              </span>
-                              <span className="quick-link-row-main">
-                                <span className="quick-link-name">{step.title}</span>
-                                <span className="quick-link-desc">{step.description}</span>
-                              </span>
-                            </button>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </section>
-                ))}
+                              {isCompleted ? '✓' : idx + 1}
+                            </span>
+                            <span className="quick-link-row-main">
+                              <span className="quick-link-name">{step.title}</span>
+                              {/* <span className="quick-link-desc">{step.description}</span> */}
+                            </span>
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </section>
               </div>
             </div>
 
@@ -413,10 +361,15 @@ export default function UseCasesLibrary() {
                     </div>
 
                     {/* Description */}
-                    <p style={{ fontSize: '16px', color: '#666', margin: '0', lineHeight: '1.6', fontStyle: 'italic' }}>
-                      {activeStep.description}
-                    </p>
-                  </div>
+                    <div style={{ 
+                      margin: '0', 
+                      color: '#555',
+                      fontSize: '15px',
+                      lineHeight: '1.7'
+                    }}>
+                      <MarkdownRenderer content={activeStep.description} />
+                    </div>
+                  </div> 
 
                   {/* Detailed Content */}
                   {activeStep.detailed_content && activeStep.detailed_content.length > 0 && (
@@ -430,7 +383,7 @@ export default function UseCasesLibrary() {
                       }}>
                         📋 Step Details
                       </h3>
-                      {renderDetailedContent(activeStep.detailed_content)}
+                      <StepContentRenderer content={activeStep.detailed_content} />
                     </div>
                   )}
 
@@ -504,7 +457,7 @@ export default function UseCasesLibrary() {
                         </button>
                       )}
 
-                      {selectedStepIndex < selectedUseCase.steps!.length - 1 && (
+                      {selectedStepIndex < orderedSteps.length - 1 && (
                         <button
                           onClick={() => setSelectedStepIndex(selectedStepIndex + 1)}
                           style={{
@@ -522,7 +475,7 @@ export default function UseCasesLibrary() {
                         </button>
                       )}
 
-                      {selectedStepIndex === selectedUseCase.steps!.length - 1 && (
+                      {selectedStepIndex === orderedSteps.length - 1 && (
                         <button
                           onClick={() => setViewMode('info')}
                           style={{
@@ -551,7 +504,7 @@ export default function UseCasesLibrary() {
                     textAlign: 'center'
                   }}>
                     <div style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>
-                      Progress: {completedSteps.size} of {selectedUseCase.steps!.length} steps completed
+                      Progress: {completedSteps.size} of {orderedSteps.length} steps completed
                     </div>
                     <div style={{
                       width: '100%',
@@ -561,7 +514,7 @@ export default function UseCasesLibrary() {
                       overflow: 'hidden'
                     }}>
                       <div style={{
-                        width: `${(completedSteps.size / selectedUseCase.steps!.length) * 100}%`,
+                        width: `${(completedSteps.size / orderedSteps.length) * 100}%`,
                         height: '100%',
                         background: '#28a745',
                         transition: 'width 0.3s ease'
@@ -599,33 +552,62 @@ export default function UseCasesLibrary() {
             fontFamily: 'Georgia, serif',
             position: 'relative'
           }}>
-            {/* Close Button */}
-            <button
-              onClick={handleCloseDetail}
-              style={{
-                position: 'fixed',
-                top: '80px',
-                right: '20px',
-                padding: '12px 24px',
-                backgroundColor: '#666',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontWeight: '600',
-                fontSize: '16px',
-                zIndex: 1000,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#555';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#666';
-              }}
-            >
-              ← Back to Library
-            </button>
+            {/* Action Buttons - Top Right */}
+            <div style={{
+              position: 'fixed',
+              top: '80px',
+              right: '20px',
+              display: 'flex',
+              gap: '10px',
+              zIndex: 1000
+            }}>
+              <button
+                onClick={() => handleDeleteUseCase(selectedUseCase.id)}
+                style={{
+                  padding: '12px 24px',
+                  backgroundColor: '#dc3545',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  fontSize: '16px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#c82333';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#dc3545';
+                }}
+                title="Delete this use case"
+              >
+                🗑️ Delete
+              </button>
+              
+              <button
+                onClick={handleCloseDetail}
+                style={{
+                  padding: '12px 24px',
+                  backgroundColor: '#666',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  fontSize: '16px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#555';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#666';
+                }}
+              >
+                ← Back to Library
+              </button>
+            </div>
 
             {/* Header with Get Started Button */}
             <div style={{
@@ -664,340 +646,273 @@ export default function UseCasesLibrary() {
                 {favorites.has(selectedUseCase.id) ? <AiFillHeart /> : <AiOutlineHeart />}
               </button>
 
-              <h1 style={{ margin: '0 0 12px 0', color: '#0064d2', fontSize: '36px', fontWeight: 'bold' }}>
+              <h1 style={{ margin: '0 0 12px 0', color: '#0064d2', fontSize: '42px', fontWeight: 'bold' }}>
                 {selectedUseCase.title || selectedUseCase.name}
               </h1>
-              <p style={{ color: '#666', fontSize: '18px', margin: '0 0 20px 0', fontStyle: 'italic' }}>
+              <p style={{ color: '#666', fontSize: '22px', margin: '0 0 20px 0', fontStyle: 'italic' }}>
                 Use Case Details
               </p>
               
-              {/* Get Started Button - Only show if there are steps */}
-              {selectedUseCase.steps && selectedUseCase.steps.length > 0 && (
+              {/* Action Buttons */}
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '10px' }}>
+                {/* Get Started Button - Only show if there are steps */}
+                {selectedUseCase.steps && selectedUseCase.steps.length > 0 && (
+                  <button
+                    onClick={() => setViewMode('guide')}
+                    style={{
+                      padding: '16px 32px',
+                      backgroundColor: '#28a745',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '18px',
+                      fontWeight: 'bold',
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 12px rgba(40, 167, 69, 0.3)',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#218838';
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = '0 6px 16px rgba(40, 167, 69, 0.4)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#28a745';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(40, 167, 69, 0.3)';
+                    }}
+                  >
+                    🚀 Get Started →
+                  </button>
+                )}
+
+                {/* Create Learning Path Button */}
                 <button
-                  onClick={() => setViewMode('guide')}
+                  onClick={() => setShowAddonModal(true)}
                   style={{
                     padding: '16px 32px',
-                    backgroundColor: '#28a745',
+                    backgroundColor: '#6f42c1',
                     color: 'white',
                     border: 'none',
                     borderRadius: '8px',
                     fontSize: '18px',
                     fontWeight: 'bold',
                     cursor: 'pointer',
-                    boxShadow: '0 4px 12px rgba(40, 167, 69, 0.3)',
-                    transition: 'all 0.3s ease',
-                    marginTop: '10px'
+                    boxShadow: '0 4px 12px rgba(111, 66, 193, 0.3)',
+                    transition: 'all 0.3s ease'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#218838';
+                    e.currentTarget.style.backgroundColor = '#5a32a3';
                     e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 6px 16px rgba(40, 167, 69, 0.4)';
+                    e.currentTarget.style.boxShadow = '0 6px 16px rgba(111, 66, 193, 0.4)';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#28a745';
+                    e.currentTarget.style.backgroundColor = '#6f42c1';
                     e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(40, 167, 69, 0.3)';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(111, 66, 193, 0.3)';
                   }}
                 >
-                  🚀 Get Started →
+                  ➕ Create Learning Path
                 </button>
+              </div>
+
+              {/* Category Tags */}
+              {selectedUseCase.categories && selectedUseCase.categories.length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center', marginTop: '20px' }}>
+                  {selectedUseCase.categories.map(cat => (
+                    <span key={cat} style={{
+                      padding: '4px 12px',
+                      backgroundColor: '#f0f0f0',
+                      border: '1px solid #ccc',
+                      borderRadius: '16px',
+                      fontSize: '12px',
+                      color: '#555',
+                      fontWeight: '500'
+                    }}>
+                      {cat}
+                    </span>
+                  ))}
+                </div>
               )}
             </div>
 
-            {/* General Information */}
-            <section style={{ marginBottom: '35px', pageBreakInside: 'avoid' }}>
-              <h2 style={{ 
-                color: '#0064d2', 
-                borderBottom: '2px solid #e0e0e0',
-                paddingBottom: '12px',
-                marginBottom: '20px',
-                fontSize: '26px',
-                fontWeight: '600'
-              }}>
-                General Information
-              </h2>
-              
-              <div style={{ display: 'grid', gap: '18px' }}>
-                {selectedUseCase.thumbnail_url && (
-                  <div>
-                    <strong style={{ display: 'block', color: '#222', marginBottom: '10px', fontSize: '15px' }}>Thumbnail:</strong>
-                    <img src={selectedUseCase.thumbnail_url} alt="Use case thumbnail" style={{ 
-                      maxWidth: '350px', 
-                      borderRadius: '6px',
-                      border: '2px solid #ddd',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                    }} />
-                  </div>
-                )}
-                
-                <div>
-                  <strong style={{ display: 'block', color: '#222', marginBottom: '8px', fontSize: '15px' }}>Use Case Name:</strong>
-                  <p style={{ margin: 0, fontSize: '16px', lineHeight: '1.7', color: '#333' }}>
-                    {selectedUseCase.name || selectedUseCase.title || 'Not provided'}
-                  </p>
-                </div>
-                
-                <div>
-                  <strong style={{ display: 'block', color: '#222', marginBottom: '8px', fontSize: '15px' }}>Use Case Lead:</strong>
-                  <p style={{ margin: 0, fontSize: '16px', lineHeight: '1.7', color: '#333' }}>
-                    {selectedUseCase.is_anonymous ? '(Anonymous Submission)' : (selectedUseCase.lead_name || (selectedUseCase as any).created_by || 'Not provided')}
-                  </p>
-                </div>
-                
-                {selectedUseCase.team_members && selectedUseCase.team_members.length > 0 && (
-                  <div>
-                    <strong style={{ display: 'block', color: '#222', marginBottom: '8px', fontSize: '15px' }}>Team Members:</strong>
-                    <p style={{ margin: 0, fontSize: '16px', lineHeight: '1.7', color: '#333' }}>
-                      {selectedUseCase.team_members.join(', ')}
-                    </p>
-                  </div>
-                )}
-                
-                <div>
-                  <strong style={{ display: 'block', color: '#222', marginBottom: '10px', fontSize: '15px' }}>Overview:</strong>
-                  <div style={{ 
-                    margin: 0, 
-                    fontSize: '16px', 
-                    lineHeight: '1.9',
-                    whiteSpace: 'pre-wrap',
-                    backgroundColor: '#f8f9fa',
-                    padding: '18px',
-                    borderRadius: '6px',
-                    borderLeft: '4px solid #0064d2',
-                    color: '#333'
-                  }}>
-                    {selectedUseCase.brief_overview || selectedUseCase.description || 'Not provided'}
-                  </div>
-                </div>
+            {/* Thumbnail Image - Centered, Full Width */}
+            {selectedUseCase.thumbnail_url && (
+              <div style={{ marginBottom: '35px', textAlign: 'center' }}>
+                <img src={selectedUseCase.thumbnail_url} alt="Use case thumbnail" style={{ 
+                  maxWidth: '100%',
+                  width: '600px',
+                  borderRadius: '6px',
+                  border: '2px solid #ddd',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                }} />
               </div>
-            </section>
+            )}
 
-            {/* Project Configuration */}
-            <section style={{ marginBottom: '35px', pageBreakInside: 'avoid' }}>
-              <h2 style={{ 
-                color: '#0064d2', 
-                borderBottom: '2px solid #e0e0e0',
-                paddingBottom: '12px',
-                marginBottom: '20px',
-                fontSize: '26px',
-                fontWeight: '600'
+            {/* Use Case Lead */}
+            <div style={{ marginBottom: '25px' }}>
+              <strong style={{ display: 'block', color: '#999', marginBottom: '8px', fontSize: '15px', fontStyle: 'italic' }}>
+                *Use case lead will only display if a name is attached
+              </strong>
+              <p style={{ margin: 0, fontSize: '18px', lineHeight: '1.7', color: '#333' }}>
+                {selectedUseCase.is_anonymous ? '(Anonymous Submission)' : (selectedUseCase.lead_name || (selectedUseCase as any).created_by || 'Not provided')}
+              </p>
+            </div>
+
+            {/* Team Members */}
+            {selectedUseCase.team_members && selectedUseCase.team_members.length > 0 && (
+              <div style={{ marginBottom: '25px' }}>
+                <strong style={{ display: 'block', color: '#222', marginBottom: '8px', fontSize: '20px' }}>Team Members:</strong>
+                <p style={{ margin: 0, fontSize: '18px', lineHeight: '1.7', color: '#333' }}>
+                  {selectedUseCase.team_members.join(', ')}
+                </p>
+              </div>
+            )}
+
+            {/* Overview */}
+            <div style={{ marginBottom: '35px' }}>
+              <strong style={{ display: 'block', color: '#222', marginBottom: '10px', fontSize: '22px' }}>Overview:</strong>
+              <div style={{ 
+                margin: 0, 
+                fontSize: '18px', 
+                lineHeight: '1.9',
+                whiteSpace: 'pre-wrap',
+                backgroundColor: '#f8f9fa',
+                padding: '18px',
+                borderRadius: '6px',
+                borderLeft: '4px solid #0064d2',
+                color: '#333'
               }}>
-                Project Configuration
-              </h2>
-              
-              <div style={{ display: 'grid', gap: '18px' }}>
-                <div>
-                  <strong style={{ display: 'block', color: '#222', marginBottom: '8px', fontSize: '15px' }}>Business Unit:</strong>
-                  <p style={{ margin: 0, fontSize: '16px', lineHeight: '1.7', color: '#333' }}>
-                    {selectedUseCase.business_unit || 'Not provided'}
-                  </p>
-                </div>
-                
-                {selectedUseCase.is_for_developers && (
-                  <>
-                    {selectedUseCase.coding_language && (
-                      <div>
-                        <strong style={{ display: 'block', color: '#222', marginBottom: '8px', fontSize: '15px' }}>Coding Language:</strong>
-                        <p style={{ margin: 0, fontSize: '16px', lineHeight: '1.7', color: '#333' }}>
-                          {selectedUseCase.coding_language}
-                        </p>
-                      </div>
-                    )}
+                {selectedUseCase.brief_overview || selectedUseCase.description || 'Not provided'}
+              </div>
+            </div>
+
+            {/* What You Need */}
+            {selectedUseCase.tools && selectedUseCase.tools.length > 0 && (
+              <div style={{ marginBottom: '35px', textAlign: 'center' }}>
+                <strong style={{ display: 'block', color: '#6f42c1', marginBottom: '16px', fontSize: '22px' }}>What you need:</strong>
+                <div style={{ 
+                  display: 'flex', 
+                  flexWrap: 'wrap', 
+                  gap: '12px', 
+                  justifyContent: 'center',
+                  alignItems: 'center'
+                }}>
+                  {selectedUseCase.tools.map((tool, idx) => {
+                    // Find matching related link (case-insensitive)
+                    const matchingLink = selectedUseCase.related_links?.find(
+                      link => link.name.toLowerCase() === tool.toLowerCase()
+                    );
                     
-                    {selectedUseCase.ide && (
-                      <div>
-                        <strong style={{ display: 'block', color: '#222', marginBottom: '8px', fontSize: '15px' }}>IDE:</strong>
-                        <p style={{ margin: 0, fontSize: '16px', lineHeight: '1.7', color: '#333' }}>
-                          {selectedUseCase.ide}
-                        </p>
-                      </div>
-                    )}
-                  </>
-                )}
-                
-                {selectedUseCase.tools && selectedUseCase.tools.length > 0 && (
-                  <div>
-                    <strong style={{ display: 'block', color: '#222', marginBottom: '10px', fontSize: '15px' }}>Tools and Technologies:</strong>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                      {selectedUseCase.tools.map(tool => (
-                        <span key={tool} style={{
+                    return matchingLink ? (
+                      <a 
+                        key={idx}
+                        href={matchingLink.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        style={{ 
                           padding: '8px 16px',
                           backgroundColor: '#e3f2fd',
-                          border: '1px solid #0064d2',
-                          borderRadius: '20px',
-                          fontSize: '14px',
                           color: '#0064d2',
-                          fontWeight: '500'
-                        }}>
-                          {tool}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                {selectedUseCase.related_links && selectedUseCase.related_links.length > 0 && (
-                  <div>
-                    <strong style={{ display: 'block', color: '#222', marginBottom: '10px', fontSize: '15px' }}>Related Links:</strong>
-                    <ul style={{ margin: '0', paddingLeft: '25px', lineHeight: '1.8' }}>
-                      {selectedUseCase.related_links.map((link, idx) => (
-                        <li key={idx} style={{ marginBottom: '10px', fontSize: '15px' }}>
-                          <strong>{link.name}:</strong>{' '}
-                          <a href={link.url} target="_blank" rel="noopener noreferrer" style={{ color: '#0064d2', textDecoration: 'underline' }}>
-                            {link.url}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            </section>
-
-         
-            {/* Additional Information */}
-            <section style={{ marginBottom: '35px' }}>
-              <h2 style={{ 
-                color: '#0064d2', 
-                borderBottom: '2px solid #e0e0e0',
-                paddingBottom: '12px',
-                marginBottom: '20px',
-                fontSize: '26px',
-                fontWeight: '600'
-              }}>
-                Additional Information
-              </h2>
-              
-              <div style={{ display: 'grid', gap: '18px' }}>
-                {selectedUseCase.technical_details && (
-                  <div>
-                    <strong style={{ display: 'block', color: '#222', marginBottom: '10px', fontSize: '15px' }}>
-                      Technical Details:
-                    </strong>
-                    <div style={{ 
-                      margin: 0, 
-                      fontSize: '15px', 
-                      lineHeight: '1.9',
-                      whiteSpace: 'pre-wrap',
-                      backgroundColor: '#f8f9fa',
-                      padding: '18px',
-                      borderRadius: '6px',
-                      borderLeft: '4px solid #28a745',
-                      color: '#333'
-                    }}>
-                      {selectedUseCase.technical_details}
-                    </div>
-                  </div>
-                )}
-                
-                {selectedUseCase.data_requirements && (
-                  <div>
-                    <strong style={{ display: 'block', color: '#222', marginBottom: '10px', fontSize: '15px' }}>
-                      Data Requirements:
-                    </strong>
-                    <div style={{ 
-                      margin: 0, 
-                      fontSize: '15px', 
-                      lineHeight: '1.9',
-                      whiteSpace: 'pre-wrap',
-                      backgroundColor: '#f8f9fa',
-                      padding: '18px',
-                      borderRadius: '6px',
-                      color: '#333'
-                    }}>
-                      {selectedUseCase.data_requirements}
-                    </div>
-                  </div>
-                )}
-                
-                {selectedUseCase.implementation_steps && (
-                  <div>
-                    <strong style={{ display: 'block', color: '#222', marginBottom: '10px', fontSize: '15px' }}>
-                      Implementation Steps:
-                    </strong>
-                    <div style={{ 
-                      margin: 0, 
-                      fontSize: '15px', 
-                      lineHeight: '1.9',
-                      whiteSpace: 'pre-wrap',
-                      backgroundColor: '#f8f9fa',
-                      padding: '18px',
-                      borderRadius: '6px',
-                      color: '#333'
-                    }}>
-                      {selectedUseCase.implementation_steps}
-                    </div>
-                  </div>
-                )}
-                
-                {selectedUseCase.categories && selectedUseCase.categories.length > 0 && (
-                  <div>
-                    <strong style={{ display: 'block', color: '#222', marginBottom: '10px', fontSize: '15px' }}>Categories:</strong>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                      {selectedUseCase.categories.map(cat => (
-                        <span key={cat} style={{
+                          borderRadius: '6px',
+                          textDecoration: 'none',
+                          fontWeight: '500',
+                          fontSize: '16px',
+                          border: '2px solid #0064d2',
+                          transition: 'all 0.2s ease',
+                          cursor: 'pointer'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#0064d2';
+                          e.currentTarget.style.color = 'white';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = '#e3f2fd';
+                          e.currentTarget.style.color = '#0064d2';
+                        }}
+                      >
+                        {tool}
+                      </a>
+                    ) : (
+                      <span 
+                        key={idx}
+                        style={{ 
                           padding: '8px 16px',
-                          backgroundColor: '#f0f0f0',
-                          border: '1px solid #ccc',
-                          borderRadius: '20px',
-                          fontSize: '14px',
-                          color: '#555'
-                        }}>
-                          {cat}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                {selectedUseCase.estimated_time && (
-                  <div>
-                    <strong style={{ display: 'block', color: '#222', marginBottom: '8px', fontSize: '15px' }}>
-                      Estimated Time to Complete:
-                    </strong>
-                    <p style={{ margin: 0, fontSize: '16px', lineHeight: '1.7', color: '#333' }}>
-                      {selectedUseCase.estimated_time}
+                          backgroundColor: '#f5f5f5',
+                          color: '#333',
+                          borderRadius: '6px',
+                          fontWeight: '500',
+                          fontSize: '16px',
+                          border: '2px solid #e0e0e0'
+                        }}
+                      >
+                        {tool}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Estimated Time */}
+            {selectedUseCase.estimated_time && (
+              <div style={{ marginBottom: '35px', textAlign: 'center' }}>
+                <strong style={{ display: 'block', color: '#6f42c1', marginBottom: '12px', fontSize: '22px' }}>
+                  Estimated Time to Complete:
+                </strong>
+                <p style={{ margin: 0, fontSize: '18px', lineHeight: '1.7', color: '#333' }}>
+                  {selectedUseCase.estimated_time}
+                </p>
+              </div>
+            )}
+
+            {/* Developer-specific fields */}
+            {selectedUseCase.is_for_developers && (
+              <>
+                {selectedUseCase.coding_language && (
+                  <div style={{ marginBottom: '25px' }}>
+                    <strong style={{ display: 'block', color: '#222', marginBottom: '8px', fontSize: '20px' }}>Coding Language:</strong>
+                    <p style={{ margin: 0, fontSize: '18px', lineHeight: '1.7', color: '#333' }}>
+                      {selectedUseCase.coding_language}
                     </p>
                   </div>
                 )}
                 
-                {selectedUseCase.media_links && selectedUseCase.media_links.length > 0 && (
-                  <div>
-                    <strong style={{ display: 'block', color: '#222', marginBottom: '10px', fontSize: '15px' }}>Media:</strong>
-                    <ul style={{ margin: '0', paddingLeft: '25px', lineHeight: '1.8' }}>
-                      {selectedUseCase.media_links.map((link, idx) => (
-                        <li key={idx} style={{ marginBottom: '10px', fontSize: '15px' }}>
-                          <strong>{link.name}:</strong>{' '}
-                          <a href={link.url} target="_blank" rel="noopener noreferrer" style={{ color: '#0064d2', textDecoration: 'underline' }}>
-                            {link.url}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
+                {selectedUseCase.ide && (
+                  <div style={{ marginBottom: '25px' }}>
+                    <strong style={{ display: 'block', color: '#222', marginBottom: '8px', fontSize: '20px' }}>IDE:</strong>
+                    <p style={{ margin: 0, fontSize: '18px', lineHeight: '1.7', color: '#333' }}>
+                      {selectedUseCase.ide}
+                    </p>
                   </div>
                 )}
-                
-                {selectedUseCase.search_tags && selectedUseCase.search_tags.length > 0 && (
-                  <div>
-                    <strong style={{ display: 'block', color: '#222', marginBottom: '10px', fontSize: '15px' }}>Search Tags:</strong>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                      {selectedUseCase.search_tags.map(tag => (
-                        <span key={tag} style={{
-                          padding: '8px 16px',
-                          backgroundColor: '#f0f0f0',
-                          border: '1px solid #ccc',
-                          borderRadius: '20px',
-                          fontSize: '14px',
-                          color: '#555'
-                        }}>
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </section>
+              </>
+            )}
+
+            {/* Related Links - Only show links that don't match tools */}
+            {selectedUseCase.related_links && selectedUseCase.related_links.length > 0 && (() => {
+              // Filter out links that match tools (case-insensitive)
+              const toolNames = (selectedUseCase.tools ?? []).map(t => t.toLowerCase());
+              const uniqueLinks = selectedUseCase.related_links!.filter(
+                link => !toolNames.includes(link.name.toLowerCase())
+              );
+              
+              return uniqueLinks.length > 0 ? (
+                <div style={{ marginBottom: '35px' }}>
+                  <strong style={{ display: 'block', color: '#222', marginBottom: '10px', fontSize: '20px' }}>Related Links:</strong>
+                  <ul style={{ margin: '0', paddingLeft: '25px', lineHeight: '1.8' }}>
+                    {uniqueLinks.map((link, idx) => (
+                      <li key={idx} style={{ marginBottom: '10px', fontSize: '17px' }}>
+                        <strong>{link.name}:</strong>{' '}
+                        <a href={link.url} target="_blank" rel="noopener noreferrer" style={{ color: '#0064d2', textDecoration: 'underline' }}>
+                          {link.url}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null;
+            })()}
 
             {/* Footer with Back Button */}
             <div style={{
@@ -1033,6 +948,22 @@ export default function UseCasesLibrary() {
               </button>
             </div>
           </div>
+        )}
+
+        {/* Use Case Addon Modal */}
+        {selectedUseCase && (
+          <UseCaseAddonModal
+            isOpen={showAddonModal}
+            baseUseCase={{
+              id: selectedUseCase.id,
+              title: selectedUseCase.title,
+              description: selectedUseCase.description,
+              category: selectedUseCase.category,
+              thumbnail_url: selectedUseCase.thumbnail_url
+            }}
+            onClose={() => setShowAddonModal(false)}
+            onSave={handleSaveAddon}
+          />
         )}
       </div>
     );

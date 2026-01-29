@@ -7,6 +7,7 @@ import { StepContentRenderer } from '../components/StepContentRenderer';
 import { StepContentEditor } from '../components/StepContentEditor';
 import type { DetailedContentItem } from '../components/StepContentRenderer';
 import { CustomStepsEditor } from '../components/CustomStepsEditor';
+import { MarkdownRenderer } from '../components/MarkdownRenderer';
 
 // Import step components from DynamicSteps
 import RequestAccess from './Steps/DynamicSteps/RequestAccess';
@@ -90,6 +91,9 @@ export default function UseCasePrototype() {
   const [isEditingContent, setIsEditingContent] = useState(false);
   const [editingContent, setEditingContent] = useState<DetailedContentItem[]>([]);
   const [customStepContent, setCustomStepContent] = useState<{[key: string]: DetailedContentItem[]}>({});
+  
+  // Store full custom step data including rich content
+  const [fullCustomStepData, setFullCustomStepData] = useState<{[key: string]: any}>({});
   
   // AI Autofill state
   const [autofillData, setAutofillData] = useState<AutofillData | null>(null);
@@ -490,15 +494,36 @@ export default function UseCasePrototype() {
         isIdeAlsoAiTool,
         toolsAndTechnologies,
         relatedLinks,
-        generatedSteps: generatedSteps.map((step, index) => ({
-          stepId: step.id,
-          title: step.title,
-          description: step.description,
-          orderIndex: index,
-          category: step.category,
-          isCustom: step.category === 'custom',
-          comment: stepComments[step.id] || null
-        })),
+        generatedSteps: generatedSteps.map((step, index) => {
+          // Get the detailed content for this step
+          const fullStepData = DYNAMIC_STEPS.find(s => s.id === step.id);
+          const customContent = customStepContent[step.id];
+          const fullCustomData = fullCustomStepData[step.id];
+          
+          // Determine which detailed content to use
+          let detailedContent = null;
+          if (customContent) {
+            // Use custom edited content
+            detailedContent = customContent;
+          } else if (fullStepData?.detailed_content) {
+            // Use predefined step content
+            detailedContent = fullStepData.detailed_content;
+          } else if (fullCustomData?.richContent) {
+            // Use custom step rich content
+            detailedContent = fullCustomData.richContent;
+          }
+          
+          return {
+            stepId: step.id,
+            title: step.title,
+            description: step.description,
+            detailed_content: detailedContent, // Include the rich content!
+            orderIndex: index,
+            category: step.category,
+            isCustom: step.category === 'custom',
+            comment: stepComments[step.id] || null
+          };
+        }),
         technicalDetails,
         dataRequirements,
         implementationSteps,
@@ -757,38 +782,65 @@ export default function UseCasePrototype() {
                 Setup Steps ({generatedSteps.length})
               </h2>
               
-              <ol style={{ margin: 0, paddingLeft: '30px', lineHeight: '1.8' }}>
-                {generatedSteps.map((step) => (
-                  <li key={step.id} style={{ 
-                    marginBottom: '20px',
-                    fontSize: '16px',
-                    color: '#333'
-                  }}>
-                    <strong style={{ fontSize: '17px', color: '#222' }}>{step.title}</strong>
-                    <p style={{ 
-                      margin: '6px 0 0 0', 
-                      color: '#555',
-                      fontSize: '15px',
-                      lineHeight: '1.7'
+              <div style={{ margin: 0, paddingLeft: '0', lineHeight: '1.8' }}>
+                {generatedSteps.map((step, index) => {
+                  // Get the detailed content for this step
+                  const fullStepData = DYNAMIC_STEPS.find(s => s.id === step.id);
+                  const customContent = customStepContent[step.id];
+                  
+                  return (
+                    <div key={step.id} style={{ 
+                      marginBottom: '30px',
+                      paddingBottom: '20px',
+                      borderBottom: index < generatedSteps.length - 1 ? '1px solid #e0e0e0' : 'none'
                     }}>
-                      {step.description}
-                    </p>
-                    {stepComments[step.id] && (
-                      <div style={{
-                        marginTop: '10px',
-                        padding: '10px 14px',
-                        backgroundColor: '#fffbeb',
-                        borderLeft: '4px solid #fbbf24',
-                        fontSize: '14px',
-                        color: '#78350f',
-                        borderRadius: '4px'
+                      {/* Step Number and Title */}
+                      <h3 style={{ 
+                        fontSize: '20px', 
+                        color: '#0064d2',
+                        marginBottom: '16px',
+                        fontWeight: '600'
                       }}>
-                        <strong>💬 Comment:</strong> {stepComments[step.id]}
+                        {index + 1}. {step.title}
+                      </h3>
+                      
+                      {/* Step Content using StepContentRenderer */}
+                      <div style={{ paddingLeft: '0' }}>
+                        {customContent ? (
+                          <StepContentRenderer content={customContent} />
+                        ) : fullStepData?.detailed_content ? (
+                          <StepContentRenderer content={fullStepData.detailed_content} />
+                        ) : (
+                          <p style={{ 
+                            margin: '0', 
+                            color: '#555',
+                            fontSize: '15px',
+                            lineHeight: '1.7',
+                            whiteSpace: 'pre-wrap'
+                          }}>
+                            {step.description}
+                          </p>
+                        )}
                       </div>
-                    )}
-                  </li>
-                ))}
-              </ol>
+                      
+                      {/* Step Comment if exists */}
+                      {stepComments[step.id] && (
+                        <div style={{
+                          marginTop: '16px',
+                          padding: '12px 16px',
+                          backgroundColor: '#fffbeb',
+                          borderLeft: '4px solid #fbbf24',
+                          fontSize: '14px',
+                          color: '#78350f',
+                          borderRadius: '4px'
+                        }}>
+                          <strong>💬 Comment:</strong> {stepComments[step.id]}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </section>
           )}
 
@@ -1830,9 +1882,44 @@ export default function UseCasePrototype() {
                         {(() => {
                           const fullStepData = DYNAMIC_STEPS.find(s => s.id === selectedStep.id);
                           const customContent = customStepContent[selectedStep.id];
+                          const fullCustomData = fullCustomStepData[selectedStep.id];
                           
-                          // Prioritize custom content, then detailed_content, then fallback to hardcoded component
-                          if (customContent) {
+                          // For custom steps, render their full content
+                          if (fullCustomData) {
+                            return (
+                              <>
+                                {/* Show custom title if set, otherwise show text as title */}
+                                <h2>
+                                  {fullCustomData.title && fullCustomData.title.trim() 
+                                    ? fullCustomData.title 
+                                    : fullCustomData.text}
+                                </h2>
+                                
+                                {/* Show text as content if there's a separate title */}
+                                {fullCustomData.title && fullCustomData.title.trim() && fullCustomData.text && (
+                                  <div style={{ marginBottom: '16px' }}>
+                                    <MarkdownRenderer content={fullCustomData.text} className="step-content" />
+                                  </div>
+                                )}
+                                
+                                {/* Show detailed content if present */}
+                                {fullCustomData.detailedContent && fullCustomData.detailedContent.trim() && (
+                                  <div style={{ marginBottom: '16px' }}>
+                                    <MarkdownRenderer content={fullCustomData.detailedContent} className="step-detailed-content" />
+                                  </div>
+                                )}
+                                
+                                {/* Show rich content (code blocks, callouts, etc.) if present */}
+                                {fullCustomData.richContent && fullCustomData.richContent.length > 0 && (
+                                  <div style={{ marginTop: '16px' }}>
+                                    <StepContentRenderer content={fullCustomData.richContent} />
+                                  </div>
+                                )}
+                              </>
+                            );
+                          }
+                          // Prioritize custom content, then detailed_content, then fallback to description
+                          else if (customContent) {
                             return (
                               <>
                                 <h2>{selectedStep.title}</h2>
@@ -1953,21 +2040,43 @@ export default function UseCasePrototype() {
                 <h3 style={{ marginBottom: '16px' }}>Create Custom Steps To Help Implement Use Case</h3>
                 <CustomStepsEditor
                   onStepsChange={(steps) => {
+                    // Store the full custom step data with all fields
+                    const customDataMap: {[key: string]: any} = {};
+                    
                     // Convert CustomSteps to Step format and add to generated steps
                     const newSteps = steps
-                      .filter(s => s.text.trim())
-                      .map((step, index) => ({
-                        id: `custom-${Date.now()}-${index}`,
-                        title: step.text.length > 50 ? step.text.substring(0, 50) + '...' : step.text,
-                        description: step.detailedContent ? `${step.text}\n\n${step.detailedContent}` : step.text,
-                        category: 'custom' as const
-                      }));
+                      .filter(s => s.text.trim() || (s.title && s.title.trim()))
+                      .map((step, index) => {
+                        const stepId = `custom-${Date.now()}-${index}`;
+                        
+                        // Determine display title - use custom title if set, otherwise use text
+                        const displayTitle = step.title && step.title.trim() 
+                          ? step.title 
+                          : (step.text.length > 50 ? step.text.substring(0, 50) + '...' : step.text);
+                        
+                        // Store full custom step data
+                        customDataMap[stepId] = {
+                          text: step.text,
+                          title: step.title,
+                          detailedContent: step.detailedContent,
+                          richContent: step.richContent
+                        };
+                        
+                        return {
+                          id: stepId,
+                          title: displayTitle,
+                          description: step.detailedContent ? `${step.text}\n\n${step.detailedContent}` : step.text,
+                          category: 'custom' as const
+                        };
+                      });
                     
                     // Only add if there are valid steps
                     if (newSteps.length > 0) {
                       // Remove previously added custom steps and add new ones
                       const nonCustomSteps = generatedSteps.filter(s => s.category !== 'custom');
                       setGeneratedSteps([...nonCustomSteps, ...newSteps]);
+                      // Update the full custom step data
+                      setFullCustomStepData(customDataMap);
                     }
                   }}
                 />

@@ -1,4 +1,5 @@
 import React from 'react';
+import { MarkdownRenderer } from './MarkdownRenderer';
 
 // List item can be a simple string or an object with detailed content
 export interface ListItemData {
@@ -127,10 +128,10 @@ export function StepContentRenderer({ content, className = '' }: StepContentRend
 
           case 'text':
             return (
-              <p key={key} style={{ marginBottom: '12px', color: '#333' }}>
+              <div key={key} style={{ marginBottom: '12px', color: '#333' }}>
                 {item.label && <strong>{item.label} </strong>}
-                {item.text}
-              </p>
+                <MarkdownRenderer content={item.text || ''} />
+              </div>
             );
 
           case 'code':
@@ -155,7 +156,7 @@ export function StepContentRenderer({ content, className = '' }: StepContentRend
                   
                   return (
                     <li key={i} style={{ marginBottom: '8px', color: '#333' }}>
-                      {itemData.text}
+                      <MarkdownRenderer content={itemData.text} />
                       {itemData.detailedContent && (
                         <div style={{
                           marginTop: '8px',
@@ -166,7 +167,7 @@ export function StepContentRenderer({ content, className = '' }: StepContentRend
                           paddingTop: '4px',
                           paddingBottom: '4px'
                         }}>
-                          {itemData.detailedContent}
+                          <MarkdownRenderer content={itemData.detailedContent} />
                         </div>
                       )}
                     </li>
@@ -178,7 +179,7 @@ export function StepContentRenderer({ content, className = '' }: StepContentRend
           case 'callout':
             return (
               <Callout key={key} variant={item.variant}>
-                {item.text}
+                <MarkdownRenderer content={item.text || ''} />
               </Callout>
             );
 
@@ -215,7 +216,9 @@ export function StepContentRenderer({ content, className = '' }: StepContentRend
                 <strong style={{ display: 'block', marginBottom: '8px', color: '#0064d2' }}>
                   {item.label}
                 </strong>
-                <div style={{ color: '#333' }}>{item.text}</div>
+                <div style={{ color: '#333' }}>
+                  <MarkdownRenderer content={item.text || ''} />
+                </div>
               </div>
             );
 

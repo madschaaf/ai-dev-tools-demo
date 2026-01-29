@@ -18,6 +18,9 @@
     "installMCP": "cd /Users/madschaaf/Documents/Dev/Test-App/mcp-setup-wizard && code --install-extension ./mcp-setup-wizard-extension.vsix --force"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@ebay/chomsky-client": "^3.1.6",
     "@types/multer": "^2.0.0",
     "cors": "^2.8.5",
