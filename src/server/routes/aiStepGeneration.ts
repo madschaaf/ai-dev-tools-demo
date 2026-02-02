@@ -11,8 +11,10 @@ interface GeneratedStep {
 }
 
 interface StepGenerationRequest {
-  aiTool: string;
-  aiToolLink?: string;
+  toolsAndTechnologies: Array<{
+    name: string;
+    url: string;
+  }>;
   whatCreated: string;
   mediaItems: Array<{
     type: string;
@@ -26,20 +28,19 @@ interface StepGenerationRequest {
  * POST /api/ai/generate-steps
  */
 router.post('/generate-steps', async (req: express.Request, res: express.Response) => {
-  const { aiTool, aiToolLink, whatCreated, mediaItems }: StepGenerationRequest = req.body;
+  const { toolsAndTechnologies, whatCreated, mediaItems }: StepGenerationRequest = req.body;
   
   // Validation
-  if (!aiTool || !whatCreated) {
+  if (!toolsAndTechnologies || toolsAndTechnologies.length === 0 || !whatCreated) {
     return res.status(400).json({ 
-      error: 'Missing required fields: aiTool and whatCreated are required' 
+      error: 'Missing required fields: toolsAndTechnologies and whatCreated are required' 
     });
   }
   
   try {
     // TODO: Replace with actual AI API call once credentials are available
     const generatedSteps = await generateStepsWithAI({
-      aiTool,
-      aiToolLink,
+      toolsAndTechnologies,
       whatCreated,
       mediaItems
     });
@@ -56,7 +57,11 @@ router.post('/generate-steps', async (req: express.Request, res: express.Respons
  * This will be replaced with actual AI API integration (OpenAI, Claude, etc.)
  */
 async function generateStepsWithAI(params: StepGenerationRequest): Promise<GeneratedStep[]> {
-  const { aiTool, aiToolLink, whatCreated, mediaItems } = params;
+  const { toolsAndTechnologies, whatCreated, mediaItems } = params;
+  
+  // Get all tool names for display
+  const toolNames = toolsAndTechnologies.map(t => t.name).join(', ');
+  const allToolNames = toolsAndTechnologies.map(t => t.name);
   
   // TODO: Replace this with actual AI API call
   // Example for OpenAI:
@@ -78,12 +83,12 @@ async function generateStepsWithAI(params: StepGenerationRequest): Promise<Gener
   const steps: GeneratedStep[] = [
     {
       id: `step-${Date.now()}-1`,
-      title: `Set Up ${aiTool}`,
+      title: `Set Up ${toolNames}`,
       detailed_content: [
         {
           id: 'intro',
           type: 'text',
-          text: `Get started with ${aiTool} to create: ${whatCreated}`
+          text: `Get started with ${toolNames} to create: ${whatCreated}`
         },
         {
           id: 'access',
@@ -95,16 +100,21 @@ async function generateStepsWithAI(params: StepGenerationRequest): Promise<Gener
           id: 'access-steps',
           type: 'list',
           listStyle: 'numbered',
-          items: [
-            aiToolLink 
-              ? `Navigate to [${aiTool}](${aiToolLink})`
-              : `Search for "${aiTool}" in your browser`,
-            'Sign in with your eBay credentials if required',
-            'Verify you have the necessary permissions'
-          ]
+          items: toolsAndTechnologies.length > 0 && toolsAndTechnologies[0].url
+            ? toolsAndTechnologies.map(tool => 
+                `Navigate to [${tool.name}](${tool.url})`
+              ).concat([
+                'Sign in with your eBay credentials if required',
+                'Verify you have the necessary permissions'
+              ])
+            : [
+                `Search for "${toolNames}" in your browser`,
+                'Sign in with your eBay credentials if required',
+                'Verify you have the necessary permissions'
+              ]
         }
       ],
-      aiTools: [aiTool]
+      aiTools: allToolNames
     }
   ];
   
@@ -127,7 +137,7 @@ async function generateStepsWithAI(params: StepGenerationRequest): Promise<Gener
             : `- [${item.name}](${item.url})`
         }))
       ],
-      aiTools: [aiTool]
+      aiTools: allToolNames
     });
   }
   
@@ -138,12 +148,16 @@ async function generateStepsWithAI(params: StepGenerationRequest): Promise<Gener
  * Build the AI prompt from user inputs
  */
 function buildPrompt(params: StepGenerationRequest): string {
-  const { aiTool, aiToolLink, whatCreated, mediaItems } = params;
+  const { toolsAndTechnologies, whatCreated, mediaItems } = params;
+  
+  const toolsList = toolsAndTechnologies
+    .map(t => `${t.name}${t.url ? ` (${t.url})` : ''}`)
+    .join(', ');
   
   let prompt = `Generate step-by-step instructions for the following:
 
 **What was created**: ${whatCreated}
-**AI Tool used**: ${aiTool}${aiToolLink ? ` (${aiToolLink})` : ''}
+**AI Tools used**: ${toolsList}
 `;
 
   if (mediaItems && mediaItems.length > 0) {
@@ -176,7 +190,7 @@ function buildPrompt(params: StepGenerationRequest): string {
       "language": "bash" | "javascript" (for code blocks)
     }
   ],
-  "aiTools": ["${aiTool}"]
+  "aiTools": ${JSON.stringify(toolsAndTechnologies.map(t => t.name))}
 }
 
 Make the steps:

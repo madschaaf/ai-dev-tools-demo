@@ -712,7 +712,7 @@ export default function UseCasesLibrary() {
                     e.currentTarget.style.boxShadow = '0 4px 12px rgba(111, 66, 193, 0.3)';
                   }}
                 >
-                  ➕ Create Learning Path
+                  ➕ Create Learning Path (admin only)
                 </button>
               </div>
 

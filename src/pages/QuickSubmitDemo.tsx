@@ -270,7 +270,7 @@ export default function QuickSubmitDemo() {
 
         <div style={{ display: 'flex', gap: '20px' }}>
           {/* Steps List - Left Side */}
-          <div style={{ flex: 1, minWidth: '300px' }}>
+          <div style={{ flex: isEditingContent ? 0.8 : 1, minWidth: '250px' }}>
             <h3 style={{ marginBottom: '12px', fontSize: '16px', color: '#666' }}>
               Steps List (drag to reorder)
             </h3>
@@ -357,10 +357,10 @@ export default function QuickSubmitDemo() {
             </div>
           </div>
 
-          {/* Step Details - Right Side */}
+          {/* Step Details or Edit Content - Middle/Right */}
           <div style={{ 
-            flex: 2, 
-            minWidth: '400px',
+            flex: isEditingContent ? 1.2 : 2, 
+            minWidth: isEditingContent ? '350px' : '400px',
             maxHeight: '800px', 
             overflowY: 'auto',
             border: '1px solid #ddd',
@@ -444,6 +444,17 @@ export default function QuickSubmitDemo() {
                       </button>
                     </div>
                   </div>
+                ) : isEditingContent ? (
+                  /* Edit Mode - Show only editor, no preview */
+                  <div>
+                    <StepContentEditor
+                      content={editingContent}
+                      onChange={handleContentChange}
+                      onCancel={cancelContentEdit}
+                      onSave={saveContentEdit}
+                      hideButtons={false}
+                    />
+                  </div>
                 ) : (
                   /* View Mode */
                   <>
@@ -482,50 +493,39 @@ export default function QuickSubmitDemo() {
                       gap: '10px',
                       flexWrap: 'wrap'
                     }}>
-                      {isEditingContent ? (
-                        <StepContentEditor
-                          content={editingContent}
-                          onChange={handleContentChange}
-                          onCancel={cancelContentEdit}
-                          onSave={saveContentEdit}
-                        />
-                      ) : (
-                        <>
-                          {(selectedStep.detailed_content || customStepContent[selectedStep.id]) && (
-                            <button
-                              onClick={() => startEditingContent(selectedStep.id)}
-                              style={{
-                                padding: '10px 20px',
-                                backgroundColor: '#ff9800',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                fontWeight: '600',
-                                fontSize: '14px'
-                              }}
-                            >
-                              ✏️ Edit Content
-                            </button>
-                          )}
-                          
-                          <button
-                            onClick={() => startEditStep(selectedStep)}
-                            style={{
-                              padding: '10px 20px',
-                              backgroundColor: '#0064d2',
-                              color: 'white',
-                              border: 'none',
-                              borderRadius: '4px',
-                              cursor: 'pointer',
-                              fontWeight: '600',
-                              fontSize: '14px'
-                            }}
-                          >
-                            Edit Step
-                          </button>
-                        </>
+                      {(selectedStep.detailed_content || customStepContent[selectedStep.id]) && (
+                        <button
+                          onClick={() => startEditingContent(selectedStep.id)}
+                          style={{
+                            padding: '10px 20px',
+                            backgroundColor: '#ff9800',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            fontWeight: '600',
+                            fontSize: '14px'
+                          }}
+                        >
+                          ✏️ Edit Content
+                        </button>
                       )}
+                      
+                      <button
+                        onClick={() => startEditStep(selectedStep)}
+                        style={{
+                          padding: '10px 20px',
+                          backgroundColor: '#0064d2',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          fontWeight: '600',
+                          fontSize: '14px'
+                        }}
+                      >
+                        Edit Step
+                      </button>
                     </div>
                   </>
                 )}
@@ -539,6 +539,37 @@ export default function QuickSubmitDemo() {
               </div>
             )}
           </div>
+
+          {/* Live Preview Panel - Right Side (shown when editing) */}
+          {isEditingContent && selectedStep && (
+            <div style={{
+              flex: 1,
+              minWidth: '350px',
+              maxHeight: '800px',
+              overflowY: 'auto',
+              border: '2px solid #0064d2',
+              borderRadius: '8px',
+              padding: '24px',
+              backgroundColor: 'white'
+            }}>
+              <div style={{
+                marginBottom: '16px',
+                paddingBottom: '12px',
+                borderBottom: '2px solid #e0e0e0',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <span style={{ fontSize: '20px' }}>👁️</span>
+                <h3 style={{ margin: 0, color: '#0064d2' }}>Live Preview</h3>
+              </div>
+              
+              <article className="page link-detail">
+                <h2>{selectedStep.title}</h2>
+                <StepContentRenderer content={editingContent} />
+              </article>
+            </div>
+          )}
         </div>
       </div>
     </div>
