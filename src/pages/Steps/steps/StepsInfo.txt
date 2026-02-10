@@ -1,0 +1,546 @@
+PRE-STEPS TO ALLOW FOR DOWNLOAD OF ALL ITEMS THROUGHOUT THESE STEPS
+STANDARD SECURITY SETUP: CONFIRM YOUR SSO, PingID, and YubiKey are fully functional.
+Here’s a quick way to confirm your setup for eBay’s authentication: SSO, PingID, and YubiKey.
+
+Verify SSO
+Sign in to the Token Access Portal (TAP) at  https://tokenaccess.corp.ebay.com/ with your corp credentials; if you reach the TAP home and can open “My Account” to view your tokens, your SSO is working as expected. 
+1
+2
+
+As an additional check, sign in to Hub Services (IT support portal) using your corp SSO; successful login there typically confirms SSO is healthy. 
+3
+
+Verify PingID
+In TAP, open PingID, then check “My Account” to confirm your registered devices (mobile app or passwordless/FIDO) are listed; you can also see which one is set as “Primary.” 
+2
+
+Trigger a PingID challenge by signing into any app that requires MFA (e.g., email, VPN portal, or TAP). If you receive a push in the PingID app and can approve it successfully, PingID is correctly set up. 
+4
+
+If you’re prompted for identity verification while adding devices, complete the Ping Verify flow, then confirm the device appears under your PingID devices and set it as Primary. 
+5
+
+Verify YubiKey
+While on the corporate network or VPN, go to  https://auth.vip.ebay.com/ and use the “Validate”/test function to press your YubiKey and enter its PIN; a successful validation confirms your key is registered and usable. 
+6
+7
+
+You can also test against a VIP-protected site: when prompted, enter your corp username, your YubiKey PIN, then press the YubiKey; successful access confirms registration and PIN are correct. 
+8
+
+If you don’t see validation succeed on auth.vip or a VIP site, re-check that your YubiKey was registered on the corp network/VPN and that your PIN meets the requirements; if needed, re-register via auth.vip and retry validation. 
+6
+
+Tips and common gotchas
+Manage all your PingID devices and Primary setting directly in TAP (Add Device, Set Primary, Unpair), and use “My Account” to see your tokens in one place. 
+2
+
+New hires or users without a paired mobile may need to register a YubiKey first (and set it as Primary) to bypass Ping Verify when initially pairing PingID, then complete PingID pairing afterward. 
+
+
+
+
+SET UP PROXY
+macOS: add the WPAD/PAC URL (fastest path)
+Easiest: run “Site Proxy Configuration” in the Self Service app; this auto-configures the proxy. Restart your Mac afterward so changes apply. 
+1
+2
+
+Manual (Ventura):
+
+System Settings → Network → Wi‑Fi → Details → Proxies → turn on “Automatic Proxy Configuration.” 
+2
+Paste the URL:  https://c2sproxy.vip.ebay.com/wpad.dat and click Done/Save. Restart your Mac. 
+2
+Manual (Monterey):
+
+System Preferences → Network → select Wi‑Fi/Ethernet → Advanced → Proxies → check “Automatic Proxy Configuration.” 
+2
+Paste the URL:  https://c2sproxy.vip.ebay.com/wpad.dat, click OK, then Apply. Restart your Mac. 
+2
+Verify: access an internal VIP site (Hub/Wiki). If prompted, use your corp username + PIN+Yubi; confirm pages load. 
+2
+
+Windows: add the WPAD/PAC URL (fastest path)
+Easiest: open Software Center and run “Site Proxy Configuration” to auto-apply proxy settings; restart afterward. 
+1
+
+Manual:
+
+Settings → Network & Internet → Proxy → turn ON “Use setup script.” 
+2
+Script address:  https://c2sproxy.vip.ebay.com/wpad.dat, then Save and restart Windows so changes apply. 
+2
+Verify: access internal VIP sites; you should get a proxy auth prompt—enter corp username + PIN+Yubi and confirm pages load. 
+2
+
+Troubleshooting
+If Save/Apply is disabled or the system blocks changes:
+
+First, use the “Site Proxy Configuration” tool in Self Service/Software Center (it’s designed to work without admin elevation). 
+1
+If your device policy still prevents saving, request Local Admin Rights via Self Service and retry after elevation. 
+3
+If the WPAD URL doesn’t seem to work in your environment:
+
+Try the alternate Yubi PAC URL:  https://c2syubi.vip.ebay.com/wpadyubi.pac. 
+2
+Restart the device after applying proxy changes so browsers pick up the new settings cleanly. 
+2
+For developer CLIs (curl, Node/npm, Git, etc.):
+
+OS proxy settings may be ignored by terminal tools—set these env vars in the shell when needed:
+
+export HTTP_PROXY="http://<username>:<PIN+Yubi>@c2sproxy.vip.ebay.com:8080/"
+export HTTPS_PROXY="http://<username>:<PIN+Yubi>@c2sproxy.vip.ebay.com:8080/"
+export NO_PROXY="localhost,127.0.0.1,.corp.ebay.com"
+bash
+
+4
+5
+macOS: you can also add a “c2sproxy on/off” helper to your shell profile to toggle these automatically. 
+6
+
+
+
+
+
+SET UP TERMINAL PROXY
+
+Got it—here’s a simple, low‑friction setup so developers don’t have to remember proxy steps, with safe defaults for Node and Git.
+
+Why we won’t hardcode credentials
+The C2S proxy requires your corp username + PIN+Yubi (one‑time code), so baking credentials permanently into config (e.g., .npmrc or global Git config) is brittle and insecure. Instead, we set the proxy once per dev terminal and let tools inherit it automatically. 
+1
+2
+macOS: one‑command “on/off” in the Terminal
+Add a small helper to your shell so developers can enter their username and PIN+Yubi once per terminal session and everything (curl, Node, npm, git) just works.
+
+Step 1 — install the helper
+1) Open Terminal and paste the c2sproxy function into ~/.zshrc (macOS default shell) or ~/.bash_profile (if using bash). The documented function sets and clears http_proxy/https_proxy env vars for the current session. 
+2
+
+2) Reload your shell:
+
+source ~/.zshrc   # or: source ~/.bash_profile
+bash
+
+2
+Step 2 — use it
+Turn proxy ON (prompts for username and PIN+Yubi, saves to a secure file with 400 perms, and exports env vars):
+c2sproxy on
+bash
+
+2
+Turn proxy OFF (clears env vars):
+c2sproxy off
+bash
+
+2
+That’s it. Once “on”, CLI tools launched in that terminal (node, npm, yarn, git, curl) use http://c2sproxy.vip.ebay.com:8080 transparently. 
+2
+
+Optional: include a small NO_PROXY to prevent local/corp traffic from being proxied (you can add to the function or your profile):
+
+export NO_PROXY="localhost,127.0.0.1,.corp.ebay.com"
+bash
+
+1
+Windows: developer PowerShell with auto‑proxy
+Give developers a dedicated “Dev Proxy PowerShell” that sets proxy automatically at startup and avoids storing secrets.
+
+Step 1 — create a profile script
+Create (or edit) your PowerShell profile, e.g., C:\Users\<you>\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1, with:
+
+Write-Host "Username: $env:USERNAME"
+$pinYubi = Read-Host -AsSecureString "Enter PIN + Yubi code"
+$pinYubiPlain = (New-Object System.Net.NetworkCredential("", $pinYubi)).Password
+
+$env:HTTP_PROXY  = "http://$($env:USERNAME):$pinYubiPlain@c2sproxy.vip.ebay.com:8080/"
+$env:HTTPS_PROXY = "http://$($env:USERNAME):$pinYubiPlain@c2sproxy.vip.ebay.com:8080/"
+$env:NO_PROXY    = "localhost,127.0.0.1,.corp.ebay.com"
+
+Write-Host "C2S proxy enabled for this PowerShell session."
+powershell
+
+3
+1
+Now every time developers open that PowerShell, it will prompt once and set proxies for Node/npm/Git launched in that window.
+
+Step 2 — optional persistent env for cmd/other shells
+If you want user‑level persistent variables (applies after you restart shells), run:
+
+setx HTTP_PROXY  "http://%USERNAME%:PIN+Yubi@c2sproxy.vip.ebay.com:8080/"
+setx HTTPS_PROXY "http://%USERNAME%:PIN+Yubi@c2sproxy.vip.ebay.com:8080/"
+setx NO_PROXY    "localhost,127.0.0.1,.corp.ebay.com"
+cmd
+
+3
+1
+Note: storing the PIN+Yubi in setx is less secure; prefer the PowerShell profile prompt for day‑to‑day dev work.
+
+Tool defaults (Node, npm/yarn, Git)
+You generally don’t need extra per‑tool config—when the shell proxy is ON, tools inherit it automatically.
+
+Node/npm/yarn: They honor HTTP_PROXY/HTTPS_PROXY/NO_PROXY set by the shell, so no additional commands are required. 
+3
+
+Git: Also honors HTTP_PROXY/HTTPS_PROXY. If you ever need explicit Git settings (rare), you can do:
+
+git config --global http.proxy  "$HTTP_PROXY"
+git config --global https.proxy "$HTTPS_PROXY"
+bash
+
+To remove:
+
+git config --global --unset http.proxy
+git config --global --unset https.proxy
+bash
+
+Browsers and OS apps
+Your OS‑level WPAD/PAC (e.g., https://c2sproxy.vip.ebay.com/wpad.dat) already covers browsers and GUI apps; keep that as is. The “8080” setup above is specifically for command‑line tools that don’t read OS proxy settings. 
+4
+Rollout tips
+Ship the mac c2sproxy on/off helper via your team dotfiles/bootstrap and add a short README with, “Open Terminal → run c2sproxy on → develop.”
+Ship the Windows PowerShell profile snippet and a Start Menu shortcut named “Dev Proxy PowerShell” so devs don’t think about it—just open and code.
+
+AFTER PRESTEPS:
+1. install vs code
+2  install node.JS
+3. install git for Windows Users
+4. Go to secure access and request access for:
+    eBay Github Access
+    github-emu-copilot
+    github-emu-genai
+    CORP Citrix Jira Access
+    Slack End User
+    CORP Citrix Figma
+5. Set up github (while waiting for access to github enterprise)
+    Go to https://github.com/
+        create account you can use your ebay email
+        set up ssh keys 
+6.  Once access is granted to github enterprise go to
+    https://github.corp.ebay.com/
+    Set up your classic token in setitngs, developer settings, personal access tokens
+    SAVE The token we will need it for Cline with MCP Servers
+    Link your enterpise account to your personal go to settings, enterpise, the add ebay
+    
+
+    // Enterprise (github.corp.ebay.com)
+"env": {
+  "GITHUB_TOKEN": "<enterprise PAT>",
+  "GITHUB_API_URL": "https://github.corp.ebay.com/api/v3"
+}
+
+// Personal (github.com)
+"env": {
+  "GITHUB_TOKEN": "<github.com fine-grained PAT>",
+  "GITHUB_API_URL": "https://api.github.com"
+}
+
+
+7. Add Obsidian to your github enterpise apps this is the installation page https://github.corp.ebay.com/github-apps/obsidian-workflow-app
+
+    I wonder if I can run a playwright test here that the user clicks go and it will go to the installation page and click configure and then click only selected repositories and then click all respsotiries and then click save  
+
+    This is more informnation: https://github.corp.ebay.com/obsidian/claude-code-integration/blob/main/docs/obsidian-user-guide.md
+Onboarding Domain Repositories (Install the Obsidian Workflow App)
+To enable @obsidian/@claude triggers for a domain repository, install the Obsidian GitHub Workflow App on that repo (or organization):
+
+Open the Obsidian Workflow App page: Obsidian GitHub Workflow App
+Click "Install".
+Choose scope:
+"All repositories" to enable org‑wide, or
+"Only select repositories" and pick the repos that will use @obsidian / @claude.
+Confirm the requested permissions and complete the installation.
+Verification checklist:
+
+The app appears under the target repo: Settings → Integrations → GitHub Apps → "Obsidian Workflow App".
+Issues/PR webhooks are enabled for the repo (default).
+Notes:
+
+Domain repos generally do not need to add secrets for this integration. This hub repository obtains a cross‑repo installation token via the App to checkout code and open PRs.
+For organization‑level installs, coordinate with org owners to approve the installation.
+Quick test:
+
+In an onboarded repository, open an issue or PR and comment @obsidian help me refactor <area>.
+Watch this hub repository's Actions tab for the obsidian.yml workflow run that processes your request.
+Required Secrets
+Secret	Purpose	Example
+OBSIDIAN_GITHUB_APP_ID	GitHub App authentication	123456
+OBSIDIAN_GITHUB_APP_PRIVATE_KEY	GitHub App private key	-----BEGIN PRIVATE KEY-----...
+ANTHROPIC_AUTH_TOKEN	HubGPT Gateway authentication	ebay-token-xyz...
+Environment Variables
+The system automatically configures these environment variables:
+
+Corporate Infrastructure
+GITHUB_API_URL=https://github.corp.ebay.com/api/v3
+GITHUB_SERVER_URL=https://github.corp.ebay.com
+NPM_CONFIG_REGISTRY=https://artifactory.corp.ebay.com/artifactory/api/npm/npm-corp/
+Claude Integration
+ANTHROPIC_BASE_URL=https://platformgateway2.vip.ebay.com/hubgptgatewaysvc/v1/anthropic
+ANTHROPIC_MODEL=hubgpt-chat-completions-claude-sonnet-4-5
+Workflow Context
+CLAUDE_TARGET_REPOSITORY=${{ steps.target.outputs.repository }}
+CLAUDE_ISSUE_NUMBER=${{ steps.target.outputs.issue_number }}
+CLAUDE_PR_NUMBER=${{ steps.target.outputs.pr_number }}
+CLAUDE_WEBHOOK_EVENT=${{ steps.target.outputs.webhook_event }}
+📋 Usage Guide
+For Domain Teams
+1. Basic Usage
+Comment on any GitHub issue or pull request with:
+
+@claude - Triggers basic Claude assistance
+@obsidian - Triggers enhanced Obsidian workflow with custom configurations
+2. Available Tools
+Both workflows provide Claude with access to:
+
+Bash: Execute shell commands
+Edit/MultiEdit: Modify files and code
+Write: Create new files
+LS: List and explore directories
+WebFetch/WebSearch: Access external resources
+Grep: Search through code
+3. Workflow-Specific Features
+Claude Workflow (@claude):
+
+Basic code assistance
+Simple issue resolution
+Standard tool set
+Obsidian Workflow (@obsidian):
+
+Custom prompt loading
+MCP server integration
+Label-based workflow routing
+Advanced configuration management
+
+Claude code Prerequisites on macOS
+Ensure you’re connected to the GlobalProtect VPN (corp network) so internal endpoints and SSO work properly. 
+1
+
+In Self Service, run the Site Proxy configuration to route CLI and npm traffic correctly. 
+2
+1
+
+In Self Service, install the Netskope agent and apply the CA certificate fixes: “Netskope Root CA Certificate” and “Netskope Certificates – Apply Fix.” 
+2
+1
+
+Install Node.js 22.17.0 using nvm (recommended baseline; install scripts include nvm compatibility). 
+2
+1
+
+# Install and wire up nvm (Apple Silicon path shown)
+brew install nvm
+mkdir -p ~/.nvm
+echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.zshrc
+echo '[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && . "/opt/homebrew/opt/nvm/nvm.sh"' >> ~/.zshrc
+source ~/.zshrc
+
+# Install the tested Node.js version
+nvm install 22.17.0
+nvm use 22.17.0
+nvm alias default 22.17.0
+
+# Verify
+node -v
+npm -v
+bash
+
+1
+Note: Some engineers reported success with Node 24 but had to adjust shell profile changes manually; stick to 22.17.0 unless you have a specific need. 
+2
+
+Install and validate Claude Code
+Run the eBay setup script, then the doctor script to validate your environment. 
+2
+1
+# Install
+/bin/bash -c "$(curl -fsSL https://installsvc.vip.ebay.com/repos/claude-code/raw/main/claude-code-setup.sh)"
+
+# Validate
+/bin/bash -c "$(curl -fsSL https://installsvc.vip.ebay.com/repos/claude-code/raw/main/claude-code-doctor.sh)"
+
+# Optional uninstall
+/bin/bash -c "$(curl -fsSL https://installsvc.vip.ebay.com/repos/claude-code/raw/main/claude-code-uninstall.sh)"
+bash
+
+2
+1
+Launch Claude Code by typing claude, and choose “Yes, proceed” when prompted. 
+2
+First-run authentication
+When prompted to authenticate in the browser, if the page times out, make sure Site Proxy is installed and active. The login uses your username plus YubiKey PIN and touch for OTP on the first pass, then standard auth flow. 
+2
+1
+
+If you work from the Isolated Dev Zone (SDDZ), you will see the Anthropic API base URLs during setup (e.g., platformgateway2/3). Follow the SDDZ-specific settings if applicable. 
+3
+
+Common macOS fixes
+“Extra inputs are not permitted” (HTTP 400) fix: add this to your ~/.claude/settings.json and relaunch. 
+2
+{
+  "env": {
+    "CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS": 1
+  }
+}
+json
+
+2
+Connection errors or “Site can’t be reached”: reapply the Netskope certificate fix from Self Service; you can also test connectivity with a simple fetch to platformgateway. 
+4
+
+HTTP 429 quota errors (Vertex AI backends): this indicates temporary quota exhaustion; retry later or switch models if available. 
+4
+
+Where to get help
+Join the public Slack channel community-claude-code for updates and troubleshooting tips. 
+5
+
+Reference the full Installation and Troubleshooting guides anytime. 
+2
+4
+
+CLINE and claude woul dbe ideal 
+Cline & Claude Code
+Created by Wu, Zhe, last updated on Jul 22, 2025  6 minute read
+22 Jul 2025 Tips by Meltser, Igor 
+
+mechanical arm Hybrid Terminal and IDE Integration
+
+For maximum efficiency, Claude Code can be operated primarily from a customized terminal environment (e.g., iTerm2), while leveraging an IDE for visually intensive tasks like code review. This workflow maintains the speed of a terminal-centric process while integrating the robust UI capabilities of a modern IDE.
+
+The core of this integration is the /ide command. After launching Claude Code within your project directory, execute /ide to establish a connection with your running IDE (e.g., VS Code or IntelliJ). This allows all subsequent file modifications proposed by Claude in the terminal to be streamed directly to the IDE for review and acceptance, streamlining the diff and merge process.
+
+mechanical arm Contextual Interaction with External APIs
+
+When a project requires interaction with another service's API, Claude's context can be dynamically expanded to include the external service's codebase. This provides Claude with the necessary information to accurately construct API calls and handle data models.
+
+Clone designated service code
+Use /add-dir command in your working project Claude Code instance to add that service code for context.
+/add-dir /path/to/external-service-repository
+Instruct Claude which API you want to call
+Profit
+
+Need to update the Settings.JSON file to make sure it is configured correctly
+
+{
+    "http.proxyStrictSSL": false,
+    "tabnine.experimentalAutoImports": true,
+    "mssql.connectionGroups": [
+        {
+            "name": "ROOT",
+            "id": "7F4E822A-752B-4AD8-82E6-3EFE531BDBAA"
+        }
+    ],
+    "workbench.colorTheme": "Solarized Dark",
+    "github.copilot.chat.anthropic.thinking.enabled": true,
+    "github.copilot.chat.alternateGptPrompt.enabled": true,
+    "github.copilot.chat.languageContext.typescript.enabled": true,
+    "github.copilot.chat.languageContext.typescript.includeDocumentation": true,
+    "sqlDatabaseProjects.enablePreviewFeatures": true,
+    "github-enterprise.hosts": [
+    "github.corp.ebay.com"
+],
+"github-authentication.useElectronFetch": false,
+"workbench.settings.applyToAllProfiles": [
+    "github-enterprise.uri"
+],
+"RainbowBrackets.depreciation-notice": false,
+"github.copilot.nextEditSuggestions.enabled": true,
+"files.autoSave": "afterDelay",
+"aiUseCase.iafToken": "TEST Need to figure how i get this token for ai models at ebay",
+"apiKeyHelper": "npx @ebay/claude-code-token@latest get_token",
+"claude-code.environmentVariables": [
+  { "name": "ANTHROPIC_API_KEY", "value": "$(npx @ebay/claude-code-token@latest get_token)" },
+  { "name": "CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS", "value": "1" },
+  { "name": "ANTHROPIC_MODEL", "value": "hubgpt-chat-completions-claude-sonnet-4-5" },
+  { "name": "ANTHROPIC_BASE_URL", "value": "https://platformgateway2.vip.ebay.com/hubgptgatewaysvc/v1/anthropic" },
+  { "name": "CLAUDE_CODE_API_KEY_HELPER_TTL_MS", "value": "360000000" },
+  { "name": "DISABLE_TELEMETRY", "value": "1" },
+  { "name": "ANTHROPIC_LOG", "value": "debug" }
+],
+"claudeCode.preferredLocation": "panel"
+}
+
+Have Windows?
+There's a "better" Google document with more specific Windows installation instructions, but it's not "published".  Reach out to the owner here for access: https://tcgplayer.enterprise.slack.com/archives/C08RQLPSW7L/p1757956077680199
+
+Update: I've reached out to the owner and requested that they migrate their document to this space and cross-link the two documents for easier discovery and editing. – Scott Mayfield (scmayfield)
+
+Certificate Setup (Netskope)
+Open Self-Service (Mac) or Software Center (Windows).
+Search for cert.
+Apply the following:
+Netskope Root CA Certificate (Mac)
+Netskope Certificate Apply Fix (Mac) or Netskope Certificates Apply Fix (Windows)
+
+Install Claude Code
+
+
+/bin/bash -c "$(curl -fsSL https://installsvc.vip.ebay.com/repos/claude-code/raw/main/claude-code-setup.sh)"
+Validate Claude Code Installation
+
+
+/bin/bash -c "$(curl -fsSL https://installsvc.vip.ebay.com/repos/claude-code/raw/main/claude-code-doctor.sh)"
+UnInstall Claude Code
+
+
+/bin/bash -c "$(curl -fsSL https://installsvc.vip.ebay.com/repos/claude-code/raw/main/claude-code-uninstall.sh)"
+
+
+To open the Claude code in a new terminal, simply type claude and press Enter. Then, choose option 1. Yes, proceed.
+
+
+
+
+
+
+After setup, you can start using Claude Code by entering natural language prompts. For example:
+
+Prompt : Write a Python script that prints "Hello, Claude!"
+If the prompt runs successfully, it means the installation was successful.
+
+
+
+
+or this is the github link to instlal claude GitHub links (VSIX)
+Corporate GitHub Releases page:  https://github.corp.ebay.com/DevGenAI/cline/releases. 
+1
+
+Example direct asset (corp): ebay-cline-3.17.12.vsix. 
+2
+
+If you’re in the Isolated Dev Zone (SDDZ), use the SDDZ mirror:  https://github.sddz.ebay.com/DevGenAI/cline/releases. 
+3
+The Claude Code CLI is separate and installed via our internal script; for IDE-side integration and chat UI, use the eBay Cline VSIX above. You can still link the CLI to VS Code with the /ide command if you prefer terminal-driven workflows.
+
+
+8. Download Cline https://github.corp.ebay.com/DevGenAI/cline/releases vsix file https://github.corp.ebay.com/DevGenAI/cline/releases/download/v3.36.2/ebay-cline-3.36.2.vsix
+This repo will have extensions that should have been installed check the VS Code extension tab for full list
+-- Cline 
+
+
+
+9. after all the vsix tools are downloaded then In VS Code, go to Extensions → “…(ellipsis)” → Install from VSIX… and select the downloaded file, then restart VS Code
+
+10. git clone this repo https://github.com/madschaaf/Ai-dev-tools but I will put i ton the github enterprise later
+
+
+11. Now this repo should have all the extensions pre loaded expect the vsix files may be a little tricker which was the steps before if they are needed
+
+12. click login into github copilot use your personal account for copilot
+
+13. you can sign into vs code through you microsfot use your ebay email
+
+14. on the left hand side click the extension for cline and sign in, then configure your mcps
+
+15. enter ctrl shift p and find configure mcp setup (this will be a extension that is created) then go through these steps to set up all your mcp servers
+
+16. Join all the slack channels 
+file:///Users/madschaaf/Downloads/Developer_Ascent_AI_Engineering_Stack.pdf
+file:///Users/madschaaf/Downloads/Forge_AI_Cockpit_Setup.pdf
+
+info about access to https://github.com/ebay-copilot
+other helpful ai tools for devs ebay has accounts for: chat gpt, google apps, adobe, figma, 

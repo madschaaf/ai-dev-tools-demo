@@ -1,0 +1,234 @@
+/* AI Use Case Icon Component */
+.ai-use-case-icon {
+  position: absolute;
+  z-index: 9998;
+  cursor: pointer;
+}
+
+/* AI Icon Wrapper */
+.ai-icon-wrapper {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* AI Icon SVG */
+.ai-icon {
+  width: 32px;
+  height: 32px;
+  color: #646cff;
+  filter: drop-shadow(0 2px 8px rgba(100, 108, 255, 0.3));
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 2;
+}
+
+.ai-use-case-icon:hover .ai-icon {
+  transform: scale(1.1);
+  filter: drop-shadow(0 4px 16px rgba(100, 108, 255, 0.5));
+}
+
+/* Subtle Flash Animation */
+.ai-icon-pulse {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #95048133 0%, transparent 80%);
+  animation: pulse-flash 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes pulse-flash {
+  0%, 100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.3);
+  }
+}
+
+/* Hover Popup */
+.ai-use-case-popup {
+  position: fixed;
+  bottom: 80px;
+  left: 30px;
+  min-width: 280px;
+  max-width: 320px;
+  background: rgba(26, 26, 26, 0.98);
+  border: 1px solid rgba(100, 108, 255, 0.3);
+  border-radius: 12px;
+  padding: 16px;
+  padding-bottom: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4),
+              0 0 0 1px rgba(100, 108, 255, 0.1);
+  backdrop-filter: blur(10px);
+  animation: popup-appear 0.2s ease-out;
+  z-index: 9999;
+  pointer-events: auto;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+}
+
+/* Create invisible bridge between icon and popup for smooth hovering */
+.ai-use-case-popup::before {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 10px;
+  width: 60px;
+  height: 20px;
+  pointer-events: auto;
+}
+
+@keyframes popup-appear {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Popup Header */
+.popup-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.popup-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.4;
+  flex: 1;
+}
+
+/* Favorite Button */
+.favorite-btn {
+  background: transparent;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.favorite-btn svg {
+  width: 20px;
+  height: 20px;
+  color: #888;
+  transition: all 0.2s ease;
+}
+
+.favorite-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.favorite-btn:hover svg {
+  color: #ff6b6b;
+  transform: scale(1.1);
+}
+
+.favorite-btn.favorited svg {
+  color: #ff6b6b;
+  fill: #ff6b6b;
+}
+
+.favorite-btn.favorited:hover svg {
+  transform: scale(1.2);
+}
+
+/* Popup Description */
+.popup-description {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Popup Actions */
+.popup-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.view-use-case-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #646cff 0%, #535bf2 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.view-use-case-btn:hover {
+  background: linear-gradient(135deg, #535bf2 0%, #4249d1 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(100, 108, 255, 0.4);
+}
+
+/* Light Mode Adjustments */
+@media (prefers-color-scheme: light) {
+  .ai-use-case-popup {
+    background: rgba(255, 255, 255, 0.98);
+    border: 1px solid rgba(100, 108, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1),
+                0 0 0 1px rgba(100, 108, 255, 0.1);
+  }
+
+  .popup-header h3 {
+    color: #213547;
+  }
+
+  .popup-description {
+    color: rgba(33, 53, 71, 0.8);
+  }
+
+  .favorite-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .ai-use-case-popup {
+    min-width: 240px;
+    max-width: 280px;
+  }
+  
+  .popup-header h3 {
+    font-size: 14px;
+  }
+  
+  .popup-description {
+    font-size: 13px;
+  }
+}
