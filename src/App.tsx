@@ -16,6 +16,7 @@ import ReviewStepsLibrary from './pages/ReviewStepsLibrary'
 import Library from './pages/Library'
 import heroVideo from './assets/ai-ideas.mp4'
 import robotVideo from './assets/ai-robot.mp4'
+import InstallPython from './pages/Steps/DynamicSteps/InstallPython.tsx'
 
 // Import video assets using Vite's import system
 
@@ -285,6 +286,7 @@ export default function App() {
           <Route path="/all-steps" element={<AllSteps />} />
           <Route path="/review-submissions" element={<ReviewStepsLibrary />} />
           <Route path="/library" element={<Library />} />
+          <Route path="/install-python" element={<InstallPython />} />
         </Routes>
       </div>
     </>

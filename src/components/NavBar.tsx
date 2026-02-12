@@ -75,6 +75,13 @@ export default function NavBar() {
                 >
                   All Steps
                 </NavLink>
+                <NavLink 
+                  to="/install-python" 
+                  className="dropdown-item"
+                  onClick={() => setIsDropdownOpen(false)}
+                >
+                  Install Python
+                </NavLink>
               </div>
             )}
           </div>
